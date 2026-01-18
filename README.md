@@ -77,6 +77,29 @@ bunx oracle-skills -a claude-code -a opencode
 bunx oracle-skills agents
 ```
 
+### Show Installed Skills
+
+```bash
+# Local (project) skills
+bunx oracle-skills list
+
+# Global (user) skills
+bunx oracle-skills list -g
+
+# For specific agent
+bunx oracle-skills list -a claude-code -g
+```
+
+### Uninstall Skills
+
+```bash
+# Remove all skills from detected agents
+bunx oracle-skills uninstall -g -y
+
+# Remove specific skill from specific agent
+bunx oracle-skills uninstall -a claude-code -s rrr -g
+```
+
 ## Supported Agents
 
 | Agent | Project Path | Global Path |
@@ -96,14 +119,23 @@ bunx oracle-skills agents
 | Droid | `.factory/skills/` | `~/.factory/skills/` |
 | Windsurf | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
 
-## Options
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `install` | Install Oracle skills (default) |
+| `uninstall` | Remove installed skills |
+| `list` | Show installed skills |
+| `agents` | List supported agents |
+
+## Options (for install/uninstall)
 
 | Option | Description |
 |--------|-------------|
-| `-g, --global` | Install to user directory instead of project |
+| `-g, --global` | Use user directory instead of project |
 | `-a, --agent <agents...>` | Target specific agents |
-| `-s, --skill <skills...>` | Install specific skills by name |
-| `-l, --list` | List available skills without installing |
+| `-s, --skill <skills...>` | Specific skills by name |
+| `-l, --list` | List available skills (install only) |
 | `-y, --yes` | Skip confirmation prompts |
 | `-V, --version` | Show version |
 | `-h, --help` | Show help |
