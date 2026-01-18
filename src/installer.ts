@@ -109,7 +109,7 @@ export async function installSkills(
     // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
-    // Copy each skill
+    // Copy each skill and inject version
     for (const skill of skillsToInstall) {
       const destPath = join(targetDir, skill.name);
 
@@ -120,6 +120,20 @@ export async function installSkills(
 
       // Copy skill folder
       await $`cp -r ${skill.path} ${destPath}`.quiet();
+
+      // Inject version into SKILL.md frontmatter
+      const skillMdPath = join(destPath, 'SKILL.md');
+      if (existsSync(skillMdPath)) {
+        let content = await Bun.file(skillMdPath).text();
+        // Add version after opening ---
+        if (content.startsWith('---')) {
+          content = content.replace(
+            /^---\n/,
+            `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
+          );
+          await Bun.write(skillMdPath, content);
+        }
+      }
     }
 
     // Write manifest with version info
