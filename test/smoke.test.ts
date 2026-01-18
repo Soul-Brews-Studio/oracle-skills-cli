@@ -32,7 +32,7 @@ describe("recap scripts", () => {
 });
 
 describe("schedule scripts", () => {
-  it("calendar.ts", async () => expect(await run(`${S}/schedule/scripts/calendar.ts`)).toMatch(/\d{4}|Su Mo Tu/));
+  it.skipIf(!!process.env.SKIP_CAL)("calendar.ts", async () => expect(await run(`${S}/schedule/scripts/calendar.ts`)).toMatch(/\d{4}|Su Mo Tu/));
   it("query.ts", async () => expect(await run(`${S}/schedule/scripts/query.ts`)).toContain("Usage"));
 });
 

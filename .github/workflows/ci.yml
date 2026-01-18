@@ -30,7 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -38,7 +38,10 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ncal
       - run: bun install
-      - run: bun test test/smoke.test.ts
+      - name: Run smoke tests (skip calendar on Windows)
+        run: bun test test/smoke.test.ts
+        env:
+          SKIP_CAL: ${{ runner.os == 'Windows' && '1' || '' }}
 
   cli:
     name: CLI Tests
