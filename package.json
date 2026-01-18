@@ -15,8 +15,9 @@
     "build": "bun build src/index.ts --outdir dist --target bun --minify",
     "dev": "bun run src/index.ts",
     "test": "bun test test/",
+    "compile": "bun scripts/compile.ts",
     "prepare": "lefthook install",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run compile && bun run build"
   },
   "keywords": [
     "oracle",
