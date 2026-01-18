@@ -131,10 +131,11 @@ export async function installSkills(
             /^---\n/,
             `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
           );
-          // Append version to description (shows in autocomplete)
+          // Prepend version AND scope to description
+          const scope = options.global ? 'Global' : 'Local';
           content = content.replace(
-            /^(description:\s*.+?)(\n)/m,
-            `$1 [v${pkg.version}]$2`
+            /^(description:\s*)(.+?)(\n)/m,
+            `$1v${pkg.version} (${scope}) | $2$3`
           );
           await Bun.write(skillMdPath, content);
         }
