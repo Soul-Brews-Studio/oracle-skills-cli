@@ -18,22 +18,22 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli
 
 Oracle skills are reusable instruction sets for AI coding agents, built by [Soul Brews Studio](https://github.com/Soul-Brews-Studio). They extend your agent's capabilities with specialized workflows:
 
-| # | Skill | Description |
-|---|-------|-------------|
-| 1 | **context-finder** | Fast codebase search |
-| 2 | **feel** | Log emotions |
-| 3 | **forward** | Session handoff |
-| 4 | **fyi** | Log information for reference |
-| 5 | **learn** | Explore codebases with parallel agents |
-| 6 | **project** | Project lifecycle management |
-| 7 | **recap** | Fresh start context summary |
-| 8 | **rrr** | Session retrospective with AI diary |
-| 9 | **schedule** | Calendar queries |
-| 10 | **skill-creator** | Create new skills |
-| 11 | **standup** | Daily standup check |
-| 12 | **trace** | Find projects across git history, repos, docs |
-| 13 | **watch** | Learn from YouTube videos |
-| 14 | **where-we-are** | Session awareness |
+| # | Skill | Type | Description |
+|---|-------|------|-------------|
+| 1 | **context-finder** | search | Fast codebase search |
+| 2 | **feel** | log | Log emotions |
+| 3 | **forward** | session | Session handoff |
+| 4 | **fyi** | log | Log information for reference |
+| 5 | **learn** | learn | Explore codebases with parallel agents |
+| 6 | **project** | workflow | Project lifecycle management |
+| 7 | **recap** | session | Fresh start context summary |
+| 8 | **rrr** | session | Session retrospective with AI diary |
+| 9 | **schedule** | workflow | Calendar queries |
+| 10 | **skill-creator** | meta | Create new skills |
+| 11 | **standup** | workflow | Daily standup check |
+| 12 | **trace** | search | Find projects across git history, repos, docs |
+| 13 | **watch** | learn | Learn from YouTube videos |
+| 14 | **where-we-are** | session | Session awareness |
 
 ## Usage
 
