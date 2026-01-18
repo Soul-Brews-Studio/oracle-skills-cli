@@ -51,7 +51,7 @@ ${body}
 `;
 
         await writeFile(join(COMMANDS_DIR, `${skillName}.md`), commandContent);
-        console.log(`✓ ${skillName}`);
+        console.log(`✓ ${skillName} (v${pkg.version})`);
         count++;
       }
     }
