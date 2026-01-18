@@ -121,15 +121,20 @@ export async function installSkills(
       // Copy skill folder
       await $`cp -r ${skill.path} ${destPath}`.quiet();
 
-      // Inject version into SKILL.md frontmatter
+      // Inject version into SKILL.md frontmatter and description
       const skillMdPath = join(destPath, 'SKILL.md');
       if (existsSync(skillMdPath)) {
         let content = await Bun.file(skillMdPath).text();
-        // Add version after opening ---
         if (content.startsWith('---')) {
+          // Add installer field after opening ---
           content = content.replace(
             /^---\n/,
             `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
+          );
+          // Append version to description (shows in autocomplete)
+          content = content.replace(
+            /^(description:\s*.+?)(\n)/m,
+            `$1 [v${pkg.version}]$2`
           );
           await Bun.write(skillMdPath, content);
         }
