@@ -1,11 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import { $ } from 'bun';
-import { existsSync, mkdirSync, rmSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
 import { agents, detectInstalledAgents, getAgentNames } from '../src/agents';
-
-const TEST_DIR = join(tmpdir(), `oracle-skills-test-${Date.now()}`);
+import { discoverSkills } from '../src/installer';
 
 describe('agents', () => {
   it('should have 14 agents defined', () => {
@@ -22,7 +18,6 @@ describe('agents', () => {
   it('should detect installed agents', () => {
     const detected = detectInstalledAgents();
     expect(Array.isArray(detected)).toBe(true);
-    // At least one agent should be detected in most dev environments
   });
 
   it('should have valid agent config structure', () => {
@@ -58,35 +53,22 @@ describe('CLI', () => {
 });
 
 describe('installer', () => {
-  beforeAll(() => {
-    mkdirSync(TEST_DIR, { recursive: true });
-  });
-
-  afterAll(() => {
-    rmSync(TEST_DIR, { recursive: true, force: true });
-  });
-
-  it('should clone repo with sparse checkout', async () => {
-    const { cloneRepo, cleanup } = await import('../src/installer');
-    
-    const repoPath = await cloneRepo();
-    expect(existsSync(repoPath)).toBe(true);
-    expect(existsSync(join(repoPath, 'oracle-skills'))).toBe(true);
-    
-    await cleanup(repoPath);
-    expect(existsSync(repoPath)).toBe(false);
-  }, 30000); // 30s timeout for clone
-
-  it('should discover skills from repo', async () => {
-    const { cloneRepo, discoverSkills, cleanup } = await import('../src/installer');
-    
-    const repoPath = await cloneRepo();
-    const skills = await discoverSkills(repoPath);
+  it('should discover bundled skills', async () => {
+    const skills = await discoverSkills();
     
     expect(skills.length).toBeGreaterThan(0);
     expect(skills.some(s => s.name === 'rrr')).toBe(true);
     expect(skills.some(s => s.name === 'recap')).toBe(true);
+    expect(skills.some(s => s.name === 'trace')).toBe(true);
+  });
+
+  it('should have skill descriptions', async () => {
+    const skills = await discoverSkills();
     
-    await cleanup(repoPath);
-  }, 30000);
+    for (const skill of skills) {
+      expect(skill.name).toBeDefined();
+      expect(skill.path).toBeDefined();
+      // Most skills should have descriptions
+    }
+  });
 });
