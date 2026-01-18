@@ -1,0 +1,52 @@
+{
+  "name": "oracle-skills",
+  "version": "1.0.0",
+  "description": "Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents",
+  "type": "module",
+  "bin": {
+    "oracle-skills": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --clean",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "oracle",
+    "skills",
+    "claude-code",
+    "opencode",
+    "cursor",
+    "codex",
+    "ai-agents",
+    "soul-brews",
+    "cli"
+  ],
+  "author": "Soul Brews Studio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Soul-Brews-Studio/oracle-skills-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Soul-Brews-Studio/oracle-skills-cli/issues"
+  },
+  "homepage": "https://github.com/Soul-Brews-Studio/oracle-skills-cli#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "commander": "^12.0.0"
+  }
+}
