@@ -45,7 +45,7 @@ if (MODE === 'time' || MODE === 'all') {
       device: cols[0],
       updated: new Date(cols[12]) 
     };
-  }).filter(r => r && r.device && r.device.includes('iPhone'));
+  }).filter(r => r && r.device && (r.device.includes('iPhone') || r.device.includes('iPad')));
 
   if (records.length > 0) {
     // Sort by time
@@ -60,6 +60,6 @@ if (MODE === 'time' || MODE === 'all') {
     console.log(`records = ${records.length}`);
     console.log(`hours_here = ${hoursHere}`);
   } else {
-    console.log('No iPhone records found.');
+    console.log('No records found in history.');
   }
 }
