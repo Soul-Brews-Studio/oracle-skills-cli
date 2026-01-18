@@ -36,7 +36,7 @@ try {
   } else {
     // Try without language suffix - find any .srt
     const files = readdirSync(tempDir).filter(f => f.endsWith('.srt'));
-    if (files.length > 0) {
+    if (files.length) {
       console.log(await Bun.file(join(tempDir, files[0])).text());
     } else {
       console.log("NO_CAPTIONS_AVAILABLE");

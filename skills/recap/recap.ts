@@ -87,13 +87,13 @@ console.log(`## 📊 GIT: ${branch} (+${ahead} ahead)`);
 console.log(`Last: ${lastCommit}`);
 console.log("");
 
-if (modified.length > 0) {
+if (modified.length) {
   console.log(`**Modified** (${modified.length}):`);
   modified.forEach(l => console.log(`  ${l.slice(3)}`));
   console.log("");
 }
 
-if (untracked.length > 0) {
+if (untracked.length) {
   console.log(`**Untracked** (${untracked.length}):`);
   untracked.forEach(l => console.log(`  ${l.slice(3)}`));
   console.log("");

@@ -28,14 +28,14 @@ const local = (await $`ghq list`.text().catch(() => ""))
   .split("\n")
   .filter((l) => l.toLowerCase().includes(query.toLowerCase()));
 
-if (local.length > 0) {
+if (local.length) {
   console.log(`Found ${local.length} local:`);
   local.forEach((r) => console.log(`  ~/Code/${r}`));
   if (!remote) process.exit(0);
 }
 
-// Remote search (GitHub API)
-if (remote || local.length === 0) {
+// Remote search - fallback or when --remote
+if (remote || !local.length) {
   console.log("\nSearching GitHub...\n");
 
   const user = (await $`gh api user --jq '.login'`.text()).trim();
@@ -47,7 +47,7 @@ if (remote || local.length === 0) {
   for (const org of orgs) {
     const repos = await $`gh repo list ${org} --limit 100 --json name --jq '.[].name'`.text().catch(() => "");
     const matches = repos.split("\n").filter((n) => n.toLowerCase().includes(query.toLowerCase()));
-    if (matches.length > 0) {
+    if (matches.length) {
       console.log(`\n${org}:`);
       matches.forEach((n) => console.log(`  ${org}/${n}`));
     }
