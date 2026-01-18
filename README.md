@@ -1,5 +1,8 @@
 # oracle-skills
 
+[![CI](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/github/v/tag/Soul-Brews-Studio/oracle-skills-cli?label=version)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/releases)
+
 Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents with a single command.
 
 ## Quick Start
