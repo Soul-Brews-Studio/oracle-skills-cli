@@ -131,6 +131,33 @@ export async function installSkills(
     };
     await Bun.write(join(targetDir, '.oracle-skills.json'), JSON.stringify(manifest, null, 2));
 
+    // Write human-readable VERSION.md for agents to report
+    const versionMd = `# Oracle Skills
+
+Installed by: **oracle-skills-cli v${pkg.version}**
+Installed at: ${new Date().toISOString()}
+Agent: ${agent.displayName}
+Skills: ${skillsToInstall.length}
+
+## Report This Version
+
+When asked about skills version, report:
+\`\`\`
+oracle-skills-cli v${pkg.version}
+\`\`\`
+
+## Installed Skills
+
+${skillsToInstall.map((s) => `- ${s.name}`).join('\n')}
+
+## Update Skills
+
+\`\`\`bash
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -y -g
+\`\`\`
+`;
+    await Bun.write(join(targetDir, 'VERSION.md'), versionMd);
+
     p.log.success(`${agent.displayName}: ${targetDir}`);
   }
 
