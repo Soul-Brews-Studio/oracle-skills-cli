@@ -2,7 +2,7 @@
 import { program } from 'commander';
 import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents, getAgentNames } from './agents.js';
-import { cloneRepo, listSkills, installSkills, uninstallSkills, cleanup } from './installer.js';
+import { listSkills, installSkills, uninstallSkills } from './installer.js';
 import pkg from '../package.json' with { type: 'json' };
 
 const VERSION = pkg.version;
@@ -24,15 +24,10 @@ program
   .action(async (options) => {
     p.intro('🔮 Oracle Skills Installer');
 
-    let repoPath: string | null = null;
-
     try {
-      // Clone the repo
-      repoPath = await cloneRepo();
-
       // List mode - just show skills and exit
       if (options.list) {
-        await listSkills(repoPath);
+        await listSkills();
         p.outro('Use --skill <name> to install specific skills');
         return;
       }
@@ -96,7 +91,7 @@ program
       }
 
       // Install skills
-      await installSkills(repoPath, targetAgents, {
+      await installSkills(targetAgents, {
         global: options.global,
         skills: options.skill,
         yes: options.yes,
@@ -106,11 +101,6 @@ program
     } catch (error) {
       p.log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       process.exit(1);
-    } finally {
-      // Cleanup temp directory
-      if (repoPath) {
-        cleanup(repoPath);
-      }
     }
   });
 

@@ -1,36 +1,19 @@
 import { $ } from 'bun';
-import { existsSync, readdirSync, rmSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
 import * as p from '@clack/prompts';
 import { agents } from './agents.js';
 import type { Skill, InstallOptions } from './types.js';
 
-const REPO = 'Soul-Brews-Studio/plugin-marketplace';
-const SKILLS_PATH = 'oracle-skills/skills';
-
-export async function cloneRepo(): Promise<string> {
-  const spinner = p.spinner();
-  spinner.start('Cloning Oracle skills repository');
-
-  const tempDir = join(tmpdir(), `oracle-skills-${Date.now()}`);
-
-  try {
-    // Sparse checkout for faster clone
-    await $`git clone --depth 1 --filter=blob:none --sparse https://github.com/${REPO}.git ${tempDir}`.quiet();
-    await $`git -C ${tempDir} sparse-checkout set ${SKILLS_PATH}`.quiet();
-    spinner.stop('Repository cloned');
-    return tempDir;
-  } catch {
-    // Fallback to full clone
-    spinner.stop('Sparse clone failed, trying full clone');
-    await $`git clone --depth 1 https://github.com/${REPO}.git ${tempDir}`.quiet();
-    return tempDir;
-  }
+// Skills are bundled in the repo
+function getSkillsDir(): string {
+  // Get directory relative to this file
+  const thisFile = import.meta.path;
+  return join(dirname(thisFile), '..', 'skills');
 }
 
-export async function discoverSkills(repoPath: string): Promise<Skill[]> {
-  const skillsPath = join(repoPath, SKILLS_PATH);
+export async function discoverSkills(): Promise<Skill[]> {
+  const skillsPath = getSkillsDir();
 
   if (!existsSync(skillsPath)) {
     return [];
@@ -58,8 +41,8 @@ export async function discoverSkills(repoPath: string): Promise<Skill[]> {
   return skills;
 }
 
-export async function listSkills(repoPath: string): Promise<void> {
-  const skills = await discoverSkills(repoPath);
+export async function listSkills(): Promise<void> {
+  const skills = await discoverSkills();
 
   if (skills.length === 0) {
     p.log.warn('No skills found');
@@ -77,11 +60,10 @@ export async function listSkills(repoPath: string): Promise<void> {
 }
 
 export async function installSkills(
-  repoPath: string,
   targetAgents: string[],
   options: InstallOptions
 ): Promise<void> {
-  const allSkills = await discoverSkills(repoPath);
+  const allSkills = await discoverSkills();
 
   if (allSkills.length === 0) {
     p.log.error('No skills found to install');
@@ -123,7 +105,7 @@ export async function installSkills(
 
     const targetDir = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
 
-    // Create target directory using Bun Shell
+    // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
     // Copy each skill
@@ -143,14 +125,6 @@ export async function installSkills(
   }
 
   spinner.stop(`Installed ${skillsToInstall.length} skills to ${targetAgents.length} agent(s)`);
-}
-
-export async function cleanup(repoPath: string): Promise<void> {
-  try {
-    await $`rm -rf ${repoPath}`.quiet();
-  } catch {
-    // Ignore cleanup errors
-  }
 }
 
 export async function uninstallSkills(
