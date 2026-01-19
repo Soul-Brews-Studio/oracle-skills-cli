@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
+description: v1.4.0 (Static) | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
 ---
 
 **EXECUTE NOW:**

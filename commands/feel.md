@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
+description: v1.4.0 (Static) | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
 ---
 
 **EXECUTE NOW:**

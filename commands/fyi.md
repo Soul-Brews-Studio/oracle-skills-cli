@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
+description: v1.4.0 (Static) | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
 ---
 
 **EXECUTE NOW:**

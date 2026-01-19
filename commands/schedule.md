@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
+description: v1.4.0 (Static) | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
 ---
 
 **EXECUTE NOW:**

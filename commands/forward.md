@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Create handoff for next session. Use when user says "forward", "handoff", "wrap up", or before ending session.
+description: v1.4.0 (Static) | Create handoff for next session. Use when user says "forward", "handoff", "wrap up", or before ending session.
 ---
 
 **EXECUTE NOW:**

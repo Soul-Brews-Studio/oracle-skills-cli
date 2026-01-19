@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
+description: v1.4.0 (Static) | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
 ---
 
 **EXECUTE NOW:**

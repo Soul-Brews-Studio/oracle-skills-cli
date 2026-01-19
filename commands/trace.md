@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history". Supports --oracle (fast), --deep (5 subagents), and trace logging.
+description: v1.4.0 (Static) | Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history". Supports --oracle (fast), --deep (5 subagents), and trace logging.
 ---
 
 **EXECUTE NOW:**

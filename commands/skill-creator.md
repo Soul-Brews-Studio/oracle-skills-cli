@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Create new skills with Oracle philosophy. Use when user says "create skill", "new skill", "make a skill for X", or wants to build custom Claude Code skills.
+description: v1.4.0 (Static) | Create new skills with Oracle philosophy. Use when user says "create skill", "new skill", "make a skill for X", or wants to build custom Claude Code skills.
 ---
 
 **EXECUTE NOW:**

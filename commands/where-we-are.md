@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
+description: v1.4.0 (Static) | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
 ---
 
 **EXECUTE NOW:**

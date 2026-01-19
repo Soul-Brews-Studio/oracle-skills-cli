@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Fast search through git history, retrospectives, issues, and codebase. Use when user asks to "find", "search", "where is", or needs to locate something in the codebase or history.
+description: v1.4.0 (Static) | Fast search through git history, retrospectives, issues, and codebase. Use when user asks to "find", "search", "where is", or needs to locate something in the codebase or history.
 ---
 
 **EXECUTE NOW:**

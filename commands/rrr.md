@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
+description: v1.4.0 (Static) | Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
 ---
 
 **EXECUTE NOW:**

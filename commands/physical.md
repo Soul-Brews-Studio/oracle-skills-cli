@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
+description: v1.4.0 (Static) | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
 ---
 
 **EXECUTE NOW:**

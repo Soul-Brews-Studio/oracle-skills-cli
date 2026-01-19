@@ -1,6 +1,6 @@
 {
   "name": "oracle-skills",
-  "version": "1.3.4",
+  "version": "1.4.0",
   "description": "Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents",
   "type": "module",
   "bin": {

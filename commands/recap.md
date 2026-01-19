@@ -1,5 +1,5 @@
 ---
-description: v1.3.4 (Static) | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
+description: v1.4.0 (Static) | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
 ---
 
 **EXECUTE NOW:**
