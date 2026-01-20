@@ -193,15 +193,39 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -y -
       const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
       await $`mkdir -p ${commandsDir}`.quiet();
 
+      const scopeChar = scope === 'Global' ? 'G' : 'L';
+      const skillsPath = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
+      
       for (const skill of skillsToInstall) {
         const skillMdPath = join(targetDir, skill.name, 'SKILL.md');
         if (existsSync(skillMdPath)) {
-          let content = await Bun.file(skillMdPath).text();
-          // Change SKLL to CMD for commands directory
-          content = content.replace(/-SKLL \|/g, '-CMD |');
-          // Write flat command file: commands/<skillname>.md
+          // Create stub that points to full skill in skills/
+          const stubContent = `---
+description: v${pkg.version} ${scopeChar}-CMD | ${skill.description}
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Task
+  - WebFetch
+---
+
+# /${skill.name}
+
+Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
+
+**Skill file**: \`${skillsPath}/${skill.name}/SKILL.md\`
+
+Read the skill file above and follow ALL instructions in it.
+
+---
+*oracle-skills-cli v${pkg.version}*
+`;
           const commandPath = join(commandsDir, `${skill.name}.md`);
-          await Bun.write(commandPath, content);
+          await Bun.write(commandPath, stubContent);
         }
       }
       p.log.success(`OpenCode commands: ${commandsDir}`);
