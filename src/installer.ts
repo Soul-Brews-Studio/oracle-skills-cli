@@ -125,21 +125,21 @@ export async function installSkills(
 
     for (const skill of skillsToInstall) {
       if (useStubs) {
-        // OpenCode: copy flat stub file and replace {skillPath}
+        // OpenCode: copy flat stub file (fyi.md not fyi/SKILL.md)
         const stubFile = join(commandsDir, `${skill.name}.md`);
-        const destFile = join(targetDir, skill.name, 'SKILL.md');
+        const destFile = join(targetDir, `${skill.name}.md`);
         
-        // Remove existing if present
+        // Remove existing directory or file
         if (existsSync(join(targetDir, skill.name))) {
           await $`rm -rf ${join(targetDir, skill.name)}`.quiet();
         }
-        
-        // Create directory and copy stub
-        await $`mkdir -p ${join(targetDir, skill.name)}`.quiet();
+        if (existsSync(destFile)) {
+          await $`rm -f ${destFile}`.quiet();
+        }
         
         if (existsSync(stubFile)) {
           let content = await Bun.file(stubFile).text();
-          // Replace {skillPath} placeholder with Claude Code's path (where full skills live)
+          // Replace {skillPath} placeholder with Claude Code's path
           content = content.replace(/\{skillPath\}/g, fullSkillPath);
           // Update version in description to include scope
           content = content.replace(
@@ -257,10 +257,22 @@ export async function uninstallSkills(
       continue;
     }
 
-    // Get installed skills
-    const installed = readdirSync(targetDir, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
-      .map((d) => d.name);
+    // Get installed skills (directories for most agents, flat .md files for OpenCode)
+    const entries = readdirSync(targetDir, { withFileTypes: true });
+    const isOpenCode = agentName === 'opencode';
+    
+    const installed = entries
+      .filter((d) => {
+        if (d.name.startsWith('.')) return false;
+        if (isOpenCode) {
+          // OpenCode: flat .md files
+          return d.isFile() && d.name.endsWith('.md') && d.name !== 'VERSION.md';
+        } else {
+          // Other agents: directories
+          return d.isDirectory();
+        }
+      })
+      .map((d) => isOpenCode ? d.name.replace('.md', '') : d.name);
 
     // Filter if specific skills requested
     const toRemove = options.skills
@@ -271,7 +283,9 @@ export async function uninstallSkills(
 
     // Remove skills
     for (const skill of toRemove) {
-      const skillPath = join(targetDir, skill);
+      const skillPath = isOpenCode 
+        ? join(targetDir, `${skill}.md`)
+        : join(targetDir, skill);
       await $`rm -rf ${skillPath}`.quiet();
       totalRemoved++;
     }
