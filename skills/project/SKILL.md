@@ -31,12 +31,13 @@ Clone repo for **study** (read-only reference).
 # 1. Clone via ghq
 ghq get -u https://github.com/owner/repo
 
-# 2. Create flat symlink (NOT nested!)
+# 2. Create org/repo symlink structure
 GHQ_ROOT=$(ghq root)
-ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/learn/repo-name
+mkdir -p ψ/learn/owner
+ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/learn/owner/repo
 ```
 
-**Output**: "✓ Linked [repo] to ψ/learn/repo-name"
+**Output**: "✓ Linked [repo] to ψ/learn/owner/repo"
 
 ### incubate [url|slug]
 
@@ -46,10 +47,11 @@ Clone repo for **active development**.
 # Same flow, different target
 ghq get -u https://github.com/owner/repo
 GHQ_ROOT=$(ghq root)
-ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/incubate/repo-name
+mkdir -p ψ/incubate/owner
+ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/incubate/owner/repo
 ```
 
-**Output**: "✓ Linked [repo] to ψ/incubate/repo-name"
+**Output**: "✓ Linked [repo] to ψ/incubate/owner/repo"
 
 ### find [query]
 
@@ -59,8 +61,8 @@ Search for project across all locations:
 # Search ghq repos
 ghq list | grep -i "query"
 
-# Search learn/incubate symlinks
-ls -la ψ/learn/ ψ/incubate/ 2>/dev/null | grep -i "query"
+# Search learn/incubate symlinks (org/repo structure)
+find ψ/learn ψ/incubate -type l 2>/dev/null | grep -i "query"
 ```
 
 **Output**: List matches with their ghq paths
@@ -71,10 +73,16 @@ Show all tracked projects:
 
 ```bash
 echo "📚 Learn"
-ls -la ψ/learn/ | grep "^l" | awk '{print "  " $NF " → " $11}'
+find ψ/learn -type l 2>/dev/null | while read link; do
+  target=$(readlink "$link")
+  echo "  ${link#ψ/learn/} → $target"
+done
 
 echo "🌱 Incubate"
-ls -la ψ/incubate/ | grep "^l" | awk '{print "  " $NF " → " $11}'
+find ψ/incubate -type l 2>/dev/null | while read link; do
+  target=$(readlink "$link")
+  echo "  ${link#ψ/incubate/} → $target"
+done
 
 echo "🏠 External (ghq)"
 ghq list | grep -v "laris-co/Nat-s-Agents" | head -10
@@ -84,8 +92,8 @@ ghq list | grep -v "laris-co/Nat-s-Agents" | head -10
 
 ```
 ψ/
-├── learn/<slug>     → ~/Code/github.com/owner/repo  (symlink)
-└── incubate/<slug>  → ~/Code/github.com/owner/repo  (symlink)
+├── learn/owner/repo     → ~/Code/github.com/owner/repo  (symlink)
+└── incubate/owner/repo  → ~/Code/github.com/owner/repo  (symlink)
 
 ~/Code/               ← ghq root (source of truth)
 └── github.com/owner/repo/  (actual clone)
@@ -108,12 +116,14 @@ If broken: `ghq get -u [url]` to restore source.
 # User shares URL
 User: "I want to learn from https://github.com/SawyerHood/dev-browser"
 → ghq get -u https://github.com/SawyerHood/dev-browser
-→ ln -sf ~/Code/github.com/SawyerHood/dev-browser ψ/learn/dev-browser
+→ mkdir -p ψ/learn/SawyerHood
+→ ln -sf ~/Code/github.com/SawyerHood/dev-browser ψ/learn/SawyerHood/dev-browser
 
 # User wants to develop
 User: "I want to contribute to claude-mem"
 → ghq get -u https://github.com/thedotmack/claude-mem
-→ ln -sf ~/Code/github.com/thedotmack/claude-mem ψ/incubate/claude-mem
+→ mkdir -p ψ/incubate/thedotmack
+→ ln -sf ~/Code/github.com/thedotmack/claude-mem ψ/incubate/thedotmack/claude-mem
 ```
 
 ## Anti-Patterns
@@ -121,7 +131,7 @@ User: "I want to contribute to claude-mem"
 | ❌ Wrong | ✅ Right |
 |----------|----------|
 | `git clone` directly to ψ/ | `ghq get` then symlink |
-| Nested paths: `ψ/learn/repo/github.com/...` | Flat: `ψ/learn/repo-name` |
+| Flat: `ψ/learn/repo-name` | Org structure: `ψ/learn/owner/repo` |
 | Copy files | Symlink always |
 | Manual clone outside ghq | Everything through ghq |
 
@@ -129,10 +139,10 @@ User: "I want to contribute to claude-mem"
 
 ```bash
 # Add to learn
-ghq get -u URL && ln -sf "$(ghq root)/github.com/owner/repo" ψ/learn/name
+ghq get -u URL && mkdir -p ψ/learn/owner && ln -sf "$(ghq root)/github.com/owner/repo" ψ/learn/owner/repo
 
 # Add to incubate
-ghq get -u URL && ln -sf "$(ghq root)/github.com/owner/repo" ψ/incubate/name
+ghq get -u URL && mkdir -p ψ/incubate/owner && ln -sf "$(ghq root)/github.com/owner/repo" ψ/incubate/owner/repo
 
 # Update source
 ghq get -u URL
