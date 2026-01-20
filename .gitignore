@@ -2,3 +2,6 @@ node_modules/
 *.log
 .DS_Store
 dist/
+
+# AI Brain - ephemeral
+ψ/active/
