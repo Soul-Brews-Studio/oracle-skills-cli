@@ -47,11 +47,8 @@ async function compile() {
 description: ${description}
 ---
 
-Load skill \`${skillName}\` version v${pkg.version} from path below and execute with arguments.
-
-Skill: ${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill \`${skillName}\` args: $ARGUMENTS (v${pkg.version})
+Human: ${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md
 `;
 
         await writeFile(join(COMMANDS_DIR, `${skillName}.md`), commandContent);

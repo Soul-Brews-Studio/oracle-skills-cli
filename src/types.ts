@@ -3,6 +3,9 @@ export interface AgentConfig {
   displayName: string;
   skillsDir: string;
   globalSkillsDir: string;
+  commandsDir?: string; // Separate commands directory (OpenCode uses .opencode/command/)
+  globalCommandsDir?: string;
+  useFlatFiles?: boolean; // Use skillname.md instead of skillname/SKILL.md (OpenCode commands)
   detectInstalled: () => boolean;
 }
 

@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
+description: v1.5.10 | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
 ---
 
-Load skill `schedule` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/schedule/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `schedule` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/schedule/SKILL.md

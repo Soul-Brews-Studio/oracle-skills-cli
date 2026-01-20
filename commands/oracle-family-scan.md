@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | oracle-family-scan skill
+description: v1.5.10 | oracle-family-scan skill
 ---
 
-Load skill `oracle-family-scan` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/oracle-family-scan/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `oracle-family-scan` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/oracle-family-scan/SKILL.md

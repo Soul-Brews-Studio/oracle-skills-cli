@@ -37,8 +37,8 @@ describe("installer behavior by agent type", () => {
       // NOT: command/trace/SKILL.md (directory)
       
       // Stub should be flat file format
-      expect(stubContent).toContain("Load skill `trace`");
-      expect(stubContent).toContain("ARGUMENTS: $ARGUMENTS");
+      expect(stubContent).toContain("load skill `trace`");
+      expect(stubContent).toContain("$ARGUMENTS");
       expect(stubContent).not.toContain("## Step 0:");
     });
 
@@ -49,7 +49,7 @@ describe("installer behavior by agent type", () => {
       );
 
       // Should tell agent where to find full skill
-      expect(stubContent).toContain("Skill: {skillPath}/fyi/SKILL.md");
+      expect(stubContent).toContain("Human: {skillPath}/fyi/SKILL.md");
     });
   });
 
@@ -77,25 +77,23 @@ describe("installer behavior by agent type", () => {
   });
 
   describe("actual install format", () => {
-    it("OpenCode installed file should be stub format", async () => {
-      // After install, OpenCode should have flat .md stubs
-      // NOT directories with SKILL.md
-      const openCodePath = process.env.HOME + "/.config/opencode/command";
+    it("OpenCode installed file should be full skill format", async () => {
+      // After install, OpenCode should have full skills in skills/ directory
+      // Same format as other agents: {name}/SKILL.md
+      const openCodePath = process.env.HOME + "/.config/opencode/skills";
       
       if (existsSync(openCodePath)) {
         const files = await readdir(openCodePath);
-        const traceEntry = files.find(f => f === "trace" || f === "trace.md");
+        const traceEntry = files.find(f => f === "trace");
         
         if (traceEntry === "trace") {
-          // It's a directory - check if SKILL.md exists (old format)
           const skillMdPath = join(openCodePath, "trace", "SKILL.md");
           if (existsSync(skillMdPath)) {
             const content = await readFile(skillMdPath, "utf-8");
-            // THIS SHOULD FAIL - we want stub format
-            // Stub format should NOT have "## Step 0:"
-            expect(content).not.toContain("## Step 0: Timestamp");
-            // Stub format SHOULD have load instruction
-            expect(content).toContain("Load skill `trace`");
+            // Full skill SHOULD have content
+            expect(content).toContain("# /trace");
+            // Should have version injected
+            expect(content).toContain("installer: oracle-skills-cli");
           }
         }
       }
@@ -114,7 +112,7 @@ describe("installer behavior by agent type", () => {
         "~/.claude/skills"
       );
 
-      expect(globalInstall).toContain("Skill: ~/.claude/skills/trace/SKILL.md");
+      expect(globalInstall).toContain("Human: ~/.claude/skills/trace/SKILL.md");
     });
 
     it("should replace {skillPath} for local install", async () => {
@@ -128,7 +126,7 @@ describe("installer behavior by agent type", () => {
         ".claude/skills"
       );
 
-      expect(localInstall).toContain("Skill: .claude/skills/trace/SKILL.md");
+      expect(localInstall).toContain("Human: .claude/skills/trace/SKILL.md");
     });
   });
 });

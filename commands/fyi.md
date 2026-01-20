@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
+description: v1.5.10 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
 ---
 
-Load skill `fyi` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/fyi/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `fyi` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/fyi/SKILL.md

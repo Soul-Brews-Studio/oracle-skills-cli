@@ -9,8 +9,11 @@ export const agents: Record<AgentType, AgentConfig> = {
   opencode: {
     name: 'opencode',
     displayName: 'OpenCode',
-    skillsDir: '.opencode/command', // Updated to match OpenCode legacy requirement
-    globalSkillsDir: join(home, '.config/opencode/command'), // Updated to match OpenCode legacy requirement
+    skillsDir: '.opencode/skills', // skills/<name>/SKILL.md (agent skills)
+    globalSkillsDir: join(home, '.config/opencode/skills'),
+    commandsDir: '.opencode/commands', // commands/<name>.md (slash commands)
+    globalCommandsDir: join(home, '.config/opencode/commands'),
+    useFlatFiles: true, // Commands use flat <name>.md files
     detectInstalled: () => existsSync(join(home, '.config/opencode')),
   },
   'claude-code': {

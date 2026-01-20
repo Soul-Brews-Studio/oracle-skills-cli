@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
+description: v1.5.10 | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
 ---
 
-Load skill `learn` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/learn/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `learn` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/learn/SKILL.md

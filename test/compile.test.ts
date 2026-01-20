@@ -53,8 +53,8 @@ This is the test skill content.
       "utf-8"
     );
 
-    expect(output).toContain("Load skill `trace`");
-    expect(output).toContain("version v");
+    expect(output).toContain("load skill `trace`");
+    expect(output).toContain("(v");
   });
 
   it("should include skill path placeholder", async () => {
@@ -63,17 +63,17 @@ This is the test skill content.
       "utf-8"
     );
 
-    expect(output).toContain("Skill:");
+    expect(output).toContain("Human:");
     expect(output).toContain("/trace/SKILL.md");
   });
 
-  it("should include ARGUMENTS placeholder", async () => {
+  it("should include ARGUMENTS in load line", async () => {
     const output = await readFile(
       join(process.cwd(), "commands", "trace.md"),
       "utf-8"
     );
 
-    expect(output).toContain("ARGUMENTS:");
+    expect(output).toContain("$ARGUMENTS");
   });
 
   it("should NOT include full skill content", async () => {
@@ -107,13 +107,10 @@ This is the test skill content.
     // Line 3: empty
     expect(lines[3]).toBe("");
     
-    // Line 4: Load instruction
-    expect(lines[4]).toMatch(/^Load skill `\w+` version v\d+\.\d+\.\d+ from path below/);
+    // Line 4: AI load instruction
+    expect(lines[4]).toMatch(/^AI: load skill `\w+` args: \$ARGUMENTS \(v\d+\.\d+\.\d+\)$/);
     
-    // Should have Skill: path
-    expect(output).toMatch(/Skill: .+\/SKILL\.md/);
-    
-    // Should end with ARGUMENTS
-    expect(output).toContain("ARGUMENTS: $ARGUMENTS");
+    // Line 5: Human path
+    expect(lines[5]).toMatch(/^Human: .+\/SKILL\.md$/);
   });
 });

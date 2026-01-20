@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
+description: v1.5.10 | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
 ---
 
-Load skill `standup` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/standup/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `standup` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/standup/SKILL.md

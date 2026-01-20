@@ -25,9 +25,9 @@ describe("installer stub format", () => {
     const content = await readFile(commandFile, "utf-8");
 
     // Should be stub format
-    expect(content).toContain("Load skill `trace`");
-    expect(content).toContain("Skill:");
-    expect(content).toContain("ARGUMENTS: $ARGUMENTS");
+    expect(content).toContain("load skill `trace`");
+    expect(content).toContain("Human:");
+    expect(content).toContain("$ARGUMENTS");
     
     // Should NOT have full content
     expect(content).not.toContain("## Step 0: Timestamp");
@@ -57,14 +57,14 @@ describe("installer stub format", () => {
     expect(lines[1]).toMatch(/^description: v\d+\.\d+\.\d+ \|/);
     expect(lines[2]).toBe("---");
 
-    // Load instruction
-    expect(lines[4]).toMatch(/^Load skill `.+` version v\d+/);
+    // AI load instruction
+    expect(lines[4]).toMatch(/^AI: load skill `.+` args: \$ARGUMENTS \(v\d+/);
 
-    // Skill path
-    expect(content).toMatch(/Skill: \{skillPath\}\/.+\/SKILL\.md/);
+    // Human path
+    expect(content).toMatch(/Human: \{skillPath\}\/.+\/SKILL\.md/);
 
-    // Arguments
-    expect(content).toContain("ARGUMENTS: $ARGUMENTS");
+    // Arguments (inline)
+    expect(content).toContain("$ARGUMENTS");
   });
 
   it("installer should copy stubs for OpenCode", async () => {

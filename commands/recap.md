@@ -1,9 +1,6 @@
 ---
-description: v1.5.2 | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
+description: v1.5.10 | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
 ---
 
-Load skill `recap` version v1.5.2 from path below and execute with arguments.
-
-Skill: {skillPath}/recap/SKILL.md
-
-ARGUMENTS: $ARGUMENTS
+AI: load skill `recap` args: $ARGUMENTS (v1.5.10)
+Human: {skillPath}/recap/SKILL.md

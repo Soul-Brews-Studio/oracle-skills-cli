@@ -115,42 +115,12 @@ export async function installSkills(
     // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
-    // Copy each skill - use stubs for OpenCode, full content for others
-    const useStubs = agentName === 'opencode';
-    const commandsDir = getCommandsDir();
+    // All agents: copy full skill directory to skills/
+    // OpenCode reads from .opencode/skills/ and creates slash commands automatically
     const scope = options.global ? 'Global' : 'Local';
-    // For stubs, point to Claude Code's skill path (where full skills live)
-    const claudeAgent = agents['claude-code'];
-    const fullSkillPath = options.global ? claudeAgent.globalSkillsDir : join(process.cwd(), claudeAgent.skillsDir);
 
     for (const skill of skillsToInstall) {
-      if (useStubs) {
-        // OpenCode: copy flat stub file (fyi.md not fyi/SKILL.md)
-        const stubFile = join(commandsDir, `${skill.name}.md`);
-        const destFile = join(targetDir, `${skill.name}.md`);
-        
-        // Remove existing directory or file
-        if (existsSync(join(targetDir, skill.name))) {
-          await $`rm -rf ${join(targetDir, skill.name)}`.quiet();
-        }
-        if (existsSync(destFile)) {
-          await $`rm -f ${destFile}`.quiet();
-        }
-        
-        if (existsSync(stubFile)) {
-          let content = await Bun.file(stubFile).text();
-          // Replace {skillPath} placeholder with Claude Code's path
-          content = content.replace(/\{skillPath\}/g, fullSkillPath);
-          // Update version in description to include scope
-          content = content.replace(
-            /^(description:\s*v[\d.]+)\s*\|/m,
-            `$1 (${scope}) |`
-          );
-          await Bun.write(destFile, content);
-        }
-      } else {
-        // Other agents: copy full skill directory
-        const destPath = join(targetDir, skill.name);
+      const destPath = join(targetDir, skill.name);
 
         // Remove existing if present
         if (existsSync(destPath)) {
@@ -170,15 +140,15 @@ export async function installSkills(
               /^---\n/,
               `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
             );
-            // Prepend version AND scope to description
+            // Prepend version AND scope to description (G=Global, L=Local, SKILL for other agents)
+            const scopeChar = scope === 'Global' ? 'G' : 'L';
             content = content.replace(
               /^(description:\s*)(.+?)(\n)/m,
-              `$1v${pkg.version} (${scope}) | $2$3`
+              `$1v${pkg.version} ${scopeChar}-SKLL | $2$3`
             );
             await Bun.write(skillMdPath, content);
           }
         }
-      }
     }
 
     // Write manifest with version info
@@ -217,9 +187,26 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -y -
 `;
     await Bun.write(join(targetDir, 'VERSION.md'), versionMd);
 
-    // OpenCode only: install plugin
-    if (agentName === 'opencode') {
+    // OpenCode only: also install flat command files to commands/
+    if (agentName === 'opencode' && agent.commandsDir) {
       const home = require('os').homedir();
+      const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
+      await $`mkdir -p ${commandsDir}`.quiet();
+
+      for (const skill of skillsToInstall) {
+        const skillMdPath = join(targetDir, skill.name, 'SKILL.md');
+        if (existsSync(skillMdPath)) {
+          let content = await Bun.file(skillMdPath).text();
+          // Change SKLL to CMD for commands directory
+          content = content.replace(/-SKLL \|/g, '-CMD |');
+          // Write flat command file: commands/<skillname>.md
+          const commandPath = join(commandsDir, `${skill.name}.md`);
+          await Bun.write(commandPath, content);
+        }
+      }
+      p.log.success(`OpenCode commands: ${commandsDir}`);
+
+      // Install plugin if exists
       const pluginDir = options.global
         ? join(home, '.config/opencode/plugins')
         : join(process.cwd(), '.opencode/plugins');
@@ -257,22 +244,17 @@ export async function uninstallSkills(
       continue;
     }
 
-    // Get installed skills (directories for most agents, flat .md files for OpenCode)
+    // Get installed skills (all agents use directories now)
     const entries = readdirSync(targetDir, { withFileTypes: true });
     const isOpenCode = agentName === 'opencode';
     
     const installed = entries
       .filter((d) => {
         if (d.name.startsWith('.')) return false;
-        if (isOpenCode) {
-          // OpenCode: flat .md files
-          return d.isFile() && d.name.endsWith('.md') && d.name !== 'VERSION.md';
-        } else {
-          // Other agents: directories
-          return d.isDirectory();
-        }
+        if (d.name === 'VERSION.md') return false;
+        return d.isDirectory();
       })
-      .map((d) => isOpenCode ? d.name.replace('.md', '') : d.name);
+      .map((d) => d.name)
 
     // Filter if specific skills requested
     const toRemove = options.skills
@@ -283,10 +265,21 @@ export async function uninstallSkills(
 
     // Remove skills
     for (const skill of toRemove) {
-      const skillPath = isOpenCode 
-        ? join(targetDir, `${skill}.md`)
-        : join(targetDir, skill);
+      const skillPath = join(targetDir, skill);
       await $`rm -rf ${skillPath}`.quiet();
+      
+      // OpenCode: also clean up commands/ flat files
+      if (isOpenCode && agent.commandsDir) {
+        const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
+        const flatFile = join(commandsDir, `${skill}.md`);
+        if (existsSync(flatFile)) await $`rm -f ${flatFile}`.quiet();
+        // Also clean up old command/ directory format if exists (legacy cleanup)
+        const oldCommandDir = commandsDir.replace('/commands', '/command');
+        const oldFlatFile = join(oldCommandDir, `${skill}.md`);
+        const oldDir = join(oldCommandDir, skill);
+        if (existsSync(oldFlatFile)) await $`rm -f ${oldFlatFile}`.quiet();
+        if (existsSync(oldDir)) await $`rm -rf ${oldDir}`.quiet();
+      }
       totalRemoved++;
     }
 
