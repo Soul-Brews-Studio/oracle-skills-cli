@@ -1,10 +1,13 @@
 import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
-import { join, basename } from 'path';
+import { join } from 'path';
 import { existsSync } from 'fs';
 import pkg from '../package.json' with { type: 'json' };
 
 const SKILLS_DIR = join(process.cwd(), 'skills');
 const COMMANDS_DIR = join(process.cwd(), 'commands');
+
+// Default skill path (can be overridden at install time)
+const DEFAULT_SKILL_PATH = '{skillPath}';
 
 async function compile() {
   console.log(`🔮 Compiling skills to commands (v${pkg.version})...`);
@@ -31,23 +34,24 @@ async function compile() {
       
       if (parts.length >= 3) {
         const frontmatter = parts[1];
-        const body = parts.slice(2).join('---').trim();
         
         // Extract description
         const descMatch = frontmatter.match(/description:\s*(.+)$/m);
         const rawDescription = descMatch ? descMatch[1].trim() : `${skillName} skill`;
         
-        // Inject version (Static)
-        const description = `v${pkg.version} (Static) | ${rawDescription}`;
+        // Inject version
+        const description = `v${pkg.version} | ${rawDescription}`;
         
-        // Create command format
+        // Create stub command (no content, just pointer)
         const commandContent = `---
 description: ${description}
 ---
 
-**EXECUTE NOW:**
+Load skill \`${skillName}\` version v${pkg.version} from path below and execute with arguments.
 
-${body}
+Skill: ${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md
+
+ARGUMENTS: {args}
 `;
 
         await writeFile(join(COMMANDS_DIR, `${skillName}.md`), commandContent);
@@ -57,7 +61,7 @@ ${body}
     }
   }
 
-  console.log(`\n✨ Compiled ${count} skills to ${COMMANDS_DIR}`);
+  console.log(`\n✨ Compiled ${count} skill stubs to ${COMMANDS_DIR}`);
 }
 
 compile().catch(console.error);

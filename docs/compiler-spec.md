@@ -4,7 +4,7 @@
 
 ```
 INPUT                      OUTPUT
-skills/{name}/SKILL.md  →  commands/{name}.md
+skills/{name}/SKILL.md  →  commands/{name}.md (stub)
 ```
 
 ## Input
@@ -28,11 +28,9 @@ description: {description}
 description: {version} | {description}
 ---
 
-> This is an example content from skill `{name}` (may be removed in future versions).
+Load skill `{name}` version {version} from path below and execute with arguments.
 
-{content}
-
-Load skill `{name}` version {version} and execute with the arguments below.
+Skill: {skillPath}/{name}/SKILL.md
 
 ARGUMENTS: {args}
 ```
@@ -44,35 +42,44 @@ ARGUMENTS: {args}
 | `{name}` | Directory name | `trace` |
 | `{description}` | Frontmatter | `Find projects across git history.` |
 | `{version}` | package.json | `v1.4.0` |
-| `{content}` | Skill body | `# /trace - Unified Discovery System...` |
+| `{skillPath}` | Install location (scope + agent) | `.claude/skills` or `~/.claude/skills` |
 | `{args}` | User input at runtime | `--deep about oracle` |
+
+## Skill Paths by Agent & Scope
+
+| Agent | Local (project) | Global (user) |
+|-------|-----------------|---------------|
+| Claude Code | `.claude/skills` | `~/.claude/skills` |
+| OpenCode | `.opencode/command` | `~/.config/opencode/command` |
+| Cursor | `.cursor/skills` | `~/.cursor/skills` |
+| Windsurf | `.windsurf/skills` | `~/.codeium/windsurf/skills` |
+| Codex | `.codex/skills` | `~/.codex/skills` |
+| Amp | `.agents/skills` | `~/.config/agents/skills` |
 
 ## Example
 
-**Input**: `skills/trace/SKILL.md`
-```markdown
----
-description: Find projects across git history.
----
-
-# /trace - Unified Discovery System
-
-Usage: /trace [query] --deep
-```
-
-**Output**: `commands/trace.md`
+**Global install to Claude Code**:
 ```markdown
 ---
 description: v1.4.0 | Find projects across git history.
 ---
 
-> This is an example content from skill `trace` (may be removed in future versions).
+Load skill `trace` version v1.4.0 from path below and execute with arguments.
 
-# /trace - Unified Discovery System
+Skill: ~/.claude/skills/trace/SKILL.md
 
-Usage: /trace [query] --deep
+ARGUMENTS: {args}
+```
 
-Load skill `trace` version v1.4.0 and execute with the arguments below.
+**Local install to OpenCode**:
+```markdown
+---
+description: v1.4.0 | Find projects across git history.
+---
+
+Load skill `trace` version v1.4.0 from path below and execute with arguments.
+
+Skill: .opencode/command/trace/SKILL.md
 
 ARGUMENTS: {args}
 ```
@@ -80,5 +87,6 @@ ARGUMENTS: {args}
 ## Run
 
 ```bash
-bun run scripts/compile.ts
+bun run scripts/compile.ts --agent claude-code --scope global
+bun run scripts/compile.ts --agent opencode --scope local
 ```
