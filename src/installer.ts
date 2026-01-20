@@ -13,6 +13,12 @@ function getSkillsDir(): string {
   return join(dirname(thisFile), '..', 'skills');
 }
 
+// Compiled stubs for flat file agents (OpenCode)
+function getCommandsDir(): string {
+  const thisFile = import.meta.path;
+  return join(dirname(thisFile), '..', 'commands');
+}
+
 export async function discoverSkills(): Promise<Skill[]> {
   const skillsPath = getSkillsDir();
 
@@ -109,35 +115,68 @@ export async function installSkills(
     // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
-    // Copy each skill and inject version
+    // Copy each skill - use stubs for OpenCode, full content for others
+    const useStubs = agentName === 'opencode';
+    const commandsDir = getCommandsDir();
+    const scope = options.global ? 'Global' : 'Local';
+    // For stubs, point to Claude Code's skill path (where full skills live)
+    const claudeAgent = agents['claude-code'];
+    const fullSkillPath = options.global ? claudeAgent.globalSkillsDir : join(process.cwd(), claudeAgent.skillsDir);
+
     for (const skill of skillsToInstall) {
-      const destPath = join(targetDir, skill.name);
-
-      // Remove existing if present
-      if (existsSync(destPath)) {
-        await $`rm -rf ${destPath}`.quiet();
-      }
-
-      // Copy skill folder
-      await $`cp -r ${skill.path} ${destPath}`.quiet();
-
-      // Inject version into SKILL.md frontmatter and description
-      const skillMdPath = join(destPath, 'SKILL.md');
-      if (existsSync(skillMdPath)) {
-        let content = await Bun.file(skillMdPath).text();
-        if (content.startsWith('---')) {
-          // Add installer field after opening ---
+      if (useStubs) {
+        // OpenCode: copy flat stub file and replace {skillPath}
+        const stubFile = join(commandsDir, `${skill.name}.md`);
+        const destFile = join(targetDir, skill.name, 'SKILL.md');
+        
+        // Remove existing if present
+        if (existsSync(join(targetDir, skill.name))) {
+          await $`rm -rf ${join(targetDir, skill.name)}`.quiet();
+        }
+        
+        // Create directory and copy stub
+        await $`mkdir -p ${join(targetDir, skill.name)}`.quiet();
+        
+        if (existsSync(stubFile)) {
+          let content = await Bun.file(stubFile).text();
+          // Replace {skillPath} placeholder with Claude Code's path (where full skills live)
+          content = content.replace(/\{skillPath\}/g, fullSkillPath);
+          // Update version in description to include scope
           content = content.replace(
-            /^---\n/,
-            `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
+            /^(description:\s*v[\d.]+)\s*\|/m,
+            `$1 (${scope}) |`
           );
-          // Prepend version AND scope to description
-          const scope = options.global ? 'Global' : 'Local';
-          content = content.replace(
-            /^(description:\s*)(.+?)(\n)/m,
-            `$1v${pkg.version} (${scope}) | $2$3`
-          );
-          await Bun.write(skillMdPath, content);
+          await Bun.write(destFile, content);
+        }
+      } else {
+        // Other agents: copy full skill directory
+        const destPath = join(targetDir, skill.name);
+
+        // Remove existing if present
+        if (existsSync(destPath)) {
+          await $`rm -rf ${destPath}`.quiet();
+        }
+
+        // Copy skill folder
+        await $`cp -r ${skill.path} ${destPath}`.quiet();
+
+        // Inject version into SKILL.md frontmatter and description
+        const skillMdPath = join(destPath, 'SKILL.md');
+        if (existsSync(skillMdPath)) {
+          let content = await Bun.file(skillMdPath).text();
+          if (content.startsWith('---')) {
+            // Add installer field after opening ---
+            content = content.replace(
+              /^---\n/,
+              `---\ninstaller: oracle-skills-cli v${pkg.version}\n`
+            );
+            // Prepend version AND scope to description
+            content = content.replace(
+              /^(description:\s*)(.+?)(\n)/m,
+              `$1v${pkg.version} (${scope}) | $2$3`
+            );
+            await Bun.write(skillMdPath, content);
+          }
         }
       }
     }

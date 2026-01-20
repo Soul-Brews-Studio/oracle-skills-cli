@@ -1,8 +1,8 @@
 ---
-description: v1.5.0 | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
+description: v1.5.1 | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
 ---
 
-Load skill `physical` version v1.5.0 from path below and execute with arguments.
+Load skill `physical` version v1.5.1 from path below and execute with arguments.
 
 Skill: {skillPath}/physical/SKILL.md
 
