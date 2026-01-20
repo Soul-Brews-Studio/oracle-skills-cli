@@ -5,3 +5,8 @@ dist/
 
 # AI Brain - ephemeral
 ψ/active/
+
+# Installed skills (don't commit local installs)
+.opencode/skills/
+.opencode/commands/
+.claude/skills/
