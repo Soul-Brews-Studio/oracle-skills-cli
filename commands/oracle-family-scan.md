@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | oracle-family-scan skill
+description: v1.5.11 | oracle-family-scan skill
 ---
 
-AI: load skill `oracle-family-scan` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/oracle-family-scan/SKILL.md
+# /oracle-family-scan
+
+Execute the `oracle-family-scan` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/oracle-family-scan/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/oracle-family-scan/SKILL.md`
+- Global: `~/.claude/skills/oracle-family-scan/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*

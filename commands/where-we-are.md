@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
+description: v1.5.11 | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
 ---
 
-AI: load skill `where-we-are` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/where-we-are/SKILL.md
+# /where-we-are
+
+Execute the `where-we-are` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/where-we-are/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/where-we-are/SKILL.md`
+- Global: `~/.claude/skills/where-we-are/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*

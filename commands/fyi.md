@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
+description: v1.5.11 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
 ---
 
-AI: load skill `fyi` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/fyi/SKILL.md
+# /fyi
+
+Execute the `fyi` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/fyi/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/fyi/SKILL.md`
+- Global: `~/.claude/skills/fyi/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*

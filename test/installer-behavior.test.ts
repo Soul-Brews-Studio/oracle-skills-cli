@@ -25,31 +25,30 @@ describe("installer behavior by agent type", () => {
     }
   });
 
-  describe("OpenCode install format", () => {
-    it("should install flat .md stubs (not directories)", async () => {
+  describe("compiled stub format", () => {
+    it("should have instruction format (not full content)", async () => {
       // Copy a stub to test directory
       const stubContent = await readFile(
         join(process.cwd(), "commands", "trace.md"),
         "utf-8"
       );
       
-      // OpenCode expects: command/trace.md (flat file)
-      // NOT: command/trace/SKILL.md (directory)
-      
-      // Stub should be flat file format
-      expect(stubContent).toContain("load skill `trace`");
+      // Stub should tell agent to execute skill with args
+      expect(stubContent).toContain("Execute the `trace` skill");
+      expect(stubContent).toContain("## Instructions");
       expect(stubContent).toContain("$ARGUMENTS");
       expect(stubContent).not.toContain("## Step 0:");
     });
 
-    it("stub should point to skill path for loading", async () => {
+    it("stub should include skill location", async () => {
       const stubContent = await readFile(
         join(process.cwd(), "commands", "fyi.md"),
         "utf-8"
       );
 
       // Should tell agent where to find full skill
-      expect(stubContent).toContain("Human: {skillPath}/fyi/SKILL.md");
+      expect(stubContent).toContain("## Skill Location");
+      expect(stubContent).toContain("/fyi/SKILL.md");
     });
   });
 
@@ -112,7 +111,7 @@ describe("installer behavior by agent type", () => {
         "~/.claude/skills"
       );
 
-      expect(globalInstall).toContain("Human: ~/.claude/skills/trace/SKILL.md");
+      expect(globalInstall).toContain("~/.claude/skills/trace/SKILL.md");
     });
 
     it("should replace {skillPath} for local install", async () => {
@@ -126,7 +125,7 @@ describe("installer behavior by agent type", () => {
         ".claude/skills"
       );
 
-      expect(localInstall).toContain("Human: .claude/skills/trace/SKILL.md");
+      expect(localInstall).toContain(".claude/skills/trace/SKILL.md");
     });
   });
 });

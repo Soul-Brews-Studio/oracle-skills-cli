@@ -47,23 +47,23 @@ This is the test skill content.
     expect(output).toContain("|");
   });
 
-  it("should include load instruction", async () => {
+  it("should include execute instruction", async () => {
     const output = await readFile(
       join(process.cwd(), "commands", "trace.md"),
       "utf-8"
     );
 
-    expect(output).toContain("load skill `trace`");
-    expect(output).toContain("(v");
+    expect(output).toContain("Execute the `trace` skill");
+    expect(output).toContain("## Instructions");
   });
 
-  it("should include skill path placeholder", async () => {
+  it("should include skill path locations", async () => {
     const output = await readFile(
       join(process.cwd(), "commands", "trace.md"),
       "utf-8"
     );
 
-    expect(output).toContain("Human:");
+    expect(output).toContain("## Skill Location");
     expect(output).toContain("/trace/SKILL.md");
   });
 
@@ -87,7 +87,7 @@ This is the test skill content.
     expect(output).not.toContain("## Mode 1:");
   });
 
-  it("should match spec format exactly", async () => {
+  it("should match new format with instructions", async () => {
     const output = await readFile(
       join(process.cwd(), "commands", "fyi.md"),
       "utf-8"
@@ -107,10 +107,12 @@ This is the test skill content.
     // Line 3: empty
     expect(lines[3]).toBe("");
     
-    // Line 4: AI load instruction
-    expect(lines[4]).toMatch(/^AI: load skill `\w+` args: \$ARGUMENTS \(v\d+\.\d+\.\d+\)$/);
+    // Line 4: # /skillname header
+    expect(lines[4]).toMatch(/^# \/\w+$/);
     
-    // Line 5: Human path
-    expect(lines[5]).toMatch(/^Human: .+\/SKILL\.md$/);
+    // Should have instructions section
+    expect(output).toContain("## Instructions");
+    expect(output).toContain("Read the skill file");
+    expect(output).toContain("$ARGUMENTS");
   });
 });

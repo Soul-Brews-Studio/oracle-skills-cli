@@ -19,14 +19,14 @@ describe("installer stub format", () => {
     }
   });
 
-  it("OpenCode should use stub format (flat .md files)", async () => {
-    // OpenCode uses .opencode/command/{name}.md (flat file, not directory)
+  it("compiled stubs should use instruction format (flat .md files)", async () => {
+    // Compiled stubs are flat files with instructions
     const commandFile = join(process.cwd(), "commands", "trace.md");
     const content = await readFile(commandFile, "utf-8");
 
-    // Should be stub format
-    expect(content).toContain("load skill `trace`");
-    expect(content).toContain("Human:");
+    // Should have instruction format
+    expect(content).toContain("Execute the `trace` skill");
+    expect(content).toContain("## Instructions");
     expect(content).toContain("$ARGUMENTS");
     
     // Should NOT have full content
@@ -57,11 +57,16 @@ describe("installer stub format", () => {
     expect(lines[1]).toMatch(/^description: v\d+\.\d+\.\d+ \|/);
     expect(lines[2]).toBe("---");
 
-    // AI load instruction
-    expect(lines[4]).toMatch(/^AI: load skill `.+` args: \$ARGUMENTS \(v\d+/);
+    // Header with skill name
+    expect(lines[4]).toMatch(/^# \/\w+$/);
 
-    // Human path
-    expect(content).toMatch(/Human: \{skillPath\}\/.+\/SKILL\.md/);
+    // Instructions section
+    expect(content).toContain("## Instructions");
+    expect(content).toContain("Read the skill file");
+
+    // Skill location section
+    expect(content).toContain("## Skill Location");
+    expect(content).toContain("{skillPath}");
 
     // Arguments (inline)
     expect(content).toContain("$ARGUMENTS");

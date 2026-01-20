@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | Create handoff for next session. Use when user says "forward", "handoff", "wrap up", or before ending session.
+description: v1.5.11 | Create handoff for next session. Use when user says "forward", "handoff", "wrap up", or before ending session.
 ---
 
-AI: load skill `forward` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/forward/SKILL.md
+# /forward
+
+Execute the `forward` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/forward/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/forward/SKILL.md`
+- Global: `~/.claude/skills/forward/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*

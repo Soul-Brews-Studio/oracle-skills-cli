@@ -42,13 +42,28 @@ async function compile() {
         // Inject version
         const description = `v${pkg.version} | ${rawDescription}`;
         
-        // Create stub command (no content, just pointer)
+        // Create stub command that tells agent to execute skill with args
         const commandContent = `---
 description: ${description}
 ---
 
-AI: load skill \`${skillName}\` args: $ARGUMENTS (v${pkg.version})
-Human: ${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md
+# /${skillName}
+
+Execute the \`${skillName}\` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: \`${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md\`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: \`$ARGUMENTS\`
+
+## Skill Location
+
+- Local: \`.claude/skills/${skillName}/SKILL.md\`
+- Global: \`~/.claude/skills/${skillName}/SKILL.md\`
+
+---
+*oracle-skills-cli v${pkg.version}*
 `;
 
         await writeFile(join(COMMANDS_DIR, `${skillName}.md`), commandContent);

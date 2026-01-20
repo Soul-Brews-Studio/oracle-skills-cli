@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
+description: v1.5.11 | Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
 ---
 
-AI: load skill `rrr` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/rrr/SKILL.md
+# /rrr
+
+Execute the `rrr` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/rrr/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/rrr/SKILL.md`
+- Global: `~/.claude/skills/rrr/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*

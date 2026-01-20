@@ -1,6 +1,21 @@
 ---
-description: v1.5.10 | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
+description: v1.5.11 | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
 ---
 
-AI: load skill `feel` args: $ARGUMENTS (v1.5.10)
-Human: {skillPath}/feel/SKILL.md
+# /feel
+
+Execute the `feel` skill with the provided arguments.
+
+## Instructions
+
+1. Read the skill file: `{skillPath}/feel/SKILL.md`
+2. Follow all instructions in the skill file
+3. Pass these arguments to the skill: `$ARGUMENTS`
+
+## Skill Location
+
+- Local: `.claude/skills/feel/SKILL.md`
+- Global: `~/.claude/skills/feel/SKILL.md`
+
+---
+*oracle-skills-cli v1.5.11*
