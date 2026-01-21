@@ -23,20 +23,25 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
-| 1 | **context-finder** | subagent | Fast codebase search |
-| 2 | **learn** | subagent | Explore codebases with parallel agents |
-| 3 | **rrr** | subagent | Session retrospective with AI diary |
-| 4 | **trace** | subagent | Find projects across git history, repos, docs |
-| 5 | **project** | prompt + scripts (11) | Project lifecycle management |
-| 6 | **recap** | prompt + scripts (2) | Fresh start context summary |
-| 7 | **schedule** | prompt + scripts (2) | Calendar queries |
-| 8 | **skill-creator** | prompt + scripts (1) | Create new skills |
-| 9 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
-| 10 | **feel** | prompt | Log emotions |
-| 11 | **forward** | prompt | Session handoff |
-| 12 | **fyi** | prompt | Log information for reference |
-| 13 | **standup** | prompt | Daily standup check |
-| 14 | **where-we-are** | prompt | Session awareness |
+|   | **— Subagent —** |  |  |
+| 1 | **context-finder** | subagent | Fast search through git history, retrospectives, issues, and codebase |
+| 2 | **learn** | subagent | Explore a codebase with 3 parallel Haiku agents and create documentation |
+| 3 | **rrr** | subagent | Create session retrospective with AI diary and lessons learned |
+| 4 | **trace** | subagent | Find projects across git history, repos, docs, and Oracle |
+|   | **— Prompt + Scripts —** |  |  |
+| 5 | **physical** | prompt + scripts (2) | Physical location awareness from FindMy |
+| 6 | **project** | prompt + scripts (11) | Clone and track external repos |
+| 7 | **recap** | prompt + scripts (2) | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling |
+| 8 | **schedule** | prompt + scripts (2) | Query schedule.md using DuckDB markdown extension |
+| 9 | **skill-creator** | prompt + scripts (1) | Create new skills with Oracle philosophy |
+| 10 | **watch** | prompt + scripts (3) | Learn from YouTube videos via Gemini transcription |
+|   | **— Prompt —** |  |  |
+| 11 | **feel** | prompt | Log emotions with optional structure |
+| 12 | **forward** | prompt | Create handoff for next session |
+| 13 | **fyi** | prompt | Log information for future reference |
+| 14 | **oracle-family-scan** | prompt | oracle-family-scan skill |
+| 15 | **standup** | prompt | Daily standup check - pending tasks, appointments, recent progress |
+| 16 | **where-we-are** | prompt | Session awareness - what we're doing now |
 
 ## Usage
 
