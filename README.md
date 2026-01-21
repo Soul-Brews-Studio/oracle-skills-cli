@@ -8,11 +8,11 @@ Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents
 ## Quick Start
 
 ```bash
-# From GitHub (recommended)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14
+# Latest from GitHub (recommended)
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 
-# From npm (after publish)
-bunx oracle-skills
+# Specific version
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 install -g -y
 ```
 
 > **Note**: Requires [Bun](https://bun.sh). Install with `curl -fsSL https://bun.sh/install | bash`
@@ -44,10 +44,10 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 
 ```bash
 # Interactive (prompts for confirmation)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main
 
 # Install globally (user-level)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main -g
 ```
 
 ### Agent Mode (Non-Interactive)
@@ -56,13 +56,13 @@ For CI/CD, scripts, or AI agent automation:
 
 ```bash
 # Install all skills globally, no prompts
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 install -y -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main install -y -g
 
 # Install specific skills to specific agent
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 install -y -g -a claude-code -s rrr -s trace
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main install -y -g -a claude-code -s rrr -s trace
 
 # Uninstall all, no prompts
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 uninstall -y -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main uninstall -y -g
 ```
 
 | Flag | Purpose |
