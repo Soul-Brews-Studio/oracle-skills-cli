@@ -1,4 +1,21 @@
 #!/usr/bin/env bun
+
+// Bun runtime check - must be at the very top
+if (typeof Bun === 'undefined') {
+  console.error(`
+❌ oracle-skills requires Bun runtime
+
+You're running with Node.js, but this CLI uses Bun-specific features.
+
+To fix:
+  1. Install Bun: curl -fsSL https://bun.sh/install | bash
+  2. Run with: bunx oracle-skills install -g -y
+
+More info: https://bun.sh
+`);
+  process.exit(1);
+}
+
 import { program } from 'commander';
 import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents, getAgentNames } from './agents.js';
