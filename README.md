@@ -22,7 +22,6 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 inst
 Oracle skills are reusable instruction sets for AI coding agents, built by [Soul Brews Studio](https://github.com/Soul-Brews-Studio). They extend your agent's capabilities with specialized workflows:
 
 ### Subagent Skills
-Uses parallel agents for complex tasks.
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -32,7 +31,6 @@ Uses parallel agents for complex tasks.
 | 4 | **trace** | subagent | Find projects across git history, repos, docs |
 
 ### Prompt Skills
-Simple instruction-based skills.
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
