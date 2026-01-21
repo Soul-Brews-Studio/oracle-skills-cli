@@ -1,5 +1,5 @@
 ---
-description: v1.5.16 | Fast search through git history, retrospectives, issues, and codebase. Use when user asks to "find", "search", "where is", or needs to locate something in the codebase or history.
+description: v1.5.17 | Fast search through git history, retrospectives, issues, and codebase. Use when user asks to "find", "search", "where is", or needs to locate something in the codebase or history.
 ---
 
 # /context-finder
@@ -18,4 +18,4 @@ Execute the `context-finder` skill with the provided arguments.
 - Global: `~/.claude/skills/context-finder/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.16*
+*oracle-skills-cli v1.5.17*

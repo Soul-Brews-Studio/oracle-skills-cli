@@ -13,7 +13,7 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
 /learn [url]             # Auto: clone via /project learn, then explore
 /learn [slug]            # Use slug from ψ/memory/slugs.yaml
 /learn [repo-path]       # Path to repo
-/learn [repo-name]       # Finds in ψ/learn/repo/
+/learn [repo-name]       # Finds in ψ/learn/owner/repo
 ```
 
 ## Step 0: Detect Input Type + Resolve Path
@@ -24,21 +24,26 @@ date "+🕐 %H:%M (%A %d %B %Y)"
 
 ### If URL (http* or owner/repo format)
 
-**Clone using ghq directly:**
+**Clone via ghq → symlink to ψ/learn/owner/repo:**
 ```bash
-# Clone to ψ/learn/repo/ using ghq
-GHQ_ROOT="ψ/learn/repo" ghq get "$INPUT"
+# 1. Clone to ghq default root
+ghq get -u "$INPUT"
+
+# 2. Extract owner/repo and create symlink
+GHQ_ROOT=$(ghq root)
+OWNER=$(echo "$INPUT" | sed -E 's|.*github.com/([^/]+)/.*|\1|')
+REPO=$(echo "$INPUT" | sed -E 's|.*/([^/]+)(\.git)?$|\1|')
+
+mkdir -p "ψ/learn/$OWNER"
+ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO"
 ```
 
-This uses ghq to clone to ψ/learn/repo/github.com/owner/name
+Result: `ψ/learn/owner/repo` → `~/Code/github.com/owner/repo`
 
 ### Then resolve path:
 ```bash
-# Fast path from slugs
-grep "^$INPUT:" ψ/memory/slugs.yaml | cut -d: -f2
-
-# Or find symlink
-find ψ/learn/repo -maxdepth 6 -type l | grep -i "$INPUT" | head -1
+# Find symlink by name
+find ψ/learn -type l -name "*$INPUT*" | head -1
 ```
 
 ## Scope
