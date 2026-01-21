@@ -155,13 +155,13 @@ async function generateTable() {
   }
   
   // Prompt + Scripts group
-  lines.push('|   |  |  |  |');
+  lines.push('| - |  |  |  |');
   for (const s of withScripts) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
   
   // Prompt group
-  lines.push('|   |  |  |  |');
+  lines.push('| - |  |  |  |');
   for (const s of prompt) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
