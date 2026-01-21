@@ -23,19 +23,18 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
-|   | **— Subagent —** |  |  |
 | 1 | **context-finder** | subagent | Fast search through git history |
 | 2 | **learn** | subagent | Explore a codebase |
 | 3 | **physical** | subagent | Physical location awareness from FindMy |
 | 4 | **rrr** | subagent | Create session retrospective with AI diary |
 | 5 | **trace** | subagent | Find projects across git history, repos |
-|   | **— Prompt + Scripts —** |  |  |
+|   |  |  |  |
 | 6 | **project** | prompt + scripts (11) | Clone and track external repos |
 | 7 | **recap** | prompt + scripts (2) | Fresh-start orientation—adaptive synthesis |
 | 8 | **schedule** | prompt + scripts (2) | Query schedule.md using DuckDB markdown |
 | 9 | **skill-creator** | prompt + scripts (1) | Create new skills with Oracle philosophy |
 | 10 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
-|   | **— Prompt —** |  |  |
+|   |  |  |  |
 | 11 | **feel** | prompt | Log emotions with optional structure |
 | 12 | **forward** | prompt | Create handoff for next session |
 | 13 | **fyi** | prompt | Log information for future reference |

@@ -150,19 +150,18 @@ async function generateTable() {
   let num = 1;
   
   // Subagent group
-  lines.push('|   | **— Subagent —** |  |  |');
   for (const s of subagent) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
   
   // Prompt + Scripts group
-  lines.push('|   | **— Prompt + Scripts —** |  |  |');
+  lines.push('|   |  |  |  |');
   for (const s of withScripts) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
   
   // Prompt group
-  lines.push('|   | **— Prompt —** |  |  |');
+  lines.push('|   |  |  |  |');
   for (const s of prompt) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
