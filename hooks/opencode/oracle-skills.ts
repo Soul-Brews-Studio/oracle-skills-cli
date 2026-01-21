@@ -6,7 +6,7 @@ import type { Plugin } from "@opencode-ai/plugin"
 
 const PREFIX = "opencode-cli:"
 
-/** Get current timestamp in GMT+7 (ICT) format: HH:MM */
+/** Get current timestamp in GMT+7 format: HH:MM */
 function getTimestamp(): string {
   const now = new Date()
   // Convert to GMT+7
@@ -28,7 +28,7 @@ const OracleSkillsPlugin: Plugin = () => ({
           for (const part of msg.parts) {
             if (part.type === "text" && part.text && !part.text.startsWith(PREFIX)) {
               const timestamp = getTimestamp()
-              part.text = `${PREFIX} [${timestamp} ICT] ${part.text}`
+              part.text = `${PREFIX} [${timestamp} GMT+7] ${part.text}`
             }
           }
         }
