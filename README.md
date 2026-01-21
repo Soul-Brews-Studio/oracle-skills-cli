@@ -21,22 +21,37 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 inst
 
 Oracle skills are reusable instruction sets for AI coding agents, built by [Soul Brews Studio](https://github.com/Soul-Brews-Studio). They extend your agent's capabilities with specialized workflows:
 
-| # | Skill | Type | Description |
-|---|-------|------|-------------|
-| 1 | **context-finder** | subagent | Fast codebase search |
-| 2 | **feel** | prompt | Log emotions |
-| 3 | **forward** | prompt | Session handoff |
-| 4 | **fyi** | prompt | Log information for reference |
-| 5 | **learn** | subagent | Explore codebases with parallel agents |
-| 6 | **project** | prompt + scripts (11) | Project lifecycle management |
-| 7 | **recap** | prompt + scripts (2) | Fresh start context summary |
-| 8 | **rrr** | subagent | Session retrospective with AI diary |
-| 9 | **schedule** | prompt + scripts (2) | Calendar queries |
-| 10 | **skill-creator** | prompt + scripts (1) | Create new skills |
-| 11 | **standup** | prompt | Daily standup check |
-| 12 | **trace** | subagent | Find projects across git history, repos, docs |
-| 13 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
-| 14 | **where-we-are** | prompt | Session awareness |
+### Subagent Skills
+Uses parallel agents for complex tasks.
+
+| Skill | Description |
+|-------|-------------|
+| **context-finder** | Fast codebase search |
+| **learn** | Explore codebases with parallel agents |
+| **rrr** | Session retrospective with AI diary |
+| **trace** | Find projects across git history, repos, docs |
+
+### Prompt Skills
+Simple instruction-based skills.
+
+| Skill | Description |
+|-------|-------------|
+| **feel** | Log emotions |
+| **forward** | Session handoff |
+| **fyi** | Log information for reference |
+| **standup** | Daily standup check |
+| **where-we-are** | Session awareness |
+
+### Prompt + Scripts Skills
+Skills with executable helper scripts.
+
+| Skill | Scripts | Description |
+|-------|---------|-------------|
+| **project** | 11 | Project lifecycle management |
+| **recap** | 2 | Fresh start context summary |
+| **schedule** | 2 | Calendar queries |
+| **skill-creator** | 1 | Create new skills |
+| **watch** | 3 | Learn from YouTube videos |
 
 ## Usage
 
