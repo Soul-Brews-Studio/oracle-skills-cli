@@ -3,8 +3,8 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import pkg from '../package.json' with { type: 'json' };
 
-const SKILLS_DIR = join(process.cwd(), 'skills');
-const COMMANDS_DIR = join(process.cwd(), 'commands');
+const SKILLS_DIR = join(process.cwd(), 'src', 'skills');
+const COMMANDS_DIR = join(process.cwd(), 'src', 'commands');
 
 // Default skill path (can be overridden at install time)
 const DEFAULT_SKILL_PATH = '{skillPath}';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { parseRepo, expandPath, matchesSlug, today, now } from "../skills/project/scripts/utils.ts";
+import { parseRepo, expandPath, matchesSlug, today, now } from "../src/skills/project/scripts/utils.ts";
 
 describe("parseRepo", () => {
   it("parses full URL", () => {

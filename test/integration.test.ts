@@ -119,7 +119,7 @@ describe("integration: OpenCode global install", () => {
 });
 
 describe("integration: compiled stubs", () => {
-  const COMMANDS_DIR = join(process.cwd(), "commands");
+  const COMMANDS_DIR = join(process.cwd(), "src/commands");
 
   it("compiled stubs should exist", async () => {
     expect(existsSync(COMMANDS_DIR)).toBe(true);

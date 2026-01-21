@@ -4,7 +4,7 @@ import { join, dirname } from 'path';
 import * as p from '@clack/prompts';
 import { agents } from './agents.js';
 import type { Skill, InstallOptions } from './types.js';
-import pkg from '../package.json' with { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 
 // Skills are bundled in the repo
 function getSkillsDir(): string {

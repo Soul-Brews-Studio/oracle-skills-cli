@@ -4,8 +4,8 @@ import { join } from "path";
 import { existsSync } from "fs";
 
 const TEST_DIR = join(process.cwd(), "test-compile-output");
-const TEST_SKILLS_DIR = join(TEST_DIR, "skills");
-const TEST_COMMANDS_DIR = join(TEST_DIR, "commands");
+const TEST_SKILLS_DIR = join(TEST_DIR, "src/skills");
+const TEST_COMMANDS_DIR = join(TEST_DIR, "src/commands");
 
 describe("compile", () => {
   beforeAll(async () => {
@@ -38,7 +38,7 @@ This is the test skill content.
   it("should output stub format with description", async () => {
     // Run compiler (we'll need to make it configurable)
     const output = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
@@ -49,7 +49,7 @@ This is the test skill content.
 
   it("should include execute instruction", async () => {
     const output = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
@@ -59,7 +59,7 @@ This is the test skill content.
 
   it("should include skill path locations", async () => {
     const output = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
@@ -69,7 +69,7 @@ This is the test skill content.
 
   it("should include ARGUMENTS in load line", async () => {
     const output = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
@@ -78,7 +78,7 @@ This is the test skill content.
 
   it("should NOT include full skill content", async () => {
     const output = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
@@ -89,7 +89,7 @@ This is the test skill content.
 
   it("should match new format with instructions", async () => {
     const output = await readFile(
-      join(process.cwd(), "commands", "fyi.md"),
+      join(process.cwd(), "src/commands", "fyi.md"),
       "utf-8"
     );
 

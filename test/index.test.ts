@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import { $ } from 'bun';
-import { agents, detectInstalledAgents, getAgentNames } from '../src/agents';
-import { discoverSkills } from '../src/installer';
+import { agents, detectInstalledAgents, getAgentNames } from '../src/cli/agents';
+import { discoverSkills } from '../src/cli/installer';
 
 describe('agents', () => {
   it('should have 14 agents defined', () => {
@@ -32,12 +32,12 @@ describe('agents', () => {
 
 describe('CLI', () => {
   it('should show version', async () => {
-    const result = await $`bun run src/index.ts --version`.text();
+    const result = await $`bun run src/cli/index.ts --version`.text();
     expect(result.trim()).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it('should show help', async () => {
-    const result = await $`bun run src/index.ts --help`.text();
+    const result = await $`bun run src/cli/index.ts --help`.text();
     expect(result).toContain('oracle-skills');
     expect(result).toContain('install');
     expect(result).toContain('uninstall');
@@ -45,7 +45,7 @@ describe('CLI', () => {
   });
 
   it('should list agents', async () => {
-    const result = await $`bun run src/index.ts agents`.text();
+    const result = await $`bun run src/cli/index.ts agents`.text();
     expect(result).toContain('claude-code');
     expect(result).toContain('opencode');
     expect(result).toContain('Supported agents');

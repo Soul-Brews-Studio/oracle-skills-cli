@@ -1,5 +1,5 @@
 ---
-description: v1.5.14 | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
+description: v1.5.15 | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
 ---
 
 # /recap
@@ -18,4 +18,4 @@ Execute the `recap` skill with the provided arguments.
 - Global: `~/.claude/skills/recap/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.14*
+*oracle-skills-cli v1.5.15*

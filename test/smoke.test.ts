@@ -1,7 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { $ } from "bun";
 
-const S = "skills";
+const S = "src/skills";
 
 // Helper: run script and get stdout+stderr
 const run = async (cmd: string) => {

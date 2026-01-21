@@ -20,7 +20,7 @@ import { program } from 'commander';
 import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents, getAgentNames } from './agents.js';
 import { listSkills, installSkills, uninstallSkills } from './installer.js';
-import pkg from '../package.json' with { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 
 const VERSION = pkg.version;
 

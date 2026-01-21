@@ -29,7 +29,7 @@ describe("installer behavior by agent type", () => {
     it("should have instruction format (not full content)", async () => {
       // Copy a stub to test directory
       const stubContent = await readFile(
-        join(process.cwd(), "commands", "trace.md"),
+        join(process.cwd(), "src/commands", "trace.md"),
         "utf-8"
       );
       
@@ -42,7 +42,7 @@ describe("installer behavior by agent type", () => {
 
     it("stub should include skill location", async () => {
       const stubContent = await readFile(
-        join(process.cwd(), "commands", "fyi.md"),
+        join(process.cwd(), "src/commands", "fyi.md"),
         "utf-8"
       );
 
@@ -55,7 +55,7 @@ describe("installer behavior by agent type", () => {
   describe("Claude Code install format", () => {
     it("should install directories with SKILL.md (full content)", async () => {
       const skillContent = await readFile(
-        join(process.cwd(), "skills", "trace", "SKILL.md"),
+        join(process.cwd(), "src/skills", "trace", "SKILL.md"),
         "utf-8"
       );
 
@@ -66,7 +66,7 @@ describe("installer behavior by agent type", () => {
     });
 
     it("should include scripts directory if exists", async () => {
-      const projectSkillDir = join(process.cwd(), "skills", "project");
+      const projectSkillDir = join(process.cwd(), "src/skills", "project");
       
       if (existsSync(join(projectSkillDir, "scripts"))) {
         const scripts = await readdir(join(projectSkillDir, "scripts"));
@@ -102,7 +102,7 @@ describe("installer behavior by agent type", () => {
   describe("path replacement in stubs", () => {
     it("should replace {skillPath} for global install", async () => {
       const stub = await readFile(
-        join(process.cwd(), "commands", "trace.md"),
+        join(process.cwd(), "src/commands", "trace.md"),
         "utf-8"
       );
 
@@ -116,7 +116,7 @@ describe("installer behavior by agent type", () => {
 
     it("should replace {skillPath} for local install", async () => {
       const stub = await readFile(
-        join(process.cwd(), "commands", "trace.md"),
+        join(process.cwd(), "src/commands", "trace.md"),
         "utf-8"
       );
 

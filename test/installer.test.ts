@@ -21,7 +21,7 @@ describe("installer stub format", () => {
 
   it("compiled stubs should use instruction format (flat .md files)", async () => {
     // Compiled stubs are flat files with instructions
-    const commandFile = join(process.cwd(), "commands", "trace.md");
+    const commandFile = join(process.cwd(), "src/commands", "trace.md");
     const content = await readFile(commandFile, "utf-8");
 
     // Should have instruction format
@@ -35,7 +35,7 @@ describe("installer stub format", () => {
 
   it("Claude Code should use full skill format (directory with SKILL.md)", async () => {
     // Claude Code uses .claude/skills/{name}/SKILL.md
-    const skillFile = join(process.cwd(), "skills", "trace", "SKILL.md");
+    const skillFile = join(process.cwd(), "src/skills", "trace", "SKILL.md");
     const content = await readFile(skillFile, "utf-8");
 
     // Should have full content
@@ -46,7 +46,7 @@ describe("installer stub format", () => {
 
   it("stub should have correct structure", async () => {
     const content = await readFile(
-      join(process.cwd(), "commands", "fyi.md"),
+      join(process.cwd(), "src/commands", "fyi.md"),
       "utf-8"
     );
 
@@ -77,8 +77,8 @@ describe("installer stub format", () => {
     // OpenCode target: flat .md files from commands/
     // Claude Code target: directories with SKILL.md from skills/
     
-    const openCodeCommandsDir = join(process.cwd(), "commands");
-    const claudeSkillsDir = join(process.cwd(), "skills");
+    const openCodeCommandsDir = join(process.cwd(), "src/commands");
+    const claudeSkillsDir = join(process.cwd(), "src/skills");
 
     // OpenCode commands should be flat .md files
     expect(existsSync(join(openCodeCommandsDir, "trace.md"))).toBe(true);
@@ -90,7 +90,7 @@ describe("installer stub format", () => {
 
   it("stub skillPath placeholder should be replaceable", async () => {
     const content = await readFile(
-      join(process.cwd(), "commands", "trace.md"),
+      join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
