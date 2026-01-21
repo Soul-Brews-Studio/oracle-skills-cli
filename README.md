@@ -23,20 +23,20 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
-| 1 | **feel** | prompt | Log emotions |
-| 2 | **forward** | prompt | Session handoff |
-| 3 | **fyi** | prompt | Log information for reference |
-| 4 | **standup** | prompt | Daily standup check |
-| 5 | **where-we-are** | prompt | Session awareness |
-| 6 | **project** | prompt + scripts (11) | Project lifecycle management |
-| 7 | **recap** | prompt + scripts (2) | Fresh start context summary |
-| 8 | **schedule** | prompt + scripts (2) | Calendar queries |
-| 9 | **skill-creator** | prompt + scripts (1) | Create new skills |
-| 10 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
-| 11 | **context-finder** | subagent | Fast codebase search |
-| 12 | **learn** | subagent | Explore codebases with parallel agents |
-| 13 | **rrr** | subagent | Session retrospective with AI diary |
-| 14 | **trace** | subagent | Find projects across git history, repos, docs |
+| 1 | **context-finder** | subagent | Fast codebase search |
+| 2 | **learn** | subagent | Explore codebases with parallel agents |
+| 3 | **rrr** | subagent | Session retrospective with AI diary |
+| 4 | **trace** | subagent | Find projects across git history, repos, docs |
+| 5 | **project** | prompt + scripts (11) | Project lifecycle management |
+| 6 | **recap** | prompt + scripts (2) | Fresh start context summary |
+| 7 | **schedule** | prompt + scripts (2) | Calendar queries |
+| 8 | **skill-creator** | prompt + scripts (1) | Create new skills |
+| 9 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
+| 10 | **feel** | prompt | Log emotions |
+| 11 | **forward** | prompt | Session handoff |
+| 12 | **fyi** | prompt | Log information for reference |
+| 13 | **standup** | prompt | Daily standup check |
+| 14 | **where-we-are** | prompt | Session awareness |
 
 ## Usage
 
