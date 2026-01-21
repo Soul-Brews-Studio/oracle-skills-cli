@@ -4,28 +4,8 @@ import { existsSync } from 'fs';
 
 const SKILLS_DIR = join(process.cwd(), 'src', 'skills');
 
-// Skills that use Task tool (subagents)
-const SUBAGENT_SKILLS = ['context-finder', 'learn', 'rrr', 'trace'];
-
-// Manual short descriptions (override auto-extracted)
-const SHORT_DESCRIPTIONS: Record<string, string> = {
-  'learn': 'Explore codebases with parallel agents',
-  'recap': 'Fresh-start context summary',
-  'context-finder': 'Fast codebase search',
-  'rrr': 'Session retrospective with AI diary',
-  'trace': 'Find projects across git history and Oracle',
-  'project': 'Clone and track external repos',
-  'schedule': 'Query schedule.md with DuckDB',
-  'physical': 'Location awareness from FindMy',
-  'watch': 'Learn from YouTube videos',
-  'skill-creator': 'Create new Oracle skills',
-  'standup': 'Daily standup check',
-  'where-we-are': 'Session awareness',
-  'feel': 'Log emotions',
-  'forward': 'Session handoff',
-  'fyi': 'Log info for future reference',
-  'oracle-family-scan': 'Scan Oracle family repos',
-};
+// Max description length for compact display
+const MAX_DESC_LENGTH = 45;
 
 interface Skill {
   name: string;
@@ -43,6 +23,67 @@ async function countScripts(skillDir: string): Promise<number> {
   }
 }
 
+function shortenDescription(desc: string): string {
+  // Remove "Use when..." and everything after
+  let short = desc.split(/\.\s*Use when/i)[0].trim();
+  
+  // Remove trailing period
+  short = short.replace(/\.$/, '');
+  
+  // If still too long, take first phrase before common separators
+  if (short.length > MAX_DESC_LENGTH) {
+    const separators = [' - ', ' — ', '. ', ', and ', ' and ', ' with ', ' via '];
+    for (const sep of separators) {
+      const idx = short.indexOf(sep);
+      if (idx > 10 && idx < MAX_DESC_LENGTH) {
+        short = short.substring(0, idx);
+        break;
+      }
+    }
+  }
+  
+  // Final truncation at word boundary if still too long
+  if (short.length > MAX_DESC_LENGTH) {
+    const truncated = short.substring(0, MAX_DESC_LENGTH);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > MAX_DESC_LENGTH * 0.6) {
+      short = truncated.substring(0, lastSpace);
+    } else {
+      short = truncated;
+    }
+  }
+  
+  // Clean up trailing punctuation
+  short = short.replace(/[,;:\s]+$/, '');
+  
+  return short;
+}
+
+function isSubagent(frontmatter: string, body: string): boolean {
+  // Check allowed-tools for Task
+  if (/allowed-tools:[\s\S]*?- Task/i.test(frontmatter)) {
+    return true;
+  }
+  
+  // Check description in frontmatter for subagent hints
+  const descMatch = frontmatter.match(/description:\s*(.+)/i);
+  const desc = descMatch ? descMatch[1] : '';
+  
+  // Check both description and body for subagent keywords
+  const textToCheck = `${desc}\n${body}`;
+  
+  const subagentPatterns = [
+    /\bsubagent/i,
+    /\bparallel\s+(haiku\s+)?agent/i,
+    /\b\d+\s+parallel\s+/i,           // "3 parallel", "5 parallel"
+    /\bTask\s+tool\b/i,
+    /launch.*agent/i,
+    /haiku\s+agent/i,
+  ];
+  
+  return subagentPatterns.some(p => p.test(textToCheck));
+}
+
 async function parseSkill(skillName: string): Promise<Skill | null> {
   const skillPath = join(SKILLS_DIR, skillName, 'SKILL.md');
   
@@ -54,19 +95,21 @@ async function parseSkill(skillName: string): Promise<Skill | null> {
   if (parts.length < 3) return null;
   
   const frontmatter = parts[1];
+  const body = parts.slice(2).join('---');
+  
+  // Extract description from frontmatter
   const descMatch = frontmatter.match(/description:\s*(.+?)(?:\n|$)/);
   const rawDescription = descMatch ? descMatch[1].trim() : `${skillName} skill`;
   
-  // Use manual short description or extract from frontmatter
-  const shortDesc = SHORT_DESCRIPTIONS[skillName] || rawDescription
-    .split(/\. Use when|Use when/)[0]
-    .replace(/\.$/, '')
-    .trim();
+  // Shorten description
+  const shortDesc = shortenDescription(rawDescription);
   
+  // Count scripts
   const scriptCount = await countScripts(join(SKILLS_DIR, skillName));
   
+  // Determine type
   let type: string;
-  if (SUBAGENT_SKILLS.includes(skillName)) {
+  if (isSubagent(frontmatter, body)) {
     type = 'subagent';
   } else if (scriptCount > 0) {
     type = `prompt + scripts (${scriptCount})`;

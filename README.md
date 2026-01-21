@@ -24,24 +24,24 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
 |   | **— Subagent —** |  |  |
-| 1 | **context-finder** | subagent | Fast codebase search |
-| 2 | **learn** | subagent | Explore codebases with parallel agents |
-| 3 | **rrr** | subagent | Session retrospective with AI diary |
-| 4 | **trace** | subagent | Find projects across git history and Oracle |
+| 1 | **context-finder** | subagent | Fast search through git history |
+| 2 | **learn** | subagent | Explore a codebase |
+| 3 | **physical** | subagent | Physical location awareness from FindMy |
+| 4 | **rrr** | subagent | Create session retrospective with AI diary |
+| 5 | **trace** | subagent | Find projects across git history, repos |
 |   | **— Prompt + Scripts —** |  |  |
-| 5 | **physical** | prompt + scripts (2) | Location awareness from FindMy |
 | 6 | **project** | prompt + scripts (11) | Clone and track external repos |
-| 7 | **recap** | prompt + scripts (2) | Fresh-start context summary |
-| 8 | **schedule** | prompt + scripts (2) | Query schedule.md with DuckDB |
-| 9 | **skill-creator** | prompt + scripts (1) | Create new Oracle skills |
+| 7 | **recap** | prompt + scripts (2) | Fresh-start orientation—adaptive synthesis |
+| 8 | **schedule** | prompt + scripts (2) | Query schedule.md using DuckDB markdown |
+| 9 | **skill-creator** | prompt + scripts (1) | Create new skills with Oracle philosophy |
 | 10 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
 |   | **— Prompt —** |  |  |
-| 11 | **feel** | prompt | Log emotions |
-| 12 | **forward** | prompt | Session handoff |
-| 13 | **fyi** | prompt | Log info for future reference |
-| 14 | **oracle-family-scan** | prompt | Scan Oracle family repos |
+| 11 | **feel** | prompt | Log emotions with optional structure |
+| 12 | **forward** | prompt | Create handoff for next session |
+| 13 | **fyi** | prompt | Log information for future reference |
+| 14 | **oracle-family-scan** | prompt | oracle-family-scan skill |
 | 15 | **standup** | prompt | Daily standup check |
-| 16 | **where-we-are** | prompt | Session awareness |
+| 16 | **where-we-are** | prompt | Session awareness - what we're doing now |
 
 ## Usage
 
