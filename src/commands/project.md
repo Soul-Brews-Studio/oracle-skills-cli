@@ -1,5 +1,5 @@
 ---
-description: v1.5.23 | Clone and track external repos. Use when user shares GitHub URL to study or develop, or says "search repos", "find repo", "where is [project]". Actions - learn (clone for study), incubate (clone for development), search/find (search repos), list (show tracked).
+description: v1.5.24 | Clone and track external repos. Use when user shares GitHub URL to study or develop, or says "search repos", "find repo", "where is [project]". Actions - learn (clone for study), incubate (clone for development), search/find (search repos), list (show tracked).
 ---
 
 # /project
@@ -18,4 +18,4 @@ Execute the `project` skill with the provided arguments.
 - Global: `~/.claude/skills/project/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.23*
+*oracle-skills-cli v1.5.24*
