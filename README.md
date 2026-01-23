@@ -17,23 +17,18 @@ Then run `claude "/awaken"` to create a new Oracle ([example](https://github.com
 ## Usage
 
 ```bash
-# Install all skills globally
-oracle-skills install -g -y
-
-# Install specific skills
-oracle-skills install -g -s trace -s rrr
-
-# Install to specific agent
-oracle-skills install -g -a claude-code
-
-# List installed skills
-oracle-skills list -g
-
-# Uninstall
-oracle-skills uninstall -g -y
+# Full command (or create alias below)
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -g -y
 ```
 
-> **Tip**: Create alias: `alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'`
+**Tip**: Create alias for shorter commands:
+```bash
+alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
+oracle-skills install -g -y
+oracle-skills list -g
+```
 
 | Flag | Purpose |
 |------|---------|
