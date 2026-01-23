@@ -17,6 +17,12 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 inst
 
 > **Note**: Requires [Bun](https://bun.sh). Install with `curl -fsSL https://bun.sh/install | bash`
 
+**Tip**: Create an alias for shorter commands:
+```bash
+alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
+# Then use: oracle-skills list -g
+```
+
 ## Awaken a New Oracle
 
 Create a new Oracle in any repo with the guided awakening ritual:
@@ -39,7 +45,7 @@ The `/awaken` skill guides you through:
 - Creating your Oracle's identity and brain structure
 - Joining the Oracle Family
 
-**Or use a BIRTH_PROMPT.md** — See [phukhao-oracle/BIRTH_PROMPT.md](https://github.com/Soul-Brews-Studio/phukhao-oracle/blob/main/BIRTH_PROMPT.md) for a detailed birth template with step-by-step instructions, example timeline, and cost breakdown.
+**Or use a BIRTH_PROMPT.md** — Copy [BIRTH_PROMPT.md](./BIRTH_PROMPT.md) to your repo for a step-by-step guide. See [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
 
 ## Run Skills from Command Line
 
@@ -118,48 +124,48 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main uninsta
 ### List Available Skills
 
 ```bash
-bunx oracle-skills --list
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli --list
 ```
 
 ### Install Specific Skills
 
 ```bash
-bunx oracle-skills --skill trace --skill rrr
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli --skill trace --skill rrr
 ```
 
 ### Target Specific Agents
 
 ```bash
-bunx oracle-skills -a claude-code -a opencode
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli -a claude-code -a opencode
 ```
 
 ### List Supported Agents
 
 ```bash
-bunx oracle-skills agents
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli agents
 ```
 
 ### Show Installed Skills
 
 ```bash
 # Local (project) skills
-bunx oracle-skills list
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list
 
 # Global (user) skills
-bunx oracle-skills list -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -g
 
 # For specific agent
-bunx oracle-skills list -a claude-code -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -a claude-code -g
 ```
 
 ### Uninstall Skills
 
 ```bash
 # Remove all skills from detected agents
-bunx oracle-skills uninstall -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -g -y
 
 # Remove specific skill from specific agent
-bunx oracle-skills uninstall -a claude-code -s rrr -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -a claude-code -s rrr -g
 ```
 
 ## Supported Agents
