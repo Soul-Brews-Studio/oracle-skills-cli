@@ -11,9 +11,9 @@ async function updateReadmeTable() {
   // Read current README
   const readme = await readFile(README_PATH, 'utf-8');
   
-  // Find and replace table (between "specialized workflows:" and "## Usage")
+  // Find and replace table (between "specialized workflows:" and "## Supported Agents")
   const tableStart = readme.indexOf('specialized workflows:');
-  const tableEnd = readme.indexOf('\n## Usage');
+  const tableEnd = readme.indexOf('\n## Supported Agents');
   
   if (tableStart === -1 || tableEnd === -1) {
     console.log('Could not find table markers in README');

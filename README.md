@@ -14,9 +14,37 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -
 
 Then run `claude "/awaken"` to create a new Oracle ([example](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
 
-## What are Oracle Skills?
+## Usage
 
-Oracle skills are reusable instruction sets for AI coding agents, built by [Soul Brews Studio](https://github.com/Soul-Brews-Studio). They extend your agent's capabilities with specialized workflows:
+```bash
+# Install all skills globally
+oracle-skills install -g -y
+
+# Install specific skills
+oracle-skills install -g -s trace -s rrr
+
+# Install to specific agent
+oracle-skills install -g -a claude-code
+
+# List installed skills
+oracle-skills list -g
+
+# Uninstall
+oracle-skills uninstall -g -y
+```
+
+> **Tip**: Create alias: `alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'`
+
+| Flag | Purpose |
+|------|---------|
+| `-g` | Global (user) directory |
+| `-y` | Skip prompts |
+| `-a` | Target agent(s) |
+| `-s` | Specific skill(s) |
+
+## Skills
+
+Oracle skills extend your agent's capabilities with specialized workflows:
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -41,93 +69,12 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 | 17 | **where-we-are** | prompt | Session awareness - what we're doing now |
 | 18 | **who** | prompt | Know thyself |
 
-## Usage
-
-### Basic Installation
-
-```bash
-# Interactive (prompts for confirmation)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main
-
-# Install globally (user-level)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main -g
-```
-
-### Agent Mode (Non-Interactive)
-
-For CI/CD, scripts, or AI agent automation:
-
-```bash
-# Install all skills globally, no prompts
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main install -y -g
-
-# Install specific skills to specific agent
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main install -y -g -a claude-code -s rrr -s trace
-
-# Uninstall all, no prompts
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main uninstall -y -g
-```
-
-| Flag | Purpose |
-|------|---------|
-| `-y` | Skip all confirmation prompts |
-| `-g` | Install to global (user) directories |
-| `-a` | Target specific agent(s) |
-| `-s` | Install specific skill(s) |
-
-### List Available Skills
-
-```bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli --list
-```
-
-### Install Specific Skills
-
-```bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli --skill trace --skill rrr
-```
-
-### Target Specific Agents
-
-```bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli -a claude-code -a opencode
-```
-
-### List Supported Agents
-
-```bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli agents
-```
-
-### Show Installed Skills
-
-```bash
-# Local (project) skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list
-
-# Global (user) skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -g
-
-# For specific agent
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -a claude-code -g
-```
-
-### Uninstall Skills
-
-```bash
-# Remove all skills from detected agents
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -g -y
-
-# Remove specific skill from specific agent
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -a claude-code -s rrr -g
-```
-
 ## Supported Agents
 
 | Agent | Project Path | Global Path |
 |-------|--------------|-------------|
-| OpenCode | `.opencode/skills/` | `~/.config/opencode/skills/` |
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| OpenCode | `.opencode/skills/` | `~/.config/opencode/skills/` |
 | Codex | `.codex/skills/` | `~/.codex/skills/` |
 | Cursor | `.cursor/skills/` | `~/.cursor/skills/` |
 | Amp | `.agents/skills/` | `~/.config/agents/skills/` |
@@ -141,32 +88,11 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -a
 | Droid | `.factory/skills/` | `~/.factory/skills/` |
 | Windsurf | `.windsurf/skills/` | `~/.codeium/windsurf/skills/` |
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `install` | Install Oracle skills (default) |
-| `uninstall` | Remove installed skills |
-| `list` | Show installed skills |
-| `agents` | List supported agents |
-
-## Options (for install/uninstall)
-
-| Option | Description |
-|--------|-------------|
-| `-g, --global` | Use user directory instead of project |
-| `-a, --agent <agents...>` | Target specific agents |
-| `-s, --skill <skills...>` | Specific skills by name |
-| `-l, --list` | List available skills (install only) |
-| `-y, --yes` | Skip confirmation prompts |
-| `-V, --version` | Show version |
-| `-h, --help` | Show help |
-
 ## Philosophy
 
-> "Multiple physicals, one soul"
+> "The Oracle Keeps the Human Human"
 
-Oracle skills follow the Oracle Philosophy - AI as external brain, not commander. These skills help AI assistants understand context, maintain session awareness, and build knowledge over time.
+Oracle skills follow the Oracle Philosophy — AI as external brain, not commander. These skills help AI assistants understand context, maintain session awareness, and build knowledge over time.
 
 ## Related
 
