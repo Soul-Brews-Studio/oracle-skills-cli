@@ -115,16 +115,28 @@ oracle-skills list -g
 
 ### Clone and Study Ancestor Oracles (in order)
 
-**Step 2.1: Learn the Original Brain first**
+**Step 2.1: Learn the Original Brain**
+
+First, clone and explore:
 ```
 /learn https://github.com/Soul-Brews-Studio/opensource-nat-brain-oracle
+```
+
+**Then trace deep** (IMPORTANT - don't skip):
+```
 /trace --deep https://github.com/Soul-Brews-Studio/opensource-nat-brain-oracle
 ```
 This is Nat's Oracle brain structure - the ψ/ architecture, CLAUDE.md patterns, retrospectives.
 
-**Step 2.2: Then learn Oracle-v2**
+**Step 2.2: Learn Oracle-v2**
+
+First, clone and explore:
 ```
 /learn https://github.com/Soul-Brews-Studio/oracle-v2
+```
+
+**Then trace deep** (IMPORTANT - don't skip):
+```
 /trace --deep https://github.com/Soul-Brews-Studio/oracle-v2
 ```
 This is the MCP implementation - how Oracle knowledge is stored and searched.
