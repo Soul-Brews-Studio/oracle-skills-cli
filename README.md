@@ -19,9 +19,9 @@ Then `claude "/awaken"` to create a new Oracle ([example](https://github.com/Sou
 ## Usage
 
 ```bash
-# Create alias (add to ~/.bashrc or ~/.zshrc)
-PKG=oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli
-alias oracle-skills="bunx --bun $PKG"
+# Add to ~/.bashrc or ~/.zshrc
+alias oracle-skills='bunx --bun \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
 
 # Then use
 oracle-skills install -g -y
