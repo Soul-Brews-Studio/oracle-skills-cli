@@ -59,9 +59,9 @@ Display results and done. Even if empty.
 
 ---
 
-## Mode 3: --deep (Context-Finder Subagents)
+## Mode 3: --deep (Explore Subagents)
 
-Launch context-finder subagents (Haiku) for deep search:
+Launch Explore subagents (Haiku) for deep search:
 
 | Agent | Searches |
 |-------|----------|
@@ -71,7 +71,7 @@ Launch context-finder subagents (Haiku) for deep search:
 | 4 | Other repos (ghq, ~/Code) |
 | 5 | Retrospectives & learnings |
 
-**Use Task tool with subagent_type="context-finder"**
+**Use Task tool with subagent_type="Explore"**
 
 After search, **auto-log to Oracle**:
 ```

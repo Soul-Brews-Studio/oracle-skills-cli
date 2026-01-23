@@ -235,18 +235,30 @@ program
         continue;
       }
 
-      const skills = readdirSync(skillsDir, { withFileTypes: true })
+      const skillDirs = readdirSync(skillsDir, { withFileTypes: true })
         .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
         .map((d) => d.name);
 
-      if (skills.length === 0) {
+      if (skillDirs.length === 0) {
         console.log(`  ${agent.displayName} ${scope}: (empty)`);
       } else {
-        console.log(`  ${agent.displayName} ${scope}: ${skills.length} skills`);
-        for (const skill of skills) {
-          console.log(`    - ${skill}`);
+        console.log(`  ${agent.displayName} ${scope}: ${skillDirs.length} skills`);
+        for (const skill of skillDirs) {
+          // Try to read version from SKILL.md
+          let version = '';
+          const skillMdPath = join(skillsDir, skill, 'SKILL.md');
+          if (existsSync(skillMdPath)) {
+            try {
+              const content = require('fs').readFileSync(skillMdPath, 'utf-8');
+              const versionMatch = content.match(/v(\d+\.\d+\.\d+)/);
+              if (versionMatch) {
+                version = ` (v${versionMatch[1]})`;
+              }
+            } catch {}
+          }
+          console.log(`    - ${skill}${version}`);
         }
-        totalSkills += skills.length;
+        totalSkills += skillDirs.length;
       }
       console.log('');
     }
