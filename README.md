@@ -10,8 +10,10 @@ Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents
 **For AI agents** — copy this prompt:
 ```
 Install oracle-skills globally:
-1. Check if bun is installed, if not: curl -fsSL https://bun.sh/install | bash
-2. Run: bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+1. Check if bun installed, if not install it
+2. Run this command:
+   bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
+     install -g -y
 ```
 
 **Manual**:
