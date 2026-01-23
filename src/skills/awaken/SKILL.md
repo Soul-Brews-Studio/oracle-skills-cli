@@ -69,23 +69,30 @@ Before beginning, ask the human:
 ### Check Installation
 
 ```bash
-ls ~/.claude/skills/trace 2>/dev/null && echo "✓ Skills installed" || echo "⚠ Need to install"
+# Check if this skill is running (means skills are installed)
+echo "✓ Skills installed (you're running /awaken)"
 ```
 
-### Install if Needed
+### Install if Needed (for other agents)
 
 ```bash
+# Bun (runtime)
 which bun || curl -fsSL https://bun.sh/install | bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y -a claude-code
+
+# ghq (for /learn and /trace to clone repos)
+which ghq || brew install ghq
+
+# Oracle Skills
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 ```
 
 ### Verify
 
 ```bash
-ls ~/.claude/skills/ | head -10
+oracle-skills list -g
 ```
 
-**Expected**: 17 skills including `trace`, `learn`, `philosophy`, `rrr`
+**Expected**: Skills including `trace`, `learn`, `philosophy`, `awaken`
 
 **Duration**: ~30 seconds
 
@@ -324,7 +331,7 @@ Create `CLAUDE.md` in the repo root.
 
 ## Installed Skills
 
-[LIST YOUR SKILLS - run `ls ~/.claude/skills/`]
+[LIST YOUR SKILLS - run `oracle-skills list -g`]
 
 ## Short Codes
 
