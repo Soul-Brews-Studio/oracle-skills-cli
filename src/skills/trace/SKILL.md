@@ -25,21 +25,22 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 
 ## URL Detection & Auto-Clone
 
-**If input is a GitHub URL**, clone first then trace:
+**If input is a GitHub URL**, clone AND symlink first:
 
 ```bash
-# Extract owner/repo from URL
-# Example: https://github.com/anthropics/claude-code → anthropics/claude-code
-
-# Clone with ghq (or update if exists)
-ghq get https://github.com/[owner]/[repo]
-
-# Create symlink to ψ/learn/
-mkdir -p "$ROOT/ψ/learn/[owner]"
-ln -sf ~/Code/github.com/[owner]/[repo] "$ROOT/ψ/learn/[owner]/[repo]"
+# Replace [URL] with actual URL
+ghq get -u [URL] && \
+  GHQ_ROOT=$(ghq root) && \
+  OWNER=$(echo "[URL]" | sed -E 's|.*github.com/([^/]+)/.*|\1|') && \
+  REPO=$(echo "[URL]" | sed -E 's|.*/([^/]+)(\.git)?$|\1|') && \
+  mkdir -p "ψ/learn/$OWNER" && \
+  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO" && \
+  echo "✓ Symlinked: ψ/learn/$OWNER/$REPO"
 ```
 
-Then continue with trace using the cloned path.
+**Verify:** `ls -la ψ/learn/`
+
+Then trace using `ψ/learn/[owner]/[repo]` path.
 
 > **Note**: Grep tool doesn't follow symlinks. Use Bash: `rg -L "pattern" ψ/learn/`
 

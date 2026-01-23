@@ -24,21 +24,22 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 
 ### If URL (http* or owner/repo format)
 
-**Clone via ghq → symlink to ψ/learn/owner/repo:**
+**IMPORTANT: Clone AND symlink in one command:**
 ```bash
-# 1. Clone to ghq default root
-ghq get -u "$INPUT"
-
-# 2. Extract owner/repo and create symlink
-GHQ_ROOT=$(ghq root)
-OWNER=$(echo "$INPUT" | sed -E 's|.*github.com/([^/]+)/.*|\1|')
-REPO=$(echo "$INPUT" | sed -E 's|.*/([^/]+)(\.git)?$|\1|')
-
-mkdir -p "ψ/learn/$OWNER"
-ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO"
+# Replace [URL] with actual URL, e.g. https://github.com/Soul-Brews-Studio/opensource-nat-brain-oracle
+ghq get -u [URL] && \
+  GHQ_ROOT=$(ghq root) && \
+  OWNER=$(echo "[URL]" | sed -E 's|.*github.com/([^/]+)/.*|\1|') && \
+  REPO=$(echo "[URL]" | sed -E 's|.*/([^/]+)(\.git)?$|\1|') && \
+  mkdir -p "ψ/learn/$OWNER" && \
+  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO" && \
+  echo "✓ Symlinked: ψ/learn/$OWNER/$REPO"
 ```
 
-Result: `ψ/learn/owner/repo` → `~/Code/github.com/owner/repo`
+**Verify symlink exists before exploring:**
+```bash
+ls -la ψ/learn/
+```
 
 > **Note**: Grep tool doesn't follow symlinks. Use Bash: `rg -L "pattern" ψ/learn/`
 
