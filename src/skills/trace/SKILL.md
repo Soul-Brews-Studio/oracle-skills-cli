@@ -23,6 +23,26 @@ date "+🕐 %H:%M (%A %d %B %Y)"
 
 ---
 
+## URL Detection & Auto-Clone
+
+**If input is a GitHub URL**, clone first then trace:
+
+```bash
+# Extract owner/repo from URL
+# Example: https://github.com/anthropics/claude-code → anthropics/claude-code
+
+# Clone with ghq (or update if exists)
+ghq get https://github.com/[owner]/[repo]
+
+# Create symlink to ψ/learn/
+mkdir -p "$ROOT/ψ/learn/[owner]"
+ln -sf ~/Code/github.com/[owner]/[repo] "$ROOT/ψ/learn/[owner]/[repo]"
+```
+
+Then continue with trace using the cloned path.
+
+---
+
 ## Mode 1: --oracle (Oracle Only)
 
 **Fastest. Just Oracle MCP, no extension.**
@@ -47,12 +67,6 @@ oracle_search("[query]", limit=10)
 **Step 2**: Check result count
 - If Oracle results >= 3 → Display and done
 - If Oracle results < 3 → Auto-escalate to --deep mode
-
-**Auto-Escalation Logic**:
-```
-Oracle results >= 3 → Display and done
-Oracle results < 3  → Launch 5 Explore agents (--deep)
-```
 
 ---
 
@@ -82,53 +96,41 @@ oracle_trace({
 
 ---
 
-## URL Detection & Auto-Clone
+## Trace Logging
 
-When input is a GitHub URL:
-
-```
-/trace https://github.com/org/repo
-  → ghq get (clone to ~/Code/github.com/org/repo)
-  → symlink to ψ/learn/org/repo
-  → trace locally (never /tmp)
-```
-
-**Pattern**: Uses same ghq + symlink pattern as /learn and /project
-
----
-
-## Output
-
-Traces are saved to: `ψ/memory/traces/YYYY-MM-DD-HHMM-query-slug.md`
-
-**File format**:
-```markdown
----
-query: "search query"
-mode: smart
-timestamp: 2024-01-15 14:30
-oracle_results: 5
-escalated: false
----
-
-# Trace: search query
-
-## Oracle Results
-...
-
-## Local Files
-...
-
-## Git Commits
-...
-```
-
----
-
-## Script Execution
+**Always log traces** to: `ψ/memory/traces/YYYY-MM-DD-HHMM-query-slug.md`
 
 ```bash
-ROOT="$ROOT" bun "$ROOT/src/skills/trace/scripts/trace.ts" [query] [--mode]
+# Create traces directory
+mkdir -p "$ROOT/ψ/memory/traces"
+
+# Generate filename
+# Example: 2026-01-23-1430-claude-code.md
+```
+
+**Write trace file** with this format:
+```markdown
+---
+query: "[query]"
+mode: [oracle|smart|deep]
+timestamp: YYYY-MM-DD HH:MM
+oracle_results: [count]
+escalated: [true|false]
+---
+
+# Trace: [query]
+
+**Mode**: [mode]
+**Time**: [timestamp]
+
+## Oracle Results
+[list results or "None"]
+
+## Local Files
+[list files found or "None"]
+
+## Git Commits
+[list commits or "None"]
 ```
 
 ---
@@ -146,7 +148,7 @@ ROOT="$ROOT" bun "$ROOT/src/skills/trace/scripts/trace.ts" [query] [--mode]
 | `/trace X --deep` | Really need it | Go deep with subagents |
 | Found! | **RESONANCE** | Log to Oracle |
 
-### Auto-Escalation
+### Auto-Escalation Flow
 
 ```
 /trace [query]     → Oracle search (what we know)
