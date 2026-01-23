@@ -40,6 +40,8 @@ ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO"
 
 Result: `ψ/learn/owner/repo` → `~/Code/github.com/owner/repo`
 
+> **Note**: Grep tool doesn't follow symlinks. Use Bash: `rg -L "pattern" ψ/learn/`
+
 ### Then resolve path:
 ```bash
 # Find symlink by name

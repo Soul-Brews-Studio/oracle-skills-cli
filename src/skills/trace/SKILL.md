@@ -41,6 +41,8 @@ ln -sf ~/Code/github.com/[owner]/[repo] "$ROOT/ψ/learn/[owner]/[repo]"
 
 Then continue with trace using the cloned path.
 
+> **Note**: Grep tool doesn't follow symlinks. Use Bash: `rg -L "pattern" ψ/learn/`
+
 ---
 
 ## Mode 1: --oracle (Oracle Only)
