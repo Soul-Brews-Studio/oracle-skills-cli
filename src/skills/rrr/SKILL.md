@@ -1,17 +1,9 @@
 ---
 name: rrr
 description: Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Glob
-  - Task
 ---
 
 # RRR - Session Retrospective
-
-Execute the `rrr` workflow using subagents for efficiency.
 
 ## Flow
 
@@ -24,22 +16,21 @@ Execute the `rrr` workflow using subagents for efficiency.
 date "+🕐 %H:%M (%A %d %B %Y)"
 ```
 
-## Step 1: Gather Session Data (Haiku)
+## Step 1: Gather Session Data
 
-Use context-finder subagent:
+```bash
+git diff --name-only HEAD~10
+git log --oneline -10
+git diff --stat HEAD~5
 ```
-- git diff --name-only HEAD~10
-- git log --oneline -10
-- git diff --stat HEAD~5
-```
 
-## Step 2: Draft Retrospective (Haiku)
+## Step 2: Draft Retrospective
 
-Use general-purpose subagent to write draft following template.
+Write draft following template below.
 
-## Step 3: Main Agent Review (Opus)
+## Step 3: Review
 
-Review draft:
+Verify:
 - AI Diary: 150+ words with vulnerability
 - Honest Feedback: 100+ words with 3 friction points
 - All sections complete

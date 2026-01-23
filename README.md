@@ -53,23 +53,23 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
-| 1 | **learn** | subagent | Explore a codebase |
-| 2 | **rrr** | subagent | Create session retrospective with AI diary |
-| 3 | **trace** | subagent | Find projects across git history, repos |
+| 1 | **learn** | skill + subagent | Explore a codebase |
+| 2 | **trace** | skill + subagent | Find projects across git history, repos |
 | - |  |  |  |
-| 4 | **physical** | skill + code | Physical location awareness from FindMy |
-| 5 | **project** | skill + code | Clone and track external repos |
-| 6 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
-| 7 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
-| 8 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
-| 9 | **watch** | skill + code | Learn from YouTube videos |
+| 3 | **physical** | skill + code | Physical location awareness from FindMy |
+| 4 | **project** | skill + code | Clone and track external repos |
+| 5 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 6 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 7 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
+| 8 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 10 | **awaken** | skill | Guided Oracle birth |
-| 11 | **feel** | skill | Log emotions with optional structure |
-| 12 | **forward** | skill | Create handoff for next session |
-| 13 | **fyi** | skill | Log information for future reference |
-| 14 | **oracle-family-scan** | skill | oracle-family-scan skill |
-| 15 | **philosophy** | skill | Display Oracle philosophy principles |
+| 9 | **awaken** | skill | Guided Oracle birth |
+| 10 | **feel** | skill | Log emotions with optional structure |
+| 11 | **forward** | skill | Create handoff for next session |
+| 12 | **fyi** | skill | Log information for future reference |
+| 13 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 14 | **philosophy** | skill | Display Oracle philosophy principles |
+| 15 | **rrr** | skill | Create session retrospective with AI diary |
 | 16 | **standup** | skill | Daily standup check |
 | 17 | **where-we-are** | skill | Session awareness - what we're doing now |
 | 18 | **who** | skill | Know thyself |

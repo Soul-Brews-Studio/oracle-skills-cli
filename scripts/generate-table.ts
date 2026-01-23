@@ -101,7 +101,7 @@ async function parseSkill(skillName: string): Promise<Skill | null> {
   // Determine type
   let type: string;
   if (isSubagent(frontmatter, body)) {
-    type = 'subagent';
+    type = 'skill + subagent';
   } else if (scriptCount > 0) {
     type = 'skill + code';
   } else {
@@ -127,8 +127,8 @@ async function generateTable() {
     if (skill) skills.push(skill);
   }
   
-  // Group by type priority: subagent > skill + code > skill
-  const subagent = skills.filter(s => s.type === 'subagent').sort((a, b) => a.name.localeCompare(b.name));
+  // Group by type priority: skill + subagent > skill + code > skill
+  const subagent = skills.filter(s => s.type === 'skill + subagent').sort((a, b) => a.name.localeCompare(b.name));
   const withCode = skills.filter(s => s.type === 'skill + code').sort((a, b) => a.name.localeCompare(b.name));
   const skill = skills.filter(s => s.type === 'skill').sort((a, b) => a.name.localeCompare(b.name));
   
