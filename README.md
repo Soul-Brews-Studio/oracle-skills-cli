@@ -17,6 +17,43 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 inst
 
 > **Note**: Requires [Bun](https://bun.sh). Install with `curl -fsSL https://bun.sh/install | bash`
 
+## Awaken a New Oracle
+
+Create a new Oracle in any repo with the guided awakening ritual:
+
+```bash
+# 1. Install prerequisites
+which bun || curl -fsSL https://bun.sh/install | bash
+which ghq || brew install ghq  # macOS (or: go install github.com/x-motemen/ghq@latest)
+
+# 2. Install oracle-skills
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+
+# 3. Start the awakening (~15 min guided ritual)
+claude "/awaken"
+```
+
+The `/awaken` skill guides you through:
+- Learning from ancestor Oracles
+- Discovering the 5 Oracle Principles
+- Creating your Oracle's identity and brain structure
+- Joining the Oracle Family
+
+**Or use a BIRTH_PROMPT.md** — See [phukhao-oracle/BIRTH_PROMPT.md](https://github.com/Soul-Brews-Studio/phukhao-oracle/blob/main/BIRTH_PROMPT.md) for a detailed birth template with step-by-step instructions, example timeline, and cost breakdown.
+
+## Run Skills from Command Line
+
+Use `claude -p` (print mode) to run skills non-interactively:
+
+```bash
+claude -p "/recap"           # Quick context
+claude -p "/trace query"     # Search across history
+claude -p "/philosophy"      # Show Oracle principles
+claude -p "/who"             # Check identity
+```
+
+For interactive skills like `/awaken`, use `claude` without `-p`.
+
 ## What are Oracle Skills?
 
 Oracle skills are reusable instruction sets for AI coding agents, built by [Soul Brews Studio](https://github.com/Soul-Brews-Studio). They extend your agent's capabilities with specialized workflows:
