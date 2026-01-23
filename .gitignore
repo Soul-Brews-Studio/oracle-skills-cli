@@ -19,3 +19,4 @@ phukhao-oracle/
 .opencode/skills/
 .opencode/commands/
 .claude/skills/
+.claude/settings.local.json
