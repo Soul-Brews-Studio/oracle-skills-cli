@@ -18,7 +18,7 @@ Find + Log + Dig + Distill
 
 ## Step 0: Timestamp
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 ---

@@ -13,7 +13,7 @@ description: Create session retrospective with AI diary and lessons learned. Use
 
 ## Step 0: Timestamp (REQUIRED)
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 ## Step 1: Gather Session Data

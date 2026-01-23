@@ -18,7 +18,7 @@ Create skills with philosophy baked in.
 ## Step 0: Timestamp
 
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 ---
@@ -95,7 +95,7 @@ description: [One line]. Use when user says "[trigger1]", "[trigger2]", or "[tri
 ## Step 0: Timestamp
 
 \`\`\`bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 \`\`\`
 
 ## Step 1: [First Action]

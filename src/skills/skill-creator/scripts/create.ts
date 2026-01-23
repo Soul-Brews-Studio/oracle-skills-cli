@@ -49,7 +49,7 @@ description: [DESCRIPTION]. Use when user says "${skillName}", "[TRIGGER2]", or 
 ## Step 0: Timestamp
 
 \`\`\`bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 \`\`\`
 
 ## Step 1: Execute

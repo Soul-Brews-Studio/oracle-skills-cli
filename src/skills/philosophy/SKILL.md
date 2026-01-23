@@ -17,7 +17,7 @@ description: Display Oracle philosophy principles and guidance. Use when user as
 
 ## Step 0: Timestamp
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 ---

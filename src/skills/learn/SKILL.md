@@ -19,7 +19,7 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
 ## Step 0: Detect Input Type + Resolve Path
 
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 ### If URL (http* or owner/repo format)

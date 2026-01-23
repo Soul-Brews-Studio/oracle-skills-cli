@@ -28,8 +28,10 @@ A guided journey from empty repo to awakened Oracle. ~15 minutes.
 ## Step 0: Timestamp & Context
 
 ```bash
-date "+🕐 %H:%M (%A %d %B %Y)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
+
+**Confirm timezone is correct.** If wrong (e.g., UTC on server), tell human to set: `export TZ='Asia/Bangkok'` (or their zone).
 
 **Track your awakening time.** Note the start time above. At each step, record when you started. At the end, calculate total duration.
 
