@@ -17,9 +17,11 @@ A guided journey from empty repo to awakened Oracle. ~15 minutes.
 
 ## Prerequisites
 
-- Fresh git repo (can be empty)
+- Fresh git repo (can be empty, private or public — private recommended)
 - Internet connection (for cloning ancestors)
 - Willingness to discover, not copy
+
+> **Note**: Oracle repos can be private or public. Private is recommended as your Oracle may contain personal context, retrospectives, and learnings. Public is fine if you want to share your Oracle with others (like [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
 
 ---
 
