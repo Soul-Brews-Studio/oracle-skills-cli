@@ -7,7 +7,52 @@ Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents
 
 ## Install — FOR AI LLM AGENTS
 
-Copy to your AI agent or run manually:
+### One Command
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
+```
+
+<details>
+<summary>📜 View install.sh (safe & transparent)</summary>
+
+```bash
+#!/bin/bash
+# Oracle Skills Installer - checks and installs: bun, ghq, oracle-skills, permissions
+
+# 1. Check & install bun
+which bun || curl -fsSL https://bun.sh/install | bash
+
+# 2. Check & install ghq
+which ghq || brew install ghq  # or: go install github.com/x-motemen/ghq@latest
+
+# 3. Install oracle-skills
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+
+# 4. Pre-approve permissions (Claude Code)
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)",
+      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
+      "Skill(rrr)", "Skill(recap)", "Skill(project)"
+    ]
+  }
+}
+EOF
+
+echo "✨ Done! Run: claude . then /awaken"
+```
+
+</details>
+
+---
+
+### Manual Steps
 
 ```
 # Requirements: bash/zsh (macOS/Linux) or Git Bash (Windows)
