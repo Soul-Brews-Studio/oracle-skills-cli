@@ -18,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli
 
 ```bash
 #!/bin/bash
-# Oracle Skills Installer - checks and installs: bun, ghq, oracle-skills, permissions
+# Oracle Skills Installer - checks and installs: bun, ghq, oracle-skills
 
 # 1. Check & install bun
 which bun || curl -fsSL https://bun.sh/install | bash
@@ -29,22 +29,7 @@ which ghq || brew install ghq  # or: go install github.com/x-motemen/ghq@latest
 # 3. Install oracle-skills
 ~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 
-# 4. Pre-approve permissions (Claude Code)
-mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
-      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
-      "Bash(*ψ/*)", "Bash(*psi/*)",
-      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
-      "Skill(rrr)", "Skill(recap)", "Skill(project)"
-    ]
-  }
-}
-EOF
-
+# Permissions are set up during /awaken in your Oracle repo
 echo "✨ Done! Run: claude . then /awaken"
 ```
 
@@ -69,7 +54,8 @@ which ghq || brew install ghq  # macOS
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
-# 4. Pre-approve Oracle commands (Claude Code)
+# 4. Setup permissions in your Oracle repo (run BEFORE claude .)
+# cd /path/to/your-oracle-repo
 mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
 {
   "permissions": {

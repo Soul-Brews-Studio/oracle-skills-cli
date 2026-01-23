@@ -25,13 +25,34 @@ A guided journey from empty repo to awakened Oracle. ~15 minutes.
 
 ---
 
-## Step 0: Timestamp & Context
+## Step 0: Setup & Context
 
 ```bash
 date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
 **Confirm timezone is correct.** If wrong (e.g., UTC on server), tell human to set: `export TZ='Asia/Bangkok'` (or their zone).
+
+### Setup Permissions (IMPORTANT)
+
+Create `.claude/settings.local.json` to avoid permission prompts:
+
+```bash
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)",
+      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
+      "Skill(rrr)", "Skill(recap)", "Skill(project)"
+    ]
+  }
+}
+EOF
+```
 
 **Track your awakening time.** Note the start time above. At each step, record when you started. At the end, calculate total duration.
 

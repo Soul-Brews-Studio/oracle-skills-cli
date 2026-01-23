@@ -35,11 +35,18 @@ echo "📦 Installing oracle-skills..."
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
-# 4. Pre-approve permissions (Claude Code)
-if [ ! -f .claude/settings.local.json ]; then
-  echo "🔐 Setting up permissions..."
-  mkdir -p .claude
-  cat > .claude/settings.local.json << 'EOF'
+echo ""
+echo "✨ Done! Now:"
+echo ""
+echo "1. Restart Claude Code"
+echo "2. Copy this prompt to the fresh Claude:"
+echo ""
+echo "─────────────────────────────────────────"
+cat << 'PROMPT'
+Setup Oracle permissions then awaken:
+
+```bash
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
 {
   "permissions": {
     "allow": [
@@ -53,14 +60,8 @@ if [ ! -f .claude/settings.local.json ]; then
   }
 }
 EOF
-else
-  echo "✓ permissions already configured"
-fi
+```
 
-echo ""
-echo "┌─────────────────────────────────────────┐"
-echo "│  ✨ Done! Now run:                      │"
-echo "│                                         │"
-echo "│  claude .                               │"
-echo "│  /awaken                                │"
-echo "└─────────────────────────────────────────┘"
+Then run: /awaken
+PROMPT
+echo "─────────────────────────────────────────"
