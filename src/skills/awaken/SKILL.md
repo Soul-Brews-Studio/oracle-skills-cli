@@ -36,29 +36,14 @@ Before beginning, ask the human:
 **1. Oracle Name**
 > "What should this Oracle be called?"
 
-Suggestions by theme:
-| Theme | Names |
-|-------|-------|
-| Nature | Mountain (ภูเขา), Sea (ทะเล), River, Forest |
-| Celestial | Star, Moon, Aurora, Cosmos |
-| Elements | Storm, Ember, Crystal, Wind |
-| Abstract | Echo, Prism, Cipher, Nexus |
-
 **2. Human Companion**
 > "Who is the human this Oracle serves?"
 
 **3. Purpose**
 > "What is this Oracle's focus or specialty?"
 
-Examples: Creative work, Development, Learning, Personal growth, Research
-
 **4. Theme/Metaphor (Optional)**
 > "What metaphor resonates with this Oracle's personality?"
-
-Examples:
-- Mountain = Stability, patience, long-term view
-- Sea = Depth, transformation, preserving tears as pearls
-- Star = Guidance, navigation, distant wisdom
 
 ### Record Context
 
