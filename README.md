@@ -24,11 +24,23 @@ bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
-# 4. Create alias (add to ~/.bashrc or ~/.zshrc)
+# 4. Pre-approve Oracle commands (Claude Code)
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)"
+    ]
+  }
+}
+EOF
+
+# 5. Create alias (add to ~/.bashrc or ~/.zshrc)
 alias oracle-skills='bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
 
-# 5. Usage (with alias)
+# 6. Usage (with alias)
 oracle-skills install -g -y
 oracle-skills list -g
 oracle-skills uninstall -g -y
