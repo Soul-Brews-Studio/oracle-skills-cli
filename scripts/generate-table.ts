@@ -103,9 +103,9 @@ async function parseSkill(skillName: string): Promise<Skill | null> {
   if (isSubagent(frontmatter, body)) {
     type = 'subagent';
   } else if (scriptCount > 0) {
-    type = `prompt + scripts (${scriptCount})`;
+    type = 'skill + code';
   } else {
-    type = 'prompt';
+    type = 'skill';
   }
   
   return {
@@ -127,10 +127,10 @@ async function generateTable() {
     if (skill) skills.push(skill);
   }
   
-  // Group by type priority: subagent > prompt + scripts > prompt
+  // Group by type priority: subagent > skill + code > skill
   const subagent = skills.filter(s => s.type === 'subagent').sort((a, b) => a.name.localeCompare(b.name));
-  const withScripts = skills.filter(s => s.type.startsWith('prompt + scripts')).sort((a, b) => a.name.localeCompare(b.name));
-  const prompt = skills.filter(s => s.type === 'prompt').sort((a, b) => a.name.localeCompare(b.name));
+  const withCode = skills.filter(s => s.type === 'skill + code').sort((a, b) => a.name.localeCompare(b.name));
+  const skill = skills.filter(s => s.type === 'skill').sort((a, b) => a.name.localeCompare(b.name));
   
   // Generate table
   const lines: string[] = [
@@ -144,16 +144,16 @@ async function generateTable() {
   for (const s of subagent) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
-  
-  // Prompt + Scripts group
+
+  // Skill + code group
   lines.push('| - |  |  |  |');
-  for (const s of withScripts) {
+  for (const s of withCode) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
-  
-  // Prompt group
+
+  // Skill group
   lines.push('| - |  |  |  |');
-  for (const s of prompt) {
+  for (const s of skill) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
   

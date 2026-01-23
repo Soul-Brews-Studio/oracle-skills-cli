@@ -57,22 +57,22 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 2 | **rrr** | subagent | Create session retrospective with AI diary |
 | 3 | **trace** | subagent | Find projects across git history, repos |
 | - |  |  |  |
-| 4 | **physical** | prompt + scripts (2) | Physical location awareness from FindMy |
-| 5 | **project** | prompt + scripts (11) | Clone and track external repos |
-| 6 | **recap** | prompt + scripts (2) | Fresh-start orientation—adaptive synthesis |
-| 7 | **schedule** | prompt + scripts (2) | Query schedule.md using DuckDB markdown |
-| 8 | **skill-creator** | prompt + scripts (1) | Create new skills with Oracle philosophy |
-| 9 | **watch** | prompt + scripts (3) | Learn from YouTube videos |
+| 4 | **physical** | skill + code | Physical location awareness from FindMy |
+| 5 | **project** | skill + code | Clone and track external repos |
+| 6 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 7 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 8 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
+| 9 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 10 | **awaken** | prompt | Guided Oracle birth |
-| 11 | **feel** | prompt | Log emotions with optional structure |
-| 12 | **forward** | prompt | Create handoff for next session |
-| 13 | **fyi** | prompt | Log information for future reference |
-| 14 | **oracle-family-scan** | prompt | oracle-family-scan skill |
-| 15 | **philosophy** | prompt | Display Oracle philosophy principles |
-| 16 | **standup** | prompt | Daily standup check |
-| 17 | **where-we-are** | prompt | Session awareness - what we're doing now |
-| 18 | **who** | prompt | Know thyself |
+| 10 | **awaken** | skill | Guided Oracle birth |
+| 11 | **feel** | skill | Log emotions with optional structure |
+| 12 | **forward** | skill | Create handoff for next session |
+| 13 | **fyi** | skill | Log information for future reference |
+| 14 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 15 | **philosophy** | skill | Display Oracle philosophy principles |
+| 16 | **standup** | skill | Daily standup check |
+| 17 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 18 | **who** | skill | Know thyself |
 
 ## Supported Agents
 
