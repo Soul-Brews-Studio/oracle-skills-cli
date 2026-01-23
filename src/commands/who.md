@@ -1,5 +1,5 @@
 ---
-description: v1.5.21 | Know thyself - show identity, model info, session stats, and Oracle philosophy. Use when user asks "who are you", "who", or wants to check current AI identity.
+description: v1.5.22 | Know thyself - show identity, model info, session stats, and Oracle philosophy. Use when user asks "who are you", "who", or wants to check current AI identity.
 ---
 
 # /who
@@ -18,4 +18,4 @@ Execute the `who` skill with the provided arguments.
 - Global: `~/.claude/skills/who/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.21*
+*oracle-skills-cli v1.5.22*
