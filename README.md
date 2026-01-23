@@ -10,19 +10,25 @@ Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents
 Copy to your AI agent or run manually:
 
 ```
-# 1. Install bun (if not installed)
-curl -fsSL https://bun.sh/install | bash
+# Requirements: bash/zsh (macOS/Linux) or Git Bash (Windows)
 
-# 2. Install oracle-skills
+# 1. Check & install bun
+which bun || curl -fsSL https://bun.sh/install | bash
+
+# 2. Check & install ghq (for /learn and /trace)
+which ghq || brew install ghq  # macOS
+# Linux/Windows: go install github.com/x-motemen/ghq@latest
+
+# 3. Install oracle-skills
 bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
-# 3. Create alias (add to ~/.bashrc or ~/.zshrc)
+# 4. Create alias (add to ~/.bashrc or ~/.zshrc)
 alias oracle-skills='bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
 
-# 4. Usage
+# 5. Usage
 oracle-skills install -g -y    # install all skills
 oracle-skills list -g          # list installed
 oracle-skills uninstall -g -y  # uninstall
