@@ -28,10 +28,15 @@ bunx --bun \
 alias oracle-skills='bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
 
-# 5. Usage
-oracle-skills install -g -y    # install all skills
-oracle-skills list -g          # list installed
-oracle-skills uninstall -g -y  # uninstall
+# 5. Usage (with alias)
+oracle-skills install -g -y
+oracle-skills list -g
+oracle-skills uninstall -g -y
+
+# Or full command
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -g -y
 
 # Flags
 # -g  Global (user) directory
