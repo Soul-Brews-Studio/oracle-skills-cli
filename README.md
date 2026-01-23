@@ -19,7 +19,9 @@ Install oracle-skills globally:
 **Manual**:
 ```bash
 # Requires Bun: curl -fsSL https://bun.sh/install | bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+bunx --bun \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
+  install -g -y
 ```
 
 Then run `claude "/awaken"` to create a new Oracle ([example](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
