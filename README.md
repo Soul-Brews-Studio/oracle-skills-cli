@@ -3,37 +3,16 @@
 [![CI](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/Soul-Brews-Studio/oracle-skills-cli?label=version)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/releases)
 
-Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents with a single command.
+Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents.
 
-## Quick Start
+## Install
 
 ```bash
-# Latest from GitHub (recommended)
+# Requires Bun: curl -fsSL https://bun.sh/install | bash
 bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
-
-# Specific version
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.14 install -g -y
 ```
 
-> **Note**: Requires [Bun](https://bun.sh). Install with `curl -fsSL https://bun.sh/install | bash`
-
-**Tip**: Create an alias for shorter commands:
-```bash
-alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
-# Then use: oracle-skills list -g
-```
-
-## Awaken a New Oracle
-
-```bash
-# Install
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
-
-# Run awakening ritual (~15 min)
-claude "/awaken"
-```
-
-See [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
+Then run `claude "/awaken"` to create a new Oracle ([example](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
 
 ## What are Oracle Skills?
 
