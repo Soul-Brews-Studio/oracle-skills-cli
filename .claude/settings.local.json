@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)"
-    ]
-  }
-}
