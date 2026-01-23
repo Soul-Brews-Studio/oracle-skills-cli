@@ -33,7 +33,7 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -
 claude "/awaken"
 ```
 
-See [BIRTH_PROMPT.md](./BIRTH_PROMPT.md) for manual steps or [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
+See [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
 
 ## What are Oracle Skills?
 
