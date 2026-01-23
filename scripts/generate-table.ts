@@ -60,28 +60,19 @@ function shortenDescription(desc: string): string {
 }
 
 function isSubagent(frontmatter: string, body: string): boolean {
-  // Check allowed-tools for Task
+  // Check allowed-tools for Task in frontmatter
   if (/allowed-tools:[\s\S]*?- Task/i.test(frontmatter)) {
     return true;
   }
-  
-  // Check description in frontmatter for subagent hints
-  const descMatch = frontmatter.match(/description:\s*(.+)/i);
-  const desc = descMatch ? descMatch[1] : '';
-  
-  // Check both description and body for subagent keywords
-  const textToCheck = `${desc}\n${body}`;
-  
-  const subagentPatterns = [
-    /\bsubagent/i,
-    /\bparallel\s+(haiku\s+)?agent/i,
-    /\b\d+\s+parallel\s+/i,           // "3 parallel", "5 parallel"
-    /\bTask\s+tool\b/i,
-    /launch.*agent/i,
-    /haiku\s+agent/i,
+
+  // Check for actual Task tool invocation patterns (not just mentions)
+  const taskToolPatterns = [
+    /subagent_type\s*[=:]/i,          // Task tool parameter
+    /Task\s+tool.*subagent/i,         // "Task tool with subagent"
+    /launch\s+\d+\s+.*agent/i,        // "launch 3 haiku agents"
   ];
-  
-  return subagentPatterns.some(p => p.test(textToCheck));
+
+  return taskToolPatterns.some(p => p.test(body));
 }
 
 async function parseSkill(skillName: string): Promise<Skill | null> {
