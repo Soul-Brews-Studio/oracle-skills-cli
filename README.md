@@ -7,10 +7,35 @@ Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents
 
 ## Quick Install (Claude Code)
 
-Tell Claude to run:
+**Step 1:** Tell Claude to run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
+```
+
+**Step 2:** Restart Claude Code
+
+**Step 3:** Copy this prompt to the fresh Claude:
+
+```
+Setup Oracle permissions then awaken:
+
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)",
+      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
+      "Skill(rrr)", "Skill(recap)", "Skill(project)"
+    ]
+  }
+}
+EOF
+
+Then run: /awaken
 ```
 
 ---
