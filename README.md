@@ -39,8 +39,10 @@ Oracle skills are reusable instruction sets for AI coding agents, built by [Soul
 | 12 | **forward** | prompt | Create handoff for next session |
 | 13 | **fyi** | prompt | Log information for future reference |
 | 14 | **oracle-family-scan** | prompt | oracle-family-scan skill |
-| 15 | **standup** | prompt | Daily standup check |
-| 16 | **where-we-are** | prompt | Session awareness - what we're doing now |
+| 15 | **philosophy** | prompt | Display Oracle philosophy principles |
+| 16 | **standup** | prompt | Daily standup check |
+| 17 | **where-we-are** | prompt | Session awareness - what we're doing now |
+| 18 | **who** | prompt | Know thyself |
 
 ## Usage
 
