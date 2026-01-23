@@ -115,7 +115,7 @@ which ghq || brew install ghq
 # go install github.com/x-motemen/ghq@latest
 
 # Oracle Skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.28 install -g -y
 ```
 
 ### Verify

@@ -12,7 +12,10 @@ process.chdir(root);
 
 // Gather git data
 const branch = (await $`git branch --show-current`.text()).trim();
-const ahead = (await $`git rev-list --count @{u}..HEAD 2>/dev/null`.text()).trim() || "0";
+let ahead = "0";
+try {
+  ahead = (await $`git rev-list --count @{u}..HEAD 2>/dev/null`.text()).trim() || "0";
+} catch {}
 const lastCommit = (await $`git log --oneline -1`.text()).trim().slice(8, 68);
 
 // Focus state

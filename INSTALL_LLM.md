@@ -24,7 +24,7 @@ which ghq || brew install ghq  # macOS
 
 # 3. Install oracle-skills
 ~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.28 \
   install -g -y
 
 # 4. Pre-approve Oracle commands (Claude Code)
@@ -48,7 +48,7 @@ EOF
 
 # 5. Create alias (add to ~/.bashrc or ~/.zshrc)
 alias oracle-skills='~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.28'
 
 # 6. Usage (with alias)
 oracle-skills install -g -y
@@ -56,7 +56,7 @@ oracle-skills list -g
 oracle-skills uninstall -g -y
 
 # Or full command
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.28 install -g -y
 
 # Flags
 # -g  Global (user) directory
