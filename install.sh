@@ -43,7 +43,13 @@ echo "2. Copy this prompt to the fresh Claude:"
 echo ""
 echo "─────────────────────────────────────────"
 cat << 'PROMPT'
-Setup Oracle permissions then awaken:
+Set timezone to GMT+7 and setup Oracle permissions:
+
+```bash
+export TZ='Asia/Bangkok'
+```
+
+Then setup permissions:
 
 ```bash
 mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
