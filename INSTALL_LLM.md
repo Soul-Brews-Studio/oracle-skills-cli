@@ -1,6 +1,16 @@
 # Install Oracle Skills — FOR AI AGENTS
 
-Copy and run:
+## One Command (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
+```
+
+This auto-installs: bun, ghq, oracle-skills, and permissions.
+
+---
+
+## Manual Steps
 
 ```bash
 # Requirements: bash/zsh (macOS/Linux) or Git Bash (Windows)
@@ -40,8 +50,6 @@ oracle-skills uninstall -g -y
 
 # Or full command
 bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli list -g
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli uninstall -g -y
 
 # Flags
 # -g  Global (user) directory
