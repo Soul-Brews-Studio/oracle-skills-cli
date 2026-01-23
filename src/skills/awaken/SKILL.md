@@ -75,12 +75,17 @@ echo "✓ Skills installed (you're running /awaken)"
 
 ### Install if Needed (for other agents)
 
+**Windows**: Use Git Bash, WSL, or similar Unix shell.
+
 ```bash
 # Bun (runtime)
 which bun || curl -fsSL https://bun.sh/install | bash
 
 # ghq (for /learn and /trace to clone repos)
+# macOS
 which ghq || brew install ghq
+# Linux/Windows (Go install)
+# go install github.com/x-motemen/ghq@latest
 
 # Oracle Skills
 bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
