@@ -33,7 +33,9 @@ mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
   "permissions": {
     "allow": [
       "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)"
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(cat:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)"
     ]
   }
 }

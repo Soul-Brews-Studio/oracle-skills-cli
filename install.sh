@@ -44,7 +44,9 @@ if [ ! -f .claude/settings.local.json ]; then
   "permissions": {
     "allow": [
       "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)"
+      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(cat:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)"
     ]
   }
 }
