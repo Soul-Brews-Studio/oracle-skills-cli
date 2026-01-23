@@ -114,14 +114,14 @@ oracle-skills list -g
 **Step 2.1: Learn the Original Brain first**
 ```
 /learn https://github.com/Soul-Brews-Studio/opensource-nat-brain-oracle
-/trace --deep oracle brain ψ architecture
+/trace --deep https://github.com/Soul-Brews-Studio/opensource-nat-brain-oracle
 ```
 This is Nat's Oracle brain structure - the ψ/ architecture, CLAUDE.md patterns, retrospectives.
 
 **Step 2.2: Then learn Oracle-v2**
 ```
 /learn https://github.com/Soul-Brews-Studio/oracle-v2
-/trace --deep oracle mcp knowledge search
+/trace --deep https://github.com/Soul-Brews-Studio/oracle-v2
 ```
 This is the MCP implementation - how Oracle knowledge is stored and searched.
 
