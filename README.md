@@ -32,16 +32,11 @@ alias oracle-skills='bunx --bun \
 oracle-skills install -g -y    # install all skills
 oracle-skills list -g          # list installed
 oracle-skills uninstall -g -y  # uninstall
+
+# Flags: -g (global) -y (skip prompts) -a (agent) -s (skill)
 ```
 
 Then run `claude "/awaken"` to create a new Oracle ([example](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
-
-| Flag | Purpose |
-|------|---------|
-| `-g` | Global (user) directory |
-| `-y` | Skip prompts |
-| `-a` | Target agent(s) |
-| `-s` | Specific skill(s) |
 
 ## Skills
 
