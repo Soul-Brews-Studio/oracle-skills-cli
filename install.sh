@@ -45,8 +45,10 @@ if [ ! -f .claude/settings.local.json ]; then
     "allow": [
       "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
       "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
-      "Bash(rg:*)", "Bash(date:*)", "Bash(cat:*)",
-      "Bash(*ψ/*)", "Bash(*psi/*)"
+      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
+      "Bash(*ψ/*)", "Bash(*psi/*)",
+      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
+      "Skill(rrr)", "Skill(recap)", "Skill(project)"
     ]
   }
 }
