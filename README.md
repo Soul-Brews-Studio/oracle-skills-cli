@@ -37,7 +37,11 @@ mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
 EOF
 ```
 
-Then restart Claude Code and run `/awaken`.
+Then restart Claude Code and run:
+
+```
+/awaken
+```
 
 ---
 
