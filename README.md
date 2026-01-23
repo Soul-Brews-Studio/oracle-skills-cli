@@ -5,6 +5,18 @@
 
 Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents.
 
+## Quick Install (Claude Code)
+
+Tell Claude:
+
+```
+Install oracle-skills: curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
+```
+
+Or paste the URL directly: `https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/INSTALL_LLM.md`
+
+---
+
 ## Install — FOR AI LLM AGENTS
 
 ### One Command
