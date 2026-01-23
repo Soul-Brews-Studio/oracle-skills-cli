@@ -33,8 +33,11 @@ mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
   "permissions": {
     "allow": [
       "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
-      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
+      "Bash(bun:*)", "Bash(bunx:*)", "Bash(mkdir:*)", "Bash(ln:*)",
+      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)", "Bash(tree:*)",
+      "Bash(curl:*)", "Bash(du:*)", "Bash(wc:*)",
+      "Bash(bash)", "Bash(source ~/.bashrc)",
+      "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
       "Bash(*ψ/*)", "Bash(*psi/*)",
       "Skill(learn)", "Skill(trace)", "Skill(awaken)",
       "Skill(rrr)", "Skill(recap)", "Skill(project)"
