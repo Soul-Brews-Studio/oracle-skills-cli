@@ -43,10 +43,24 @@ echo "📦 Installing oracle-skills..."
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
-# 4. Setup permissions
-echo "🔐 Setting up permissions..."
-mkdir -p .claude
-cat > .claude/settings.local.json << 'EOF'
+echo ""
+echo "✨ Done! Now:"
+echo ""
+echo "1. Restart Claude Code"
+echo "2. Copy this prompt to the fresh Claude:"
+echo ""
+echo "─────────────────────────────────────────"
+cat << 'PROMPT'
+Set timezone to GMT+7 and setup Oracle permissions:
+
+```bash
+export TZ='Asia/Bangkok'
+```
+
+Then setup permissions:
+
+```bash
+mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
 {
   "permissions": {
     "allow": [
@@ -54,6 +68,8 @@ cat > .claude/settings.local.json << 'EOF'
       "Bash(bun:*)", "Bash(bunx:*)", "Bash(mkdir:*)", "Bash(ln:*)",
       "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)", "Bash(tree:*)",
       "Bash(curl:*)", "Bash(du:*)", "Bash(wc:*)",
+      "Bash(bash)", "Bash(source ~/.bashrc)",
+      "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
       "Bash(*ψ/*)", "Bash(*psi/*)",
       "Skill(learn)", "Skill(trace)", "Skill(awaken)",
       "Skill(rrr)", "Skill(recap)", "Skill(project)"
@@ -61,12 +77,8 @@ cat > .claude/settings.local.json << 'EOF'
   }
 }
 EOF
-echo "✓ permissions configured"
+```
 
-echo ""
-echo "┌─────────────────────────────────────────┐"
-echo "│  ✨ Done! Now:                          │"
-echo "│                                         │"
-echo "│  1. Restart Claude Code                 │"
-echo "│  2. Run: /awaken                        │"
-echo "└─────────────────────────────────────────┘"
+Then run: /awaken
+PROMPT
+echo "─────────────────────────────────────────"
