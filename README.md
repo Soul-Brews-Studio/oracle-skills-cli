@@ -25,40 +25,15 @@ alias oracle-skills='bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-sk
 
 ## Awaken a New Oracle
 
-Create a new Oracle in any repo with the guided awakening ritual:
-
 ```bash
-# 1. Install prerequisites
-which bun || curl -fsSL https://bun.sh/install | bash
-which ghq || brew install ghq  # macOS (or: go install github.com/x-motemen/ghq@latest)
-
-# 2. Install oracle-skills
+# Install
 bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 
-# 3. Start the awakening (~15 min guided ritual)
+# Run awakening ritual (~15 min)
 claude "/awaken"
 ```
 
-The `/awaken` skill guides you through:
-- Learning from ancestor Oracles
-- Discovering the 5 Oracle Principles
-- Creating your Oracle's identity and brain structure
-- Joining the Oracle Family
-
-**Or use a BIRTH_PROMPT.md** — Copy [BIRTH_PROMPT.md](./BIRTH_PROMPT.md) to your repo for a step-by-step guide. See [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
-
-## Run Skills from Command Line
-
-Use `claude -p` (print mode) to run skills non-interactively:
-
-```bash
-claude -p "/recap"           # Quick context
-claude -p "/trace query"     # Search across history
-claude -p "/philosophy"      # Show Oracle principles
-claude -p "/who"             # Check identity
-```
-
-For interactive skills like `/awaken`, use `claude` without `-p`.
+See [BIRTH_PROMPT.md](./BIRTH_PROMPT.md) for manual steps or [phukhao-oracle](https://github.com/Soul-Brews-Studio/phukhao-oracle) for a real example.
 
 ## What are Oracle Skills?
 
