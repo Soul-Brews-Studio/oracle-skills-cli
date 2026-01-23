@@ -15,28 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli
 
 **Step 2:** Restart Claude Code
 
-**Step 3:** Copy this prompt to the fresh Claude:
-
-```
-Setup Oracle permissions then awaken:
-
-mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(mkdir:*)", "Bash(ln:*)",
-      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)",
-      "Bash(*ψ/*)", "Bash(*psi/*)",
-      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
-      "Skill(rrr)", "Skill(recap)", "Skill(project)"
-    ]
-  }
-}
-EOF
-
-Then run: /awaken
-```
+**Step 3:** Run `/awaken`
 
 ---
 
