@@ -6,6 +6,14 @@ set -e
 echo "🔮 Oracle Skills Installer"
 echo ""
 
+# 0. Check & install Claude Code
+if ! command -v claude &> /dev/null; then
+  echo "📦 Installing Claude Code..."
+  curl -fsSL https://claude.ai/install.sh | bash
+else
+  echo "✓ Claude Code installed"
+fi
+
 # 1. Check & install bun
 if ! command -v bun &> /dev/null; then
   echo "📦 Installing bun..."
