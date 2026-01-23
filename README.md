@@ -5,7 +5,7 @@
 
 Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents.
 
-## Install
+## Install — FOR AI LLM AGENTS
 
 Copy to your AI agent or run manually:
 
