@@ -54,4 +54,9 @@ else
 fi
 
 echo ""
-echo "✨ Done! Restart Claude Code, then run /awaken"
+echo "┌─────────────────────────────────────────┐"
+echo "│  ✨ Done! Now run:                      │"
+echo "│                                         │"
+echo "│  claude .                               │"
+echo "│  /awaken                                │"
+echo "└─────────────────────────────────────────┘"
