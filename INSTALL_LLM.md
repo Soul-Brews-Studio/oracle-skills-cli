@@ -23,7 +23,7 @@ which ghq || brew install ghq  # macOS
 # Linux/Windows: go install github.com/x-motemen/ghq@latest
 
 # 3. Install oracle-skills
-bunx --bun \
+~/.bun/bin/bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli \
   install -g -y
 
@@ -44,7 +44,7 @@ mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
 EOF
 
 # 5. Create alias (add to ~/.bashrc or ~/.zshrc)
-alias oracle-skills='bunx --bun \
+alias oracle-skills='~/.bun/bin/bunx --bun \
   oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli'
 
 # 6. Usage (with alias)
@@ -53,7 +53,7 @@ oracle-skills list -g
 oracle-skills uninstall -g -y
 
 # Or full command
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 
 # Flags
 # -g  Global (user) directory
