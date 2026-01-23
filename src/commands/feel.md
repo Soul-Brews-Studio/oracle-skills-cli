@@ -1,5 +1,5 @@
 ---
-description: v1.5.25 | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
+description: v1.5.26 | Log emotions with optional structure. Use when user says "feel", "feeling", "mood", "tired", "sleepy", "frustrated", "happy", "excited".
 ---
 
 # /feel
@@ -18,4 +18,4 @@ Execute the `feel` skill with the provided arguments.
 - Global: `~/.claude/skills/feel/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.25*
+*oracle-skills-cli v1.5.26*
