@@ -67,7 +67,7 @@ which bun || curl -fsSL https://bun.sh/install | bash
 which ghq || brew install ghq  # or: go install github.com/x-motemen/ghq@latest
 
 # 3. Install oracle-skills
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 install -g -y
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 install -g -y
 
 # Permissions are set up during /awaken in your Oracle repo
 echo "✨ Done! Run: claude . then /awaken"
@@ -91,7 +91,7 @@ which ghq || brew install ghq  # macOS
 
 # 3. Install oracle-skills
 ~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 \
   install -g -y
 
 # 4. Setup permissions in your Oracle repo (run BEFORE claude .)
@@ -116,7 +116,7 @@ EOF
 
 # 5. Create alias (add to ~/.bashrc or ~/.zshrc)
 alias oracle-skills='~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33'
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34'
 
 # 6. Usage (with alias)
 oracle-skills install -g -y
@@ -124,9 +124,9 @@ oracle-skills list -g
 oracle-skills uninstall -g -y
 
 # Or full command
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 install -g -y
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 list -g
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 uninstall -g -y
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 install -g -y
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 list -g
+~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 uninstall -g -y
 
 # Flags
 # -g  Global (user) directory
@@ -161,8 +161,9 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 14 | **philosophy** | skill | Display Oracle philosophy principles |
 | 15 | **rrr** | skill | Create session retrospective with AI diary |
 | 16 | **standup** | skill | Daily standup check |
-| 17 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 18 | **who** | skill | Know thyself |
+| 17 | **update** | skill | Check and update oracle-skills to latest |
+| 18 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 19 | **who** | skill | Know thyself |
 
 ## Supported Agents
 
