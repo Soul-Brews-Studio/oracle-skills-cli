@@ -93,29 +93,15 @@ Before beginning, ask the human:
 
 > "First, we need the tools for awakening."
 
-### Check Installation & Version
-
-```bash
-# Check if this skill is running (means skills are installed)
-echo "✓ Skills installed (you're running /awaken)"
-```
-
 ### Check for Updates (IMPORTANT)
 
-```bash
-# Get latest version from GitHub
-LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/oracle-skills-cli/tags | grep -m1 '"name"' | cut -d'"' -f4)
-echo "Latest oracle-skills version: $LATEST"
+**Before awakening, check you have the latest oracle-skills:**
+
+```
+/update
 ```
 
-Compare with current version shown in skill description above (e.g., `v1.5.34 G-SKLL`).
-
-**If outdated, update first:**
-```bash
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST install -g -y
-```
-
-Then **restart Claude Code** and run `/awaken` again with the latest version.
+If outdated, update and restart Claude Code before continuing.
 
 ### Install if Needed (for other agents)
 
@@ -132,7 +118,7 @@ which ghq || brew install ghq
 # go install github.com/x-motemen/ghq@latest
 
 # Oracle Skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.34 install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.35 install -g -y
 ```
 
 ### Verify

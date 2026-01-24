@@ -23,12 +23,12 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 
 ## Step 1: Check Current Version
 
-Your current version is shown in the skill description above (e.g., `v1.5.34 G-SKLL`).
+Your current version is shown in the skill description above (e.g., `v1.5.35 G-SKLL`).
 
 Extract just the version number:
 ```bash
 # Current version from this skill's description
-CURRENT="v1.5.34"  # Read from description above
+CURRENT="v1.5.35"  # Read from description above
 echo "Current installed: $CURRENT"
 ```
 
