@@ -1,5 +1,5 @@
 ---
-description: v1.5.29 | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
+description: v1.5.30 | Query schedule.md using DuckDB markdown extension. Use when user says "schedule", "upcoming events", "what's on today", "calendar".
 ---
 
 # /schedule
@@ -18,4 +18,4 @@ Execute the `schedule` skill with the provided arguments.
 - Global: `~/.claude/skills/schedule/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.29*
+*oracle-skills-cli v1.5.30*
