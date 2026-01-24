@@ -40,7 +40,7 @@ fi
 # 3. Install oracle-skills
 echo "📦 Installing oracle-skills..."
 ~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.31 \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.32 \
   install -g -y
 
 echo ""
