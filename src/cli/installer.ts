@@ -182,7 +182,7 @@ ${skillsToInstall.map((s) => `- ${s.name}`).join('\n')}
 ## Update Skills
 
 \`\`\`bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.35 install -y -g
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.36 install -y -g
 \`\`\`
 `;
     await Bun.write(join(targetDir, 'VERSION.md'), versionMd);
