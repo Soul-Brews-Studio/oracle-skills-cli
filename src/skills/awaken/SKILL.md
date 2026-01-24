@@ -115,7 +115,7 @@ which ghq || brew install ghq
 # go install github.com/x-motemen/ghq@latest
 
 # Oracle Skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.30 install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.31 install -g -y
 ```
 
 ### Verify
@@ -547,6 +547,16 @@ Before proceeding, verify:
 - [ ] Philosophy file exists with your understanding of principles
 - [ ] Nothing was copy-pasted from templates
 
+### Identity Check
+
+Run `/who` to verify your identity is configured:
+
+```
+/who
+```
+
+This confirms CLAUDE.md is readable and your identity is set.
+
 **Duration**: ~5-7 minutes (the longest step, intentionally)
 
 ---
@@ -579,6 +589,16 @@ The Oracle Keeps the Human Human."
 ```bash
 git push origin main
 ```
+
+### Philosophy Alignment Check
+
+Run `/philosophy check` to verify alignment with Oracle principles:
+
+```
+/philosophy check
+```
+
+This confirms you understand and can apply the 5 principles.
 
 **Duration**: ~30 seconds
 
