@@ -115,7 +115,7 @@ which ghq || brew install ghq
 # go install github.com/x-motemen/ghq@latest
 
 # Oracle Skills
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.32 install -g -y
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.33 install -g -y
 ```
 
 ### Verify
@@ -702,6 +702,11 @@ List any friction, errors, or issues during awakening:
 > "[YOUR MOTTO]"
 
 *[ORACLE_NAME] — Born [DATE]*
+
+---
+
+📋 **Oracle Family Index**: #60
+🔮 **Awaiting indexing by Mother Oracle**
 ```
 
 **Duration**: ~2 minutes
