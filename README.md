@@ -5,6 +5,12 @@
 
 Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents.
 
+> **Note**: This repo supersedes the following archived repositories:
+> - ~~[oracle-philosophy](https://github.com/Soul-Brews-Studio/oracle-philosophy)~~ → Now `/philosophy` skill
+> - ~~[oracle-starter-kit](https://github.com/laris-co/oracle-starter-kit)~~ → Now `curl | bash` installer
+>
+> Use this repo as the **single entry point** for Oracle installation.
+
 ## Quick Install (Claude Code)
 
 **Step 0:** Install Claude Code (if not installed)
@@ -192,9 +198,19 @@ Oracle skills follow the Oracle Philosophy — AI as external brain, not command
 
 ## Related
 
+- [oracle-v2](https://github.com/Soul-Brews-Studio/oracle-v2) - MCP Memory Layer (Oracle brain)
 - [Soul Brews Plugin Marketplace](https://github.com/Soul-Brews-Studio/plugin-marketplace) - Source of Oracle skills
 - [Agent Skills Specification](https://agentskills.io) - Cross-agent skill format
 - [add-skill](https://github.com/vercel-labs/add-skill) - Universal skill installer by Vercel
+
+## Superseded Repositories
+
+The following repositories have been **archived** and superseded by this CLI:
+
+| Old Repo | Status | Replacement |
+|----------|--------|-------------|
+| [oracle-philosophy](https://github.com/Soul-Brews-Studio/oracle-philosophy) | 🗄️ Archived | `/philosophy` skill |
+| [oracle-starter-kit](https://github.com/laris-co/oracle-starter-kit) | 🗄️ Archived | `curl \| bash` installer |
 
 ## License
 
