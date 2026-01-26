@@ -5,6 +5,10 @@ description: Create session retrospective with AI diary and lessons learned. Use
 
 # RRR - Session Retrospective
 
+> "Reflect to grow, document to remember."
+
+**Alias: `/retrospective`** — same function, full word.
+
 ## Flow
 
 ```

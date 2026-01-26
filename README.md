@@ -161,18 +161,21 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | - |  |  |  |
 | 9 | **awaken** | skill | Guided Oracle birth |
 | 10 | **birth** | skill | Prepare birth props for a new Oracle repo |
-| 11 | **calibrate** | skill | Calibrate Oracle instruments before |
+| 11 | **calibrate** | skill | Alias for /soul-sync |
 | 12 | **feel** | skill | Log emotions with optional structure |
 | 13 | **forward** | skill | Create handoff for next session |
 | 14 | **fyi** | skill | Log information for future reference |
-| 15 | **oracle-family-scan** | skill | oracle-family-scan skill |
-| 16 | **philosophy** | skill | Display Oracle philosophy principles |
-| 17 | **retrospective** | skill | Create session retrospective with AI diary |
-| 18 | **rrr** | skill | Create session retrospective with AI diary |
-| 19 | **standup** | skill | Daily standup check |
-| 20 | **update** | skill | Check and update oracle-skills to latest |
-| 21 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 22 | **who** | skill | Know thyself |
+| 15 | **merged** | skill | Post-merge cleanup (switch to main, delete branch) |
+| 16 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 17 | **philosophy** | skill | Display Oracle philosophy principles |
+| 18 | **retrospective** | skill | Create session retrospective with AI diary |
+| 19 | **rrr** | skill | Create session retrospective with AI diary |
+| 20 | **standup** | skill | Daily standup check |
+| 21 | **soul-sync** | skill | Sync Oracle instruments with the family |
+| 22 | **update** | skill | Alias for /soul-sync |
+| 23 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 24 | **who** | skill | Alias for /who-are-you |
+| 25 | **who-are-you** | skill | Know thyself |
 
 ## Supported Agents
 
