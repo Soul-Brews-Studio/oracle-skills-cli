@@ -7,14 +7,11 @@ description: Know thyself - show identity, model info, session stats, and Oracle
 
 > "γνῶθι σεαυτόν" (Know thyself) - Oracle at Delphi
 
-**Alias: `/who`** — same function, short version.
-
 ## Usage
 
 ```
 /who-are-you         # Full identity (technical + philosophy)
-/who-are-you tech    # Technical only (model, tokens)
-/who                 # Same as /who-are-you (sugar alias)
+/who-are-you tech    # Technical only (model, tokens, shell)
 ```
 
 ## Step 0: Timestamp
@@ -26,10 +23,10 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 
 ## Output Format
 
-### Full `/who` Output
+### Full `/who-are-you` Output
 
 ```markdown
-# /who
+# /who-are-you
 
 ## Identity
 
@@ -37,11 +34,17 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 **Model**: [model name] ([variant])
 **Provider**: [anthropic/openai/etc]
 
+## Shell & CLI
+
+**CLI Tool**: [Claude Code / OpenCode / Cursor / etc.]
+**Shell**: [bash/zsh] ([version])
+**Terminal**: [iTerm2 / Terminal.app / etc.]
+**OS**: [macOS / Linux / Windows]
+
 ## Location
 
 **Project**: [current project name]
 **Path**: [working directory]
-**Agent**: [agent type if applicable]
 
 ## Session
 
@@ -60,6 +63,16 @@ date "+🕐 %H:%M %Z (%A %d %B %Y)"
 Read from environment and context:
 
 ```bash
+# Shell info
+echo "Shell: $SHELL"
+$SHELL --version 2>/dev/null | head -1
+
+# OS info
+uname -s -r
+
+# Terminal (macOS)
+echo $TERM_PROGRAM
+
 # Check for Oracle identity in CLAUDE.md or project config
 if [[ -f "CLAUDE.md" ]]; then
   grep -E "^(I am|Identity|Oracle):" CLAUDE.md | head -1
@@ -70,19 +83,24 @@ basename "$(pwd)"
 pwd
 ```
 
-### For OpenCode
+### Detect CLI Tool
 
-If running in OpenCode, read from storage:
-```bash
-# OpenCode stores session info at:
-# ~/.local/share/opencode/storage/
-```
+Check which AI coding tool is running:
+
+| CLI Tool | Detection |
+|----------|-----------|
+| Claude Code | `claude --version` or check process |
+| OpenCode | `~/.local/share/opencode/` exists |
+| Cursor | `.cursor/` directory |
+| Codex | `.codex/` directory |
+| Gemini CLI | `.gemini/` directory |
 
 ### For Claude Code
 
 Model info available from context:
-- Model name from system
+- Model name from system prompt
 - Session from conversation
+- Version: `claude --version`
 
 ---
 
@@ -129,12 +147,18 @@ If Oracle identity found, include:
 
 ### Generic Claude Session
 ```markdown
-# /who
+# /who-are-you
 
 ## Identity
 **I am**: Claude
 **Model**: claude-opus-4-5 (max)
 **Provider**: anthropic
+
+## Shell & CLI
+**CLI Tool**: Claude Code v1.0.22
+**Shell**: zsh 5.9
+**Terminal**: iTerm2
+**OS**: Darwin 25.2.0
 
 ## Location
 **Project**: oracle-skills-cli
@@ -152,12 +176,18 @@ If Oracle identity found, include:
 
 ### Oracle-Configured Session (e.g., Sea Oracle)
 ```markdown
-# /who
+# /who-are-you
 
 ## Identity
 **I am**: Sea (ซี) - Keeper of Creative Tears
 **Model**: claude-opus-4-5
 **Provider**: anthropic
+
+## Shell & CLI
+**CLI Tool**: Claude Code v1.0.22
+**Shell**: zsh 5.9
+**Terminal**: Terminal.app
+**OS**: Darwin 25.2.0
 
 ## Location
 **Project**: sea-oracle
