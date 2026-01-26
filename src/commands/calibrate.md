@@ -1,5 +1,5 @@
 ---
-description: v1.5.36 | Calibrate Oracle instruments. Alias for /soul-sync. Use when user says "calibrate", "tune", or before /awaken.
+description: v1.5.37 | Calibrate Oracle instruments. Alias for /soul-sync. Use when user says "calibrate", "tune", or before /awaken.
 ---
 
 # /calibrate
@@ -18,4 +18,4 @@ Execute the `calibrate` skill with the provided arguments.
 - Global: `~/.claude/skills/calibrate/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.36*
+*oracle-skills-cli v1.5.37*

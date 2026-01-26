@@ -1,5 +1,5 @@
 ---
-description: v1.5.36 | Check and update oracle-skills to latest version. Use when user says "update", "upgrade", "check version", or wants latest skills.
+description: v1.5.37 | Check and update oracle-skills to latest version. Use when user says "update", "upgrade", "check version", or wants latest skills.
 ---
 
 # /update
@@ -18,4 +18,4 @@ Execute the `update` skill with the provided arguments.
 - Global: `~/.claude/skills/update/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.36*
+*oracle-skills-cli v1.5.37*
