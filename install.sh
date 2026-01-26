@@ -37,10 +37,18 @@ else
   echo "✓ ghq installed"
 fi
 
-# 3. Install oracle-skills
-echo "📦 Installing oracle-skills..."
+# 3. Get latest stable version
+echo "🔍 Fetching latest stable version..."
+LATEST_TAG=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/oracle-skills-cli/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+
+if [ -z "$LATEST_TAG" ]; then
+  echo "⚠️  Could not fetch latest version, using fallback v1.5.36"
+  LATEST_TAG="v1.5.36"
+fi
+
+echo "📦 Installing oracle-skills@$LATEST_TAG..."
 ~/.bun/bin/bunx --bun \
-  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.36 \
+  oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST_TAG \
   install -g -y
 
 echo ""
