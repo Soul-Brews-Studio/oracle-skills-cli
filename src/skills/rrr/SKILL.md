@@ -9,11 +9,88 @@ description: Create session retrospective with AI diary and lessons learned. Use
 
 **Alias: `/retrospective`** — same function, full word.
 
+## Usage
+
+```
+/rrr                 # Interactive (default)
+/rrr --direct        # One-shot write (no prompts, for low context)
+/retrospective       # Same as /rrr
+```
+
 ## Flow
 
 ```
 งานเสร็จ → rrr (retrospective + lesson learned) → commit → sync
 ```
+
+---
+
+## --direct Mode (One-Shot)
+
+**Use when context is running low.** Writes retrospective immediately without prompts.
+
+### Step 1: Gather All Context (parallel)
+
+```bash
+# Timestamp
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
+
+# Git context
+git status --porcelain
+git log --oneline -10
+git diff --stat HEAD~5
+git diff --name-only HEAD~10
+```
+
+### Step 2: Generate Paths
+
+```bash
+# Generate timestamp-based filename
+TIMESTAMP=$(date "+%H.%M")
+DATE_PATH=$(date "+%Y-%m/%d")
+SLUG="session-retrospective"  # Or derive from session context
+
+# Create directory
+mkdir -p "ψ/memory/retrospectives/$DATE_PATH"
+
+# File path
+FILE="ψ/memory/retrospectives/$DATE_PATH/${TIMESTAMP}_${SLUG}.md"
+```
+
+### Step 3: Write Immediately (NO PROMPTS)
+
+Write the full retrospective file in one shot using all gathered context. Include ALL mandatory sections:
+
+- Session Summary
+- Timeline (from session memory)
+- Files Modified (from git)
+- AI Diary (150+ words, MANDATORY)
+- Honest Feedback (100+ words, 3 friction points, MANDATORY)
+- Lessons Learned
+- Next Steps
+
+**DO NOT ASK** — just write based on available context.
+
+### Step 4: Write Lesson Learned
+
+```bash
+LEARNING_FILE="ψ/memory/learnings/$(date '+%Y-%m-%d')_${SLUG}.md"
+```
+
+Write lesson learned file immediately.
+
+### Step 5: Commit & Report
+
+```bash
+git add ψ/memory/retrospectives/ ψ/memory/learnings/
+git commit -m "rrr: ${SLUG} + lesson learned"
+```
+
+Output: `✅ Retrospective written: [FILE]`
+
+---
+
+## Interactive Mode (Default)
 
 ## Step 0: Timestamp (REQUIRED)
 ```bash
