@@ -159,25 +159,26 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 7 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
 | 8 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
 | 9 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
-| 10 | **watch** | skill + code | Learn from YouTube videos |
+| 10 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
+| 11 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 11 | **awaken** | skill | Guided Oracle birth |
-| 12 | **birth** | skill | Prepare birth props for a new Oracle repo |
-| 13 | **feel** | skill | Log emotions with optional structure |
-| 14 | **forward** | skill | Create handoff for next session |
-| 15 | **fyi** | skill | Log information for future reference |
-| 16 | **merged** | skill | Post-Merge Cleanup |
-| 17 | **oracle-family-scan** | skill | oracle-family-scan skill |
-| 18 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
-| 19 | **philosophy** | skill | Display Oracle philosophy principles |
-| 20 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
-| 21 | **retrospective** | skill | Create session retrospective with AI diary |
-| 22 | **rrr** | skill | Create session retrospective with AI diary |
-| 23 | **standup** | skill | Daily standup check |
-| 24 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 25 | **who-are-you** | skill | Know thyself |
+| 12 | **awaken** | skill | Guided Oracle birth |
+| 13 | **birth** | skill | Prepare birth props for a new Oracle repo |
+| 14 | **feel** | skill | Log emotions with optional structure |
+| 15 | **forward** | skill | Create handoff for next session |
+| 16 | **fyi** | skill | Log information for future reference |
+| 17 | **merged** | skill | Post-Merge Cleanup |
+| 18 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 19 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
+| 20 | **philosophy** | skill | Display Oracle philosophy principles |
+| 21 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
+| 22 | **retrospective** | skill | Create session retrospective with AI diary |
+| 23 | **rrr** | skill | Create session retrospective with AI diary |
+| 24 | **standup** | skill | Daily standup check |
+| 25 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 26 | **who-are-you** | skill | Know thyself |
 
-*Generated: 2026-01-27 13:08:05 UTC*
+*Generated: 2026-01-27 13:30:59 UTC*
 
 ## Supported Agents
 

@@ -36,10 +36,12 @@ Located in `src/skills/gemini/scripts/`:
 
 | Script | Purpose |
 |--------|---------|
-| `full-smooth.ts` | Complete flow demo |
-| `send-chat.ts` | Send single chat message |
-| `youtube-transcribe.ts` | Transcribe YouTube video |
+| `status.ts` | Show extension status + all tabs (like debug console) |
+| `list-tabs.ts` | List all Gemini tabs with IDs |
 | `deep-research.ts` | Deep Research automation |
+| `send-chat.ts` | Send single chat message |
+| `full-smooth.ts` | Complete flow demo |
+| `youtube-transcribe.ts` | Transcribe YouTube video |
 
 **Note:** For YouTube learning, use `/watch` skill which includes Oracle integration.
 

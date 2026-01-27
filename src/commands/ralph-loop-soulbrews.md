@@ -1,5 +1,5 @@
 ---
-description: v1.5.39 | Self-referential AI loops with session isolation. Soul Brews edition of Ralph Wiggum technique.
+description: v1.5.40 | Self-referential AI loops with session isolation. Soul Brews edition of Ralph Wiggum technique.
 ---
 
 # /ralph-loop-soulbrews
@@ -18,4 +18,4 @@ Execute the `ralph-loop-soulbrews` skill with the provided arguments.
 - Global: `~/.claude/skills/ralph-loop-soulbrews/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.39*
+*oracle-skills-cli v1.5.40*
