@@ -53,6 +53,9 @@ Execute the \`${skillName}\` skill with the provided arguments.
 
 ## Instructions
 
+**If you have a Skill tool available**: Use it directly with \`skill: "${skillName}"\` instead of reading the file manually.
+
+**Otherwise**:
 1. Read the skill file: \`${DEFAULT_SKILL_PATH}/${skillName}/SKILL.md\`
 2. Follow all instructions in the skill file
 3. Pass these arguments to the skill: \`$ARGUMENTS\`
