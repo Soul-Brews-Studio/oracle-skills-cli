@@ -164,18 +164,19 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 11 | **feel** | skill | Log emotions with optional structure |
 | 12 | **forward** | skill | Create handoff for next session |
 | 13 | **fyi** | skill | Log information for future reference |
-| 14 | **merged** | skill | Post-Merge Cleanup |
-| 15 | **oracle-family-scan** | skill | oracle-family-scan skill |
-| 16 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
-| 17 | **philosophy** | skill | Display Oracle philosophy principles |
-| 18 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
-| 19 | **retrospective** | skill | Create session retrospective with AI diary |
-| 20 | **rrr** | skill | Create session retrospective with AI diary |
-| 21 | **standup** | skill | Daily standup check |
-| 22 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 23 | **who-are-you** | skill | Know thyself |
+| 14 | **gemini** | skill | Control Gemini via MQTT WebSocket |
+| 15 | **merged** | skill | Post-Merge Cleanup |
+| 16 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 17 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
+| 18 | **philosophy** | skill | Display Oracle philosophy principles |
+| 19 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
+| 20 | **retrospective** | skill | Create session retrospective with AI diary |
+| 21 | **rrr** | skill | Create session retrospective with AI diary |
+| 22 | **standup** | skill | Daily standup check |
+| 23 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 24 | **who-are-you** | skill | Know thyself |
 
-*Generated: 2026-01-27 07:46:57 UTC*
+*Generated: 2026-01-27 08:01:02 UTC*
 
 ## Supported Agents
 
