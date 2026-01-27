@@ -152,31 +152,32 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 1 | **learn** | skill + subagent | Explore a codebase |
 | 2 | **trace** | skill + subagent | Find projects across git history, repos |
 | - |  |  |  |
-| 3 | **gemini** | skill + code | Control Gemini via MQTT WebSocket |
-| 4 | **physical** | skill + code | Physical location awareness from FindMy |
-| 5 | **project** | skill + code | Clone and track external repos |
-| 6 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
-| 7 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
-| 8 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
-| 9 | **watch** | skill + code | Learn from YouTube videos |
+| 3 | **deep-research** | skill + code | Deep Research via Gemini |
+| 4 | **gemini** | skill + code | Control Gemini via MQTT WebSocket |
+| 5 | **physical** | skill + code | Physical location awareness from FindMy |
+| 6 | **project** | skill + code | Clone and track external repos |
+| 7 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 8 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 9 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
+| 10 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 10 | **awaken** | skill | Guided Oracle birth |
-| 11 | **birth** | skill | Prepare birth props for a new Oracle repo |
-| 12 | **feel** | skill | Log emotions with optional structure |
-| 13 | **forward** | skill | Create handoff for next session |
-| 14 | **fyi** | skill | Log information for future reference |
-| 15 | **merged** | skill | Post-Merge Cleanup |
-| 16 | **oracle-family-scan** | skill | oracle-family-scan skill |
-| 17 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
-| 18 | **philosophy** | skill | Display Oracle philosophy principles |
-| 19 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
-| 20 | **retrospective** | skill | Create session retrospective with AI diary |
-| 21 | **rrr** | skill | Create session retrospective with AI diary |
-| 22 | **standup** | skill | Daily standup check |
-| 23 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 24 | **who-are-you** | skill | Know thyself |
+| 11 | **awaken** | skill | Guided Oracle birth |
+| 12 | **birth** | skill | Prepare birth props for a new Oracle repo |
+| 13 | **feel** | skill | Log emotions with optional structure |
+| 14 | **forward** | skill | Create handoff for next session |
+| 15 | **fyi** | skill | Log information for future reference |
+| 16 | **merged** | skill | Post-Merge Cleanup |
+| 17 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 18 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
+| 19 | **philosophy** | skill | Display Oracle philosophy principles |
+| 20 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
+| 21 | **retrospective** | skill | Create session retrospective with AI diary |
+| 22 | **rrr** | skill | Create session retrospective with AI diary |
+| 23 | **standup** | skill | Daily standup check |
+| 24 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 25 | **who-are-you** | skill | Know thyself |
 
-*Generated: 2026-01-27 12:03:23 UTC*
+*Generated: 2026-01-27 13:08:05 UTC*
 
 ## Supported Agents
 

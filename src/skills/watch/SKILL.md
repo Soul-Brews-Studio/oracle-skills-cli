@@ -1,9 +1,12 @@
 ---
 name: watch
 description: Learn from YouTube videos via Gemini transcription. Use when user says "watch", "transcribe youtube", "learn from video", or shares a YouTube URL to study.
+alias: /gemini transcribe
 ---
 
 # /watch - YouTube → Gemini → Oracle Knowledge
+
+**Alias for `/gemini transcribe`** with Oracle integration.
 
 Learn from YouTube videos by sending to Gemini for transcription, then indexing to Oracle.
 

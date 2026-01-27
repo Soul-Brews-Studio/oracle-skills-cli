@@ -13,6 +13,9 @@ Direct control of Gemini browser tab via MQTT WebSocket. **Tab precision works!*
 /gemini chat "Hello Gemini!"              # Send to active Gemini tab
 /gemini new "Your message"                # Create new tab + chat
 /gemini transcribe <youtube-url>          # Transcribe YouTube video
+/gemini research "topic"                  # Deep Research mode
+/gemini model fast|thinking|pro           # Select model
+/gemini canvas                            # Open Canvas mode
 ```
 
 ## The Smooth Flow
@@ -36,6 +39,9 @@ Located in `src/skills/gemini/scripts/`:
 | `full-smooth.ts` | Complete flow demo |
 | `send-chat.ts` | Send single chat message |
 | `youtube-transcribe.ts` | Transcribe YouTube video |
+| `deep-research.ts` | Deep Research automation |
+
+**Note:** For YouTube learning, use `/watch` skill which includes Oracle integration.
 
 ### Run Scripts
 
