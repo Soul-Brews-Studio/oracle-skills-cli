@@ -51,92 +51,92 @@ else
 fi
 ```
 
-### Step 2: Open Gemini via Browser
+### Step 2: Open Gemini via MQTT (Smooth Flow)
 
-```javascript
-// 1. Get or create tab
-tabs_context_mcp({ createIfEmpty: true })
+Use claude-browser-proxy MQTT commands for reliable automation.
 
-// 2. Navigate to Gemini
-navigate({ url: "https://gemini.google.com/app", tabId: TAB_ID })
+```bash
+# Create new Gemini tab
+mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
+  -m "{\"id\":\"newtab-$(date +%s)\",\"action\":\"create_tab\",\"ts\":$(date +%s)}"
 
-// 3. Wait for load
-computer({ action: "wait", duration: 3, tabId: TAB_ID })
+echo "Creating new Gemini tab..."
+sleep 4  # Wait for tab to load
 ```
 
-### Step 3: Send Transcription Request
+### Step 3: Send Transcription Request with Metadata
 
-Type into Gemini chat (varies by CC availability):
+Build prompt with JSON metadata block, then send via MQTT `chat` action.
 
-**If HAS_CC = true (cross-check mode):**
-```
-I have YouTube auto-captions for this video. Please:
-1. Watch/analyze the video for accuracy
-2. Fix any caption errors (names, technical terms, unclear parts)
-3. Add section headers and timestamps
-4. Provide 3 key takeaways
+```bash
+# Build prompt with JSON metadata
+PROMPT="Please transcribe this YouTube video with timestamps.
 
-Video: [YOUTUBE_URL]
-
-Auto-captions (may have errors):
----
-[CC_TEXT - first 2000 chars or summary]
----
-```
-
-**If HAS_CC = false (full transcription mode):**
-```
-Please transcribe this YouTube video. Include:
-1. Full transcript with timestamps
-2. Section headers for different topics
-3. Main takeaways (3 bullet points)
-4. Any notable quotes
-
-Video: [YOUTUBE_URL]
-```
-
-**For AI-to-AI transfer (full verbatim - RECOMMENDED):**
-```
-Please provide the FULL verbatim transcript of this video with timestamps.
-Do NOT summarize - I need the complete text for another AI to analyze.
-
-Video: [YOUTUBE_URL]
+\`\`\`json
+{\"title\":\"$TITLE\",\"channel\":\"$CHANNEL\",\"duration\":\"$DURATION\",\"url\":\"$URL\"}
+\`\`\`
 
 Format:
-[00:00] exact words spoken
-[00:15] next section exact words
-...
+[00:00] Text here
+
+[01:00] Next section
+
+Use double newlines between timestamps!"
+
+# Send to Gemini via MQTT
+mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
+  -m "{\"id\":\"chat-$(date +%s)\",\"action\":\"chat\",\"text\":\"$PROMPT\",\"ts\":$(date +%s)}"
+
+echo "Prompt sent to Gemini!"
 ```
 
-> **Tip**: Use full verbatim when giving transcript to Claude - let Claude do its own analysis instead of double-summarization.
+**With captions (cross-check mode):**
 
-### Step 4: Submit and Wait for Response
+```bash
+PROMPT="I have YouTube auto-captions. Please verify and fix errors.
 
-**IMPORTANT**: Use `read_page` + `ref` clicks, NOT coordinates!
+\`\`\`json
+{\"title\":\"$TITLE\",\"channel\":\"$CHANNEL\",\"duration\":\"$DURATION\",\"url\":\"$URL\"}
+\`\`\`
 
-```javascript
-// 1. Find interactive elements
-read_page({ tabId: TAB_ID, filter: "interactive" })
-// Look for: textbox "Enter a prompt here" [ref_188]
-//           button "Send message" [ref_203]
+Auto-captions:
+---
+$CC_TEXT
+---
 
-// 2. Click input field by ref
-computer({ action: "left_click", ref: "ref_188", tabId: TAB_ID })
-
-// 3. Type the prompt
-computer({ action: "type", text: PROMPT, tabId: TAB_ID })
-
-// 4. Click send button by ref (NOT coordinates!)
-computer({ action: "left_click", ref: "ref_203", tabId: TAB_ID })
-
-// 5. Wait for response (10-30 seconds for long videos)
-computer({ action: "wait", duration: 15, tabId: TAB_ID })
-
-// 6. Extract full response
-get_page_text({ tabId: TAB_ID })
+Tasks:
+1. Fix caption errors (names, technical terms)
+2. Add section headers and timestamps
+3. Provide 3 key takeaways"
 ```
 
-**Why refs?** Gemini UI elements shift positions. Coordinates fail. Refs are stable.
+### Step 4: Wait for Response
+
+```bash
+# Wait for Gemini to process (longer for long videos)
+sleep 15  # Adjust based on video length
+
+# Get response via MQTT
+mosquitto_sub -h localhost -p 1883 -t "claude/browser/response" -C 1 -W 30
+```
+
+**Or use `get_text` action:**
+
+```bash
+mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
+  -m "{\"id\":\"gettext-$(date +%s)\",\"action\":\"get_text\",\"ts\":$(date +%s)}"
+```
+
+### MQTT Quick Reference
+
+| Action | Purpose |
+|--------|---------|
+| `create_tab` | New Gemini tab |
+| `chat` | Send prompt to active tab |
+| `get_text` | Extract page text |
+| `transcribe` | Combo: new tab + hardcoded prompt |
+
+**Important**: Always use `-r` (retain) flag so responses persist!
 
 ### Step 5: Save to Knowledge
 
