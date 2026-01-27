@@ -152,19 +152,19 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 1 | **learn** | skill + subagent | Explore a codebase |
 | 2 | **trace** | skill + subagent | Find projects across git history, repos |
 | - |  |  |  |
-| 3 | **physical** | skill + code | Physical location awareness from FindMy |
-| 4 | **project** | skill + code | Clone and track external repos |
-| 5 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
-| 6 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
-| 7 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
-| 8 | **watch** | skill + code | Learn from YouTube videos |
+| 3 | **gemini** | skill + code | Control Gemini via MQTT WebSocket |
+| 4 | **physical** | skill + code | Physical location awareness from FindMy |
+| 5 | **project** | skill + code | Clone and track external repos |
+| 6 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 7 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 8 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
+| 9 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 9 | **awaken** | skill | Guided Oracle birth |
-| 10 | **birth** | skill | Prepare birth props for a new Oracle repo |
-| 11 | **feel** | skill | Log emotions with optional structure |
-| 12 | **forward** | skill | Create handoff for next session |
-| 13 | **fyi** | skill | Log information for future reference |
-| 14 | **gemini** | skill | Control Gemini via MQTT WebSocket |
+| 10 | **awaken** | skill | Guided Oracle birth |
+| 11 | **birth** | skill | Prepare birth props for a new Oracle repo |
+| 12 | **feel** | skill | Log emotions with optional structure |
+| 13 | **forward** | skill | Create handoff for next session |
+| 14 | **fyi** | skill | Log information for future reference |
 | 15 | **merged** | skill | Post-Merge Cleanup |
 | 16 | **oracle-family-scan** | skill | oracle-family-scan skill |
 | 17 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
@@ -176,7 +176,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 23 | **where-we-are** | skill | Session awareness - what we're doing now |
 | 24 | **who-are-you** | skill | Know thyself |
 
-*Generated: 2026-01-27 08:01:02 UTC*
+*Generated: 2026-01-27 08:11:08 UTC*
 
 ## Supported Agents
 
