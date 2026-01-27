@@ -1,5 +1,5 @@
 ---
-description: v1.5.40 | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
+description: v1.5.41 | Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
 ---
 
 # /learn
@@ -18,4 +18,4 @@ Execute the `learn` skill with the provided arguments.
 - Global: `~/.claude/skills/learn/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.40*
+*oracle-skills-cli v1.5.41*
