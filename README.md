@@ -175,7 +175,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 22 | **where-we-are** | skill | Session awareness - what we're doing now |
 | 23 | **who-are-you** | skill | Know thyself |
 
-*Generated: 2026-01-27 07:33:00 UTC*
+*Generated: 2026-01-27 07:40:39 UTC*
 
 ## Supported Agents
 
