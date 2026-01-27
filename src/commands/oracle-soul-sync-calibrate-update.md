@@ -1,5 +1,5 @@
 ---
-description: v1.5.38 | Sync Oracle instruments with the family. Check and update skills to latest version. Use when user says "soul-sync", "sync", "calibrate", "update", or before /awaken.
+description: v1.5.39 | Sync Oracle instruments with the family. Check and update skills to latest version. Use when user says "soul-sync", "sync", "calibrate", "update", or before /awaken.
 ---
 
 # /oracle-soul-sync-calibrate-update
@@ -18,4 +18,4 @@ Execute the `oracle-soul-sync-calibrate-update` skill with the provided argument
 - Global: `~/.claude/skills/oracle-soul-sync-calibrate-update/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.38*
+*oracle-skills-cli v1.5.39*
