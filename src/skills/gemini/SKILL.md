@@ -3,40 +3,48 @@ name: gemini
 description: Control Gemini via MQTT WebSocket. Use when user says "gemini", needs to send messages to Gemini, or control the Gemini browser tab.
 ---
 
-# /gemini - MQTT WebSocket Control for Gemini
+# /gemini - Smooth MQTT Control for Gemini
 
-Direct control of Gemini browser tab via MQTT WebSocket connection.
+Direct control of Gemini browser tab via MQTT WebSocket. **Tab precision works!**
 
-## Usage
+## Quick Start
 
 ```bash
-/gemini chat "Your message here"          # Send chat message
-/gemini model fast|pro|think              # Switch model
-/gemini get text|url|state|html           # Get data from Gemini
-/gemini click "selector"                  # Click CSS selector
-/gemini click-text "Button Text"          # Click by visible text
-/gemini custom '{"action":"...", ...}'    # Send raw JSON command
+/gemini chat "Hello Gemini!"              # Send to active Gemini tab
+/gemini new "Your message"                # Create new tab + chat
+/gemini transcribe <youtube-url>          # Transcribe YouTube video
+```
+
+## The Smooth Flow
+
+```
+create_tab → tabId → inject_badge → chat → GEMINI RESPONDS!
 ```
 
 ## Requirements
 
-1. **Gemini Proxy Extension** v2.7.1+ installed and connected (green badge)
-2. **Mosquitto broker** running with WebSocket on port 9001
-3. **Gemini tab open** in the browser
+1. **Gemini Proxy Extension** v2.8.8+ (green badge = connected)
+2. **Mosquitto broker** with WebSocket on port 9001
+3. **Extension sidebar open** (click extension icon)
 
-## Architecture
+## Scripts
 
+Located in `src/skills/gemini/scripts/`:
+
+| Script | Purpose |
+|--------|---------|
+| `full-smooth.ts` | Complete flow demo |
+| `send-chat.ts` | Send single chat message |
+| `youtube-transcribe.ts` | Transcribe YouTube video |
+
+### Run Scripts
+
+```bash
+cd src/skills/gemini/scripts
+node --experimental-strip-types full-smooth.ts
+node --experimental-strip-types send-chat.ts "Your message"
+node --experimental-strip-types youtube-transcribe.ts "https://youtube.com/..."
 ```
-Claude Code → MQTT (ws://localhost:9001) → Mosquitto → Extension → Gemini
-```
-
-| Component | Port | Protocol |
-|-----------|------|----------|
-| Mosquitto TCP | 1883 | MQTT/TCP |
-| Mosquitto WS | 9001 | MQTT/WebSocket |
-| Debug Console | 8899 | HTTP (local dev) |
-
-**IMPORTANT**: Commands only work via WebSocket (9001), NOT TCP (1883)!
 
 ## MQTT Topics
 
@@ -44,148 +52,97 @@ Claude Code → MQTT (ws://localhost:9001) → Mosquitto → Extension → Gemin
 |-------|-----------|---------|
 | `claude/browser/command` | → Extension | Send commands |
 | `claude/browser/response` | ← Extension | Command results |
-| `claude/browser/state` | ← Extension | Loading/tool state |
 | `claude/browser/status` | ← Extension | Online/offline |
 
-## Commands Reference
+**IMPORTANT**: Topics are `claude/browser/*` NOT `claude-browser-proxy/*`!
 
-### Chat
+## Commands
+
+### Tab Management
+
+```json
+{"action": "create_tab"}
+// → {tabId: 2127157543, success: true}
+
+{"action": "list_tabs"}
+// → {tabs: [...], count: 3}
+
+{"action": "focus_tab", "tabId": 2127157543}
+// → {success: true}
+
+{"action": "inject_badge", "tabId": 2127157543, "text": "HELLO"}
+// → {success: true, injected: true}
+```
+
+### Chat (with Tab Precision!)
 
 ```json
 {
   "action": "chat",
+  "tabId": 2127157543,
   "text": "Your message to Gemini"
-}
-```
-
-### Model Selection
-
-```json
-{
-  "action": "select_model",
-  "model": "thinking"  // "fast", "pro", or "thinking"
 }
 ```
 
 ### Get Data
 
 ```json
-{ "action": "get_url" }     // Returns { url, title }
-{ "action": "get_text" }    // Returns page text
-{ "action": "get_state" }   // Returns { loading, tool, responseCount }
-{ "action": "get_html" }    // Returns HTML (truncated)
+{"action": "get_url", "tabId": 123}     // {url, title}
+{"action": "get_text", "tabId": 123}    // {text}
+{"action": "get_state", "tabId": 123}   // {loading, responseCount, tool}
 ```
 
-### Click Actions
+### Model Selection
 
 ```json
-{
-  "action": "click",
-  "selector": "button.submit"
+{"action": "select_model", "model": "thinking"}
+// "fast", "pro", or "thinking"
+```
+
+## Example: Full Smooth Flow
+
+```typescript
+import mqtt from 'mqtt';
+
+const client = mqtt.connect('ws://localhost:9001');
+
+// Helper function
+async function send(action, params = {}) {
+  return new Promise((resolve) => {
+    const id = `${action}_${Date.now()}`;
+    client.subscribe('claude/browser/response');
+    client.on('message', (topic, msg) => {
+      const data = JSON.parse(msg.toString());
+      if (data.id === id) resolve(data);
+    });
+    client.publish('claude/browser/command',
+      JSON.stringify({ id, action, ...params }));
+  });
 }
 
-{
-  "action": "click_text",
-  "text": "Send"
-}
+// The Flow
+const tab = await send('create_tab');           // 1. Create tab
+await new Promise(r => setTimeout(r, 4000));    // 2. Wait for load
+await send('inject_badge', {                    // 3. Verify targeting
+  tabId: tab.tabId,
+  text: 'SMOOTH!'
+});
+await send('chat', {                            // 4. Send chat
+  tabId: tab.tabId,
+  text: 'Hello from Claude!'
+});
+// → Gemini responds!
 ```
-
-## Workflow: Send Chat via Debug Console
-
-Since MQTT commands via TCP don't work reliably, use browser automation on debug.html:
-
-### Step 1: Start Debug Server
-
-```bash
-cd ~/Code/github.com/laris-co/claude-browser-proxy
-bunx serve -p 8899 &
-```
-
-### Step 2: Open Debug Console
-
-```javascript
-// Create tab and navigate
-tabs_create_mcp()
-navigate({ url: "http://localhost:8899/debug.html", tabId: TAB_ID })
-wait(2)
-```
-
-### Step 3: Send Chat
-
-```javascript
-// Find chat input
-find({ query: "Type message to send to Gemini input", tabId: TAB_ID })
-// → ref_166
-
-// Click, type, send
-computer({ action: "left_click", ref: "ref_166", tabId: TAB_ID })
-computer({ action: "type", text: "Your message", tabId: TAB_ID })
-
-// Find and click Send Chat button
-find({ query: "Send Chat button", tabId: TAB_ID })
-// → ref_167
-computer({ action: "left_click", ref: "ref_167", tabId: TAB_ID })
-```
-
-### Step 4: Monitor Response
-
-Watch the RESPONSES panel or check state:
-
-```bash
-mosquitto_sub -t "claude/browser/state" -C 1 -W 5
-# {"loading":false,"responseCount":2,"tool":"youtube"}
-```
-
-## State Polling
-
-Monitor Gemini state (works via TCP):
-
-```bash
-# Check if extension is online
-mosquitto_sub -t "claude/browser/status" -C 1 -W 3
-
-# Poll loading state
-mosquitto_sub -t "claude/browser/state" -C 1 -W 3
-```
-
-State fields:
-- `loading`: true while Gemini is generating
-- `responseCount`: Number of responses in conversation
-- `tool`: Detected tool ("youtube", "search", "code", null)
-
-## Integration with /watch
-
-The `/watch` skill can use `/gemini` for Gemini control:
-
-```bash
-# /watch flow
-1. Get video metadata (yt-dlp)
-2. /gemini model think          # Use thinking model
-3. /gemini chat "Transcribe: [URL]"
-4. Poll state until loading=false
-5. /gemini get text             # Extract response
-6. Save to ψ/memory/learnings/
-```
-
-## Debug Console URL
-
-For manual testing: http://localhost:8899/debug.html
-
-Features:
-- Real-time MQTT traffic view
-- Quick action buttons
-- Custom JSON commands
-- Model switching
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| "Unknown action: undefined" | Use WebSocket (debug.html), not TCP |
-| Extension offline | Check badge, reconnect |
-| No Gemini tab | Open gemini.google.com first |
-| Commands ignored | Gemini tab must be in same window |
+| Commands timeout | Check topic names: `claude/browser/*` |
+| Chat doesn't type | Extension needs v2.8.8+ |
+| Tab not found | Use `list_tabs` to see available tabs |
+| Extension offline | Open extension sidebar |
 
 ## Extension Source
 
-`github.com/laris-co/claude-browser-proxy`
+`github.com/laris-co/claude-browser-proxy` (v2.8.8+)
