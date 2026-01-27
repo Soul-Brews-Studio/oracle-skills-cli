@@ -56,17 +56,23 @@ fi
 Use claude-browser-proxy MQTT commands for reliable automation.
 
 ```bash
-# Create new Gemini tab
+# Create new Gemini tab and capture tabId from response
 mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
   -m "{\"id\":\"newtab-$(date +%s)\",\"action\":\"create_tab\",\"ts\":$(date +%s)}"
 
 echo "Creating new Gemini tab..."
-sleep 4  # Wait for tab to load
+sleep 2
+
+# Get tabId from response
+TAB_ID=$(mosquitto_sub -h localhost -p 1883 -t "claude/browser/response" -C 1 -W 5 | jq -r '.tabId')
+echo "Tab ID: $TAB_ID"
+
+sleep 3  # Wait for page to fully load
 ```
 
 ### Step 3: Send Transcription Request with Metadata
 
-Build prompt with JSON metadata block, then send via MQTT `chat` action.
+Build prompt with JSON metadata block, then send via MQTT `chat` action **with tabId**.
 
 ```bash
 # Build prompt with JSON metadata
@@ -83,12 +89,14 @@ Format:
 
 Use double newlines between timestamps!"
 
-# Send to Gemini via MQTT
+# Send to Gemini via MQTT - IMPORTANT: include tabId!
 mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
-  -m "{\"id\":\"chat-$(date +%s)\",\"action\":\"chat\",\"text\":\"$PROMPT\",\"ts\":$(date +%s)}"
+  -m "{\"id\":\"chat-$(date +%s)\",\"action\":\"chat\",\"text\":\"$PROMPT\",\"tabId\":$TAB_ID,\"ts\":$(date +%s)}"
 
-echo "Prompt sent to Gemini!"
+echo "Prompt sent to Gemini tab $TAB_ID!"
 ```
+
+**IMPORTANT**: Always include `tabId` in commands to target the correct tab!
 
 **With captions (cross-check mode):**
 
