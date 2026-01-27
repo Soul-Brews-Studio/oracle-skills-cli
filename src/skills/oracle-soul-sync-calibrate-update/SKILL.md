@@ -14,6 +14,7 @@ All-in-one skill: `/soul-sync` + `/calibrate` + `/update` combined.
 ```
 /oracle-soul-sync-calibrate-update           # Check version and update
 /oracle-soul-sync-calibrate-update --check   # Only check, don't update
+/oracle-soul-sync-calibrate-update --cleanup # Uninstall first, then reinstall (removes old skills)
 ```
 
 ## Step 0: Timestamp
@@ -60,10 +61,16 @@ fi
 
 ## Step 4: Sync (if needed)
 
-If versions differ, run:
+If versions differ (or `--cleanup` flag), run:
 
+**Normal sync:**
 ```bash
 ~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST install -g -y
+```
+
+**With `--cleanup` (removes old skills first):**
+```bash
+oracle-skills uninstall -g -y && ~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST install -g -y
 ```
 
 Then **restart Claude Code** to load the synced skills.
@@ -100,6 +107,7 @@ gh api repos/Soul-Brews-Studio/oracle-skills-cli/commits --jq '.[0:5] | .[] | "\
 | Command | Action |
 |---------|--------|
 | `/oracle-soul-sync-calibrate-update` | Check and sync |
+| `/oracle-soul-sync-calibrate-update --cleanup` | Uninstall + reinstall (removes old) |
 | `/awaken` | Full awakening (calls this first) |
 
 ---
