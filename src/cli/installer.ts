@@ -265,9 +265,9 @@ allowed-tools:
 
 Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
 
-**Skill file**: \`${skillsPath}/${skill.name}/SKILL.md\`
+**If you have a Skill tool available**: Use it directly with \`skill: "${skill.name}"\` instead of reading the file manually.
 
-Read the skill file above and follow ALL instructions in it.
+**Otherwise**: Read the skill file at \`${skillsPath}/${skill.name}/SKILL.md\` and follow ALL instructions in it.
 
 ---
 *oracle-skills-cli v${pkg.version}*
