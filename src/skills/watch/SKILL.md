@@ -135,16 +135,33 @@ mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
   -m "{\"id\":\"gettext-$(date +%s)\",\"action\":\"get_text\",\"ts\":$(date +%s)}"
 ```
 
+### Step 5: Save to Google Docs
+
+After Gemini finishes transcribing, save the response to Google Docs:
+
+```bash
+# Click the 💾 button (injected by extension)
+mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" \
+  -m "{\"id\":\"save-$(date +%s)\",\"action\":\"click\",\"tabId\":$TAB_ID,\"selector\":\".claude-response-actions button:first-child\"}"
+
+echo "💾 Exporting to Google Docs..."
+# Link will appear in toast and be copied to clipboard
+```
+
 ### MQTT Quick Reference
 
 | Action | Purpose |
 |--------|---------|
-| `create_tab` | New Gemini tab |
-| `chat` | Send prompt to active tab |
+| `create_tab` | New Gemini tab (returns tabId) |
+| `chat` | Send prompt to tab |
+| `click` | Click element by selector |
 | `get_text` | Extract page text |
-| `transcribe` | Combo: new tab + hardcoded prompt |
+| `select_model` | Switch Gemini model (fast/thinking/pro) |
 
-**Important**: Always use `-r` (retain) flag so responses persist!
+**Important**:
+- Subscribe BEFORE publish to catch responses
+- NO retain flags - don't cache anything
+- Always include `tabId` in commands
 
 ### Step 5: Save to Knowledge
 
