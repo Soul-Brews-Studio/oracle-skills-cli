@@ -1,10 +1,16 @@
 import { $ } from 'bun';
 import { existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
+import { homedir } from 'os';
 import * as p from '@clack/prompts';
 import { agents } from './agents.js';
 import type { Skill, InstallOptions } from './types.js';
 import pkg from '../../package.json' with { type: 'json' };
+
+// Check if skill has hooks (needs to be installed as Claude Code plugin)
+function hasHooks(skillPath: string): boolean {
+  return existsSync(join(skillPath, 'hooks', 'hooks.json'));
+}
 
 // Skills are bundled in the repo
 function getSkillsDir(): string {
@@ -119,7 +125,15 @@ export async function installSkills(
     // OpenCode reads from .opencode/skills/ and creates slash commands automatically
     const scope = options.global ? 'Global' : 'Local';
 
+    // Track skills with hooks for separate plugin installation
+    const skillsWithHooks: Skill[] = [];
+
     for (const skill of skillsToInstall) {
+      // Check if skill has hooks - needs plugin installation
+      if (hasHooks(skill.path)) {
+        skillsWithHooks.push(skill);
+      }
+
       const destPath = join(targetDir, skill.name);
 
         // Remove existing if present
@@ -149,6 +163,40 @@ export async function installSkills(
             await Bun.write(skillMdPath, content);
           }
         }
+    }
+
+    // Install skills with hooks as Claude Code plugins
+    if (skillsWithHooks.length > 0) {
+      const pluginsDir = join(homedir(), '.claude', 'plugins');
+      await $`mkdir -p ${pluginsDir}`.quiet();
+
+      for (const skill of skillsWithHooks) {
+        const pluginDest = join(pluginsDir, skill.name);
+
+        // Remove existing plugin if present
+        if (existsSync(pluginDest)) {
+          await $`rm -rf ${pluginDest}`.quiet();
+        }
+
+        // Copy entire skill as plugin
+        await $`cp -r ${skill.path} ${pluginDest}`.quiet();
+
+        // Create .claude-plugin/plugin.json if not exists
+        const pluginJsonDir = join(pluginDest, '.claude-plugin');
+        const pluginJsonPath = join(pluginJsonDir, 'plugin.json');
+        if (!existsSync(pluginJsonPath)) {
+          await $`mkdir -p ${pluginJsonDir}`.quiet();
+          const pluginJson = {
+            name: skill.name,
+            description: skill.description,
+            version: pkg.version,
+            author: { name: 'Soul Brews Studio' },
+          };
+          await Bun.write(pluginJsonPath, JSON.stringify(pluginJson, null, 2));
+        }
+
+        p.log.success(`Plugin (hooks): ~/.claude/plugins/${skill.name}`);
+      }
     }
 
     // Write manifest with version info
@@ -291,7 +339,7 @@ export async function uninstallSkills(
     for (const skill of toRemove) {
       const skillPath = join(targetDir, skill);
       await $`rm -rf ${skillPath}`.quiet();
-      
+
       // OpenCode: also clean up commands/ flat files
       if (isOpenCode && agent.commandsDir) {
         const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
@@ -304,6 +352,14 @@ export async function uninstallSkills(
         if (existsSync(oldFlatFile)) await $`rm -f ${oldFlatFile}`.quiet();
         if (existsSync(oldDir)) await $`rm -rf ${oldDir}`.quiet();
       }
+
+      // Also clean up from ~/.claude/plugins/ if it was installed there
+      const pluginPath = join(homedir(), '.claude', 'plugins', skill);
+      if (existsSync(pluginPath)) {
+        await $`rm -rf ${pluginPath}`.quiet();
+        p.log.info(`Removed plugin: ~/.claude/plugins/${skill}`);
+      }
+
       totalRemoved++;
     }
 

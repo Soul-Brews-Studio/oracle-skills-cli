@@ -14,6 +14,8 @@ description: Create session retrospective with AI diary and lessons learned. Use
 ```
 /rrr                 # Interactive (default)
 /rrr --direct        # One-shot write (no prompts, for low context)
+/rrr --only          # Minimal retro only (very low context, /forward manual)
+/rrr --forward       # Full retro + handoff combined
 /retrospective       # Same as /rrr
 ```
 
@@ -22,6 +24,73 @@ description: Create session retrospective with AI diary and lessons learned. Use
 ```
 งานเสร็จ → rrr (retrospective + lesson learned) → commit → sync
 ```
+
+---
+
+## --only Mode (Minimal)
+
+**Use when context is VERY low.** Writes minimal retrospective only, NO lesson learned. Do `/forward` manually after.
+
+### Steps
+
+1. **Timestamp**: `date "+🕐 %H:%M %Z (%A %d %B %Y)"`
+2. **Quick git**: `git log --oneline -5`
+3. **Write minimal retro** (NO lesson learned):
+
+```markdown
+# Session Retrospective (Minimal)
+
+**Date**: YYYY-MM-DD HH:MM
+**Focus**: [Brief description]
+
+## What We Did
+- [Key accomplishment 1]
+- [Key accomplishment 2]
+
+## Key Changes
+[git log --oneline -5 output]
+
+## Next
+- [ ] [Next step]
+```
+
+4. **Commit**: `git add ψ/ && git commit -m "rrr: minimal [slug]"`
+5. **Done** - run `/forward` manually if needed
+
+---
+
+## --forward Mode (Retro + Handoff)
+
+**Use for normal wrap-up.** Combines full retrospective AND handoff in one go.
+
+### Steps
+
+1. **Do full --direct mode** (retrospective + lesson learned)
+2. **Then immediately create handoff**:
+
+Write to: `ψ/inbox/handoff/YYYY-MM-DD_HH-MM_slug.md`
+
+```markdown
+# Handoff: [Session Focus]
+
+**Date**: YYYY-MM-DD HH:MM
+
+## What We Did
+[Copy from retrospective summary]
+
+## Pending
+- [ ] [From retrospective next steps]
+
+## Next Session
+- [ ] [Specific action]
+
+## Key Files
+- [Important files from session]
+```
+
+3. **Commit both**: `git add ψ/ && git commit -m "rrr: [slug] + handoff"`
+4. **Push**: `git push origin main`
+5. **Ready for /clear**
 
 ---
 

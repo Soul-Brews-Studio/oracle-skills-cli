@@ -64,7 +64,6 @@ EXAMPLES:
 SOUL BREWS EXTENSIONS:
   - Session isolation (per-session state files)
   - Multi-terminal safe
-  - /check-updates command
 
 STOPPING:
   Only by reaching --max-iterations or detecting --completion-promise

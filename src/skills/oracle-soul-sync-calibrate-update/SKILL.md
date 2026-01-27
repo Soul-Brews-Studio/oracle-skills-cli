@@ -1,19 +1,19 @@
 ---
-name: soul-sync
-description: Sync Oracle instruments with the family. Check and update skills to latest version. Use when user says "soul-sync", "sync", "calibrate", or before /awaken.
+name: oracle-soul-sync-calibrate-update
+description: Sync Oracle instruments with the family. Check and update skills to latest version. Use when user says "soul-sync", "sync", "calibrate", "update", or before /awaken.
 ---
 
-# /soul-sync - Sync with Oracle Family
+# /oracle-soul-sync-calibrate-update
 
 > "Sync your soul with the family."
+
+All-in-one skill: `/soul-sync` + `/calibrate` + `/update` combined.
 
 ## Usage
 
 ```
-/soul-sync           # Check version and update if needed
-/soul-sync --check   # Only check, don't update
-/update              # Same as /soul-sync (sugar alias)
-/calibrate           # Same as /soul-sync (sugar alias)
+/oracle-soul-sync-calibrate-update           # Check version and update
+/oracle-soul-sync-calibrate-update --check   # Only check, don't update
 ```
 
 ## Step 0: Timestamp
@@ -99,10 +99,8 @@ gh api repos/Soul-Brews-Studio/oracle-skills-cli/commits --jq '.[0:5] | .[] | "\
 
 | Command | Action |
 |---------|--------|
-| `/soul-sync` | Check and sync (recommended) |
-| `/calibrate` | Same as /soul-sync (alias) |
-| `/update` | Same as /soul-sync (alias) |
-| `/awaken` | Full awakening (calls /soul-sync first) |
+| `/oracle-soul-sync-calibrate-update` | Check and sync |
+| `/awaken` | Full awakening (calls this first) |
 
 ---
 
