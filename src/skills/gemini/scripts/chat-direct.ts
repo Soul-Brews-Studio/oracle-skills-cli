@@ -1,6 +1,6 @@
 import mqtt from 'mqtt';
 
-const client = mqtt.connect('ws://localhost:9001');
+const client = mqtt.connect('mqtt://localhost:1883');
 const tabId = 2127157506;
 const message = process.argv[2] || 'Hello from Claude! Tab precision works!';
 

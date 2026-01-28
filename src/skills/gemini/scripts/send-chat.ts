@@ -6,7 +6,7 @@
 
 import mqtt from "mqtt";
 
-const MQTT_URL = "ws://localhost:9001";
+const MQTT_URL = "mqtt://localhost:1883";
 const TOPIC_CMD = "claude/browser/command";
 const TOPIC_RES = "claude/browser/response";
 const TOPIC_STATE = "claude/browser/state";

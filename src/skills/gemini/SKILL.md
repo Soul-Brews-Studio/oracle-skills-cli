@@ -27,7 +27,9 @@ create_tab → tabId → inject_badge → chat → GEMINI RESPONDS!
 ## Requirements
 
 1. **Gemini Proxy Extension** v2.8.8+ (green badge = connected)
-2. **Mosquitto broker** with WebSocket on port 9001
+2. **Mosquitto broker** with dual listeners:
+   - TCP port 1883 (for CLI/Bun scripts)
+   - WebSocket port 9001 (for browser extension)
 3. **Extension sidebar open** (click extension icon)
 
 ## Scripts
@@ -112,7 +114,7 @@ node --experimental-strip-types youtube-transcribe.ts "https://youtube.com/..."
 ```typescript
 import mqtt from 'mqtt';
 
-const client = mqtt.connect('ws://localhost:9001');
+const client = mqtt.connect('mqtt://localhost:1883');
 
 // Helper function
 async function send(action, params = {}) {

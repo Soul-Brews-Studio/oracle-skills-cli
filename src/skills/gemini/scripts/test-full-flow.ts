@@ -1,6 +1,6 @@
 import mqtt from 'mqtt';
 
-const client = mqtt.connect('ws://localhost:9001');
+const client = mqtt.connect('mqtt://localhost:1883');
 const TOPIC_CMD = 'claude-browser-proxy/command';
 const TOPIC_RES = 'claude-browser-proxy/response';
 

@@ -1,6 +1,6 @@
 import mqtt from 'mqtt';
 
-const client = mqtt.connect('ws://localhost:9001');
+const client = mqtt.connect('mqtt://localhost:1883');
 
 client.on('connect', () => {
   client.subscribe('claude/browser/status');

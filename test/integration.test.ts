@@ -85,7 +85,7 @@ describe("integration: OpenCode global install", () => {
     expect(content).toContain("- Task");
 
     // Should point to skill file
-    expect(content).toContain("Skill file");
+    expect(content).toContain("skill file");
     expect(content).toContain(".config/opencode/skills/rrr/SKILL.md");
 
     // Should tell AI to execute
