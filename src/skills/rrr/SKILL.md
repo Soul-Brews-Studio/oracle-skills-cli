@@ -148,7 +148,23 @@ LEARNING_FILE="ψ/memory/learnings/$(date '+%Y-%m-%d')_${SLUG}.md"
 
 Write lesson learned file immediately.
 
-### Step 5: Commit & Report
+### Step 5: Sync to Oracle (REQUIRED)
+
+**ALWAYS sync to Oracle MCP after writing lesson learned:**
+
+```bash
+# Get repo context
+REPO=$(git remote get-url origin 2>/dev/null | sed 's/.*github.com[:/]//' | sed 's/.git$//')
+```
+
+```
+Use the oracle_learn MCP tool with:
+- pattern: [Full content of the lesson learned]
+- concepts: [Array of relevant tags]
+- source: "rrr: ${REPO}"
+```
+
+### Step 6: Commit & Report
 
 ```bash
 git add ψ/memory/retrospectives/ ψ/memory/learnings/
@@ -337,7 +353,25 @@ Write both files immediately. Don't ask for confirmation.
 `tag1`, `tag2`, `tag3`
 ```
 
-## Step 7: Commit All
+## Step 7: Sync to Oracle (REQUIRED)
+
+**After writing the lesson learned file, ALWAYS sync to Oracle MCP:**
+
+```bash
+# Get repo context
+REPO=$(git remote get-url origin 2>/dev/null | sed 's/.*github.com[:/]//' | sed 's/.git$//')
+```
+
+```
+Use the oracle_learn MCP tool with:
+- pattern: [Full content of the lesson learned]
+- concepts: [Array of relevant tags from the lesson]
+- source: "rrr: ${REPO}"
+```
+
+This ensures learnings are indexed and searchable across all Oracle instances.
+
+## Step 8: Commit All
 
 ```bash
 git add ψ/memory/retrospectives/ ψ/memory/learnings/
@@ -351,5 +385,6 @@ git push origin main
 - **Honest Feedback**: 100+ words, 3 friction points
 - **Timeline**: Actual times and events
 - **Lesson Learned**: REQUIRED after every rrr
+- **Oracle Sync**: REQUIRED - call `oracle_learn` MCP tool after every lesson learned
 - **Time Zone**: GMT+7 (Bangkok)
 - **Validation**: Check all boxes before saving
