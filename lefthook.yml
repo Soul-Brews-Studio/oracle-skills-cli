@@ -4,4 +4,4 @@ pre-commit:
       run: bun run scripts/update-readme-table.ts
       stage_fixed: true
     test:
-      run: bun test test/
+      run: bun test
