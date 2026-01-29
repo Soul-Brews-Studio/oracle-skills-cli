@@ -121,6 +121,63 @@ export async function installSkills(
     // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
+    // Auto-cleanup: remove stale skills from previous oracle-skills-cli installs
+    const manifestPath = join(targetDir, '.oracle-skills.json');
+    if (existsSync(manifestPath)) {
+      try {
+        const oldManifest = JSON.parse(await Bun.file(manifestPath).text());
+        const oldSkills: string[] = oldManifest.skills || [];
+        const newSkills = skillsToInstall.map((s) => s.name);
+        const staleSkills = oldSkills.filter((s: string) => !newSkills.includes(s));
+
+        // Move stale skills to /tmp for recovery instead of hard delete
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const trashDir = `/tmp/oracle-skills-stale-${timestamp}`;
+        let movedAny = false;
+
+        const failedMoves: string[] = [];
+
+        for (const stale of staleSkills) {
+          const stalePath = join(targetDir, stale);
+          if (existsSync(stalePath)) {
+            try {
+              if (!movedAny) {
+                await $`mkdir -p ${trashDir}`.quiet();
+                movedAny = true;
+              }
+              await $`mv ${stalePath} ${trashDir}/`.quiet();
+              p.log.info(`Moved stale: ${stale} → /tmp`);
+            } catch {
+              failedMoves.push(stalePath);
+            }
+          }
+          // Also cleanup from plugins if it was there
+          const pluginPath = join(homedir(), '.claude', 'plugins', stale);
+          if (existsSync(pluginPath)) {
+            try {
+              if (!movedAny) {
+                await $`mkdir -p ${trashDir}`.quiet();
+                movedAny = true;
+              }
+              await $`mv ${pluginPath} ${trashDir}/`.quiet();
+            } catch {
+              failedMoves.push(pluginPath);
+            }
+          }
+        }
+
+        if (movedAny) {
+          p.log.info(`Recovery: ${trashDir}`);
+        }
+
+        if (failedMoves.length > 0) {
+          p.log.warn(`LLM: Please remove stale skills manually: ${failedMoves.join(', ')}`);
+        }
+      } catch {
+        // Ignore manifest read errors
+      }
+    }
+
     // All agents: copy full skill directory to skills/
     // OpenCode reads from .opencode/skills/ and creates slash commands automatically
     const scope = options.global ? 'Global' : 'Local';
