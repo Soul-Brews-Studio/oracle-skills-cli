@@ -67,7 +67,7 @@ ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/incubate/owner/repo
 Remove symlink after work is done (manual trigger):
 
 ```bash
-rm ψ/incubate/owner/repo
+unlink ψ/incubate/owner/repo
 rmdir ψ/incubate/owner 2>/dev/null
 # ghq clone preserved for future use
 ```
@@ -84,7 +84,7 @@ git -C ψ/incubate/owner/repo checkout -b feat/feature-2
 # ... work, commit, push, PR ...
 
 # 2. When all done, offload (ghq kept for PR feedback)
-rm ψ/incubate/owner/repo
+unlink ψ/incubate/owner/repo
 ```
 
 **Use case**: Extended contribution period. Keep ghq for addressing PR reviews.
@@ -222,10 +222,10 @@ ghq get -u URL && mkdir -p ψ/learn/owner && ln -sf "$(ghq root)/github.com/owne
 ghq get -u URL && mkdir -p ψ/incubate/owner && ln -sf "$(ghq root)/github.com/owner/repo" ψ/incubate/owner/repo
 
 # Offload (remove symlink only)
-rm ψ/incubate/owner/repo && rmdir ψ/incubate/owner 2>/dev/null
+unlink ψ/incubate/owner/repo && rmdir ψ/incubate/owner 2>/dev/null
 
 # Offload + purge (remove symlink AND ghq clone)
-rm ψ/incubate/owner/repo && rm -rf "$(ghq root)/github.com/owner/repo"
+unlink ψ/incubate/owner/repo && rm -rf "$(ghq root)/github.com/owner/repo"
 
 # Update source
 ghq get -u URL

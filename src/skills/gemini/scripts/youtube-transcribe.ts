@@ -1,48 +1,86 @@
-import mqtt from 'mqtt';
+#!/usr/bin/env bun
+/**
+ * YouTube Transcribe Script
+ *
+ * Workflow:
+ * 1. Create new Gemini tab
+ * 2. Wait for load
+ * 3. Inject badge
+ * 4. Send transcribe request
+ *
+ * Uses mosquitto CLI (no npm deps required)
+ */
 
-const client = mqtt.connect('mqtt://localhost:1883');
-const TOPIC_CMD = 'claude/browser/command';
-const TOPIC_RES = 'claude/browser/response';
+const MQTT_HOST = "localhost";
+const MQTT_PORT = "1883";
+const MQTT_TOPIC_CMD = "claude/browser/command";
+const MQTT_TOPIC_RSP = "claude/browser/response";
 
-const youtubeUrl = process.argv[2] || 'https://www.youtube.com/watch?v=XpHMle5Vq80';
+const youtubeUrl = Bun.argv[2] || 'https://www.youtube.com/watch?v=XpHMle5Vq80';
 
-async function send(action: string, params: any = {}): Promise<any> {
-  return new Promise((resolve) => {
-    const id = `${action}_${Date.now()}`;
-    const timeout = setTimeout(() => resolve({ timeout: true }), 8000);
-
-    const handler = (topic: string, msg: Buffer) => {
-      if (topic !== TOPIC_RES) return;
-      const data = JSON.parse(msg.toString());
-      if (data.id === id) {
-        clearTimeout(timeout);
-        client.off('message', handler);
-        resolve(data);
-      }
-    };
-    client.on('message', handler);
-    client.publish(TOPIC_CMD, JSON.stringify({ id, action, ...params }));
-  });
+// Helper to publish MQTT command
+async function mqttPub(payload: object): Promise<void> {
+  const msg = JSON.stringify(payload);
+  const proc = Bun.spawn([
+    "mosquitto_pub", "-h", MQTT_HOST, "-p", MQTT_PORT,
+    "-t", MQTT_TOPIC_CMD, "-m", msg
+  ]);
+  await proc.exited;
 }
 
-async function main() {
-  await new Promise(r => client.on('connect', r));
-  client.subscribe(TOPIC_RES);
+// Helper to subscribe and wait for response with matching ID
+async function mqttSubWait(expectedId: string, timeoutSec: number = 10): Promise<any> {
+  const proc = Bun.spawn([
+    "mosquitto_sub", "-h", MQTT_HOST, "-p", MQTT_PORT,
+    "-t", MQTT_TOPIC_RSP, "-C", "5", "-W", String(timeoutSec)
+  ], { stdout: "pipe" });
 
+  const output = await new Response(proc.stdout).text();
+  await proc.exited;
+
+  // Parse each line and find matching ID
+  for (const line of output.trim().split('\n')) {
+    if (!line) continue;
+    try {
+      const data = JSON.parse(line);
+      if (data.id === expectedId) return data;
+    } catch {}
+  }
+  return { timeout: true };
+}
+
+const ts = () => Date.now();
+
+async function main() {
   console.log('\n🎬 YOUTUBE TRANSCRIBE FLOW\n');
 
   // 1. Create tab
   console.log('1️⃣  Creating new Gemini tab...');
-  const tab = await send('create_tab');
-  console.log(`   ✅ Tab ID: ${tab.tabId}`);
+  const createId = `create_tab_${ts()}`;
+  await mqttPub({
+    id: createId,
+    action: "create_tab",
+    url: "https://gemini.google.com/app",
+    ts: ts()
+  });
+  const tabResult = await mqttSubWait(createId, 8);
+  const tabId = tabResult.tabId;
+  console.log(`   ✅ Tab ID: ${tabId || 'unknown'}`);
 
-  // 2. Wait
+  // 2. Wait for load
   console.log('2️⃣  Waiting 4s for load...');
-  await new Promise(r => setTimeout(r, 4000));
+  await Bun.sleep(4000);
 
   // 3. Badge
   console.log('3️⃣  Injecting badge...');
-  await send('inject_badge', { tabId: tab.tabId, text: 'TRANSCRIBE' });
+  await mqttPub({
+    id: `badge_${ts()}`,
+    action: "inject_badge",
+    tabId: tabId,
+    text: "TRANSCRIBE",
+    ts: ts()
+  });
+  await Bun.sleep(500);
 
   // 4. Send transcribe request
   console.log('4️⃣  Sending transcribe request...');
@@ -53,15 +91,19 @@ async function main() {
 
 Video: ${youtubeUrl}`;
 
-  await send('chat', { tabId: tab.tabId, text: prompt });
+  await mqttPub({
+    id: `chat_${ts()}`,
+    action: "chat",
+    tabId: tabId,
+    text: prompt,
+    ts: ts()
+  });
   console.log('   ✅ Request sent!');
 
   console.log('\n🎉 DONE!');
-  console.log(`   Tab ID: ${tab.tabId}`);
+  console.log(`   Tab ID: ${tabId}`);
   console.log(`   Video: ${youtubeUrl}`);
   console.log('   Check Gemini for transcription!\n');
-
-  client.end();
 }
 
 main().catch(console.error);

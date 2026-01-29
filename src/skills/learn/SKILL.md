@@ -31,8 +31,8 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
 
 **Offload source, keep docs:**
 ```bash
-rm ψ/learn/owner/repo/origin   # Remove symlink
-ghq rm owner/repo              # Remove source
+unlink ψ/learn/owner/repo/origin   # Remove symlink
+ghq rm owner/repo                  # Remove source
 # Docs remain in ψ/learn/owner/repo/
 ```
 
