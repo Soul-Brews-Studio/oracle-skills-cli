@@ -28,153 +28,58 @@ Learn from YouTube videos by sending to Gemini for transcription, then indexing 
 
 ## Workflow
 
-### Step 1: Get Metadata & Captions
+### Step 1: Run Transcription Script
 
 ```bash
-SKILL_DIR=".claude/skills/watch"
+# Simple (default chat mode)
+bun src/skills/watch/scripts/transcribe.ts <youtube-url>
 
-# Get video metadata (JSON)
-METADATA=$($SKILL_DIR/scripts/get-metadata.ts "$URL")
-TITLE=$(echo "$METADATA" | jq -r '.title')
-VIDEO_ID=$(echo "$METADATA" | jq -r '.id')
-DURATION=$(echo "$METADATA" | jq -r '.duration_string')
+# With Deep Research mode
+bun src/skills/watch/scripts/transcribe.ts --mode=research <youtube-url>
 
-echo "📹 Title: $TITLE"
-echo "⏱️ Duration: $DURATION"
-echo "🆔 Video ID: $VIDEO_ID"
+# With specific model
+bun src/skills/watch/scripts/transcribe.ts --model=thinking <youtube-url>
 
-# Get captions (may be empty)
-CC_TEXT=$($SKILL_DIR/scripts/get-cc.ts "$URL" en)
-if [ "$CC_TEXT" = "NO_CAPTIONS_AVAILABLE" ]; then
-  HAS_CC=false
-  echo "⚠️ No captions available"
-else
-  HAS_CC=true
-  echo "✅ Found YouTube captions"
-fi
+# Canvas mode for document output
+bun src/skills/watch/scripts/transcribe.ts --mode=canvas <youtube-url>
 ```
 
-### Step 2: Open Gemini via MQTT (Smooth Flow)
+**Modes:**
+| Mode | Use Case |
+|------|----------|
+| `chat` | Quick transcription (default) |
+| `research` | Deep analysis with fact-checking |
+| `canvas` | Structured document output |
 
-Use claude-browser-proxy MQTT commands for reliable automation.
+**Models:**
+| Model | Speed | Quality |
+|-------|-------|---------|
+| `fast` | Fastest | Good |
+| `thinking` | Slow | Best (reasoning) |
+| `pro` | Medium | High |
+
+The script handles:
+1. Fetching video metadata (title, channel, duration)
+2. Creating new Gemini tab with correct mode URL
+3. Selecting model if specified
+4. Sending prompt with metadata
+5. Outputting tab ID for follow-up
+
+### Step 2: Wait for Gemini Response
+
+Check the Gemini tab for the transcription. For long videos, this may take 30-60 seconds.
+
+### Step 3: Save to Knowledge
+
+Once you have the Gemini transcription, save it:
 
 ```bash
-# Create new Gemini tab and capture tabId from response
-mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
-  -m "{\"id\":\"newtab-$(date +%s)\",\"action\":\"create_tab\",\"ts\":$(date +%s)}"
-
-echo "Creating new Gemini tab..."
-sleep 2
-
-# Get tabId from response
-TAB_ID=$(mosquitto_sub -h localhost -p 1883 -t "claude/browser/response" -C 1 -W 5 | jq -r '.tabId')
-echo "Tab ID: $TAB_ID"
-
-sleep 3  # Wait for page to fully load
+bun src/skills/watch/scripts/save-learning.ts "$TITLE" "$URL" "$VIDEO_ID" "$TRANSCRIPT" "$CC_TEXT"
 ```
 
-### Step 3: Send Transcription Request with Metadata
+Or manually create a learning file at `ψ/memory/learnings/YYYY-MM-DD_video-slug.md`.
 
-Build prompt with JSON metadata block, then send via MQTT `chat` action **with tabId**.
-
-```bash
-# Build prompt with JSON metadata
-PROMPT="Please transcribe this YouTube video with timestamps.
-
-\`\`\`json
-{\"title\":\"$TITLE\",\"channel\":\"$CHANNEL\",\"duration\":\"$DURATION\",\"url\":\"$URL\"}
-\`\`\`
-
-Format:
-[00:00] Text here
-
-[01:00] Next section
-
-Use double newlines between timestamps!"
-
-# Send to Gemini via MQTT - IMPORTANT: include tabId!
-mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
-  -m "{\"id\":\"chat-$(date +%s)\",\"action\":\"chat\",\"text\":\"$PROMPT\",\"tabId\":$TAB_ID,\"ts\":$(date +%s)}"
-
-echo "Prompt sent to Gemini tab $TAB_ID!"
-```
-
-**IMPORTANT**: Always include `tabId` in commands to target the correct tab!
-
-**With captions (cross-check mode):**
-
-```bash
-PROMPT="I have YouTube auto-captions. Please verify and fix errors.
-
-\`\`\`json
-{\"title\":\"$TITLE\",\"channel\":\"$CHANNEL\",\"duration\":\"$DURATION\",\"url\":\"$URL\"}
-\`\`\`
-
-Auto-captions:
----
-$CC_TEXT
----
-
-Tasks:
-1. Fix caption errors (names, technical terms)
-2. Add section headers and timestamps
-3. Provide 3 key takeaways"
-```
-
-### Step 4: Wait for Response
-
-```bash
-# Wait for Gemini to process (longer for long videos)
-sleep 15  # Adjust based on video length
-
-# Get response via MQTT
-mosquitto_sub -h localhost -p 1883 -t "claude/browser/response" -C 1 -W 30
-```
-
-**Or use `get_text` action:**
-
-```bash
-mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" -r \
-  -m "{\"id\":\"gettext-$(date +%s)\",\"action\":\"get_text\",\"ts\":$(date +%s)}"
-```
-
-### Step 5: Save to Google Docs
-
-After Gemini finishes transcribing, save the response to Google Docs:
-
-```bash
-# Click the 💾 button (injected by extension)
-mosquitto_pub -h localhost -p 1883 -t "claude/browser/command" \
-  -m "{\"id\":\"save-$(date +%s)\",\"action\":\"click\",\"tabId\":$TAB_ID,\"selector\":\".claude-response-actions button:first-child\"}"
-
-echo "💾 Exporting to Google Docs..."
-# Link will appear in toast and be copied to clipboard
-```
-
-### MQTT Quick Reference
-
-| Action | Purpose |
-|--------|---------|
-| `create_tab` | New Gemini tab (returns tabId) |
-| `chat` | Send prompt to tab |
-| `click` | Click element by selector |
-| `get_text` | Extract page text |
-| `select_model` | Switch Gemini model (fast/thinking/pro) |
-
-**Important**:
-- Subscribe BEFORE publish to catch responses
-- NO retain flags - don't cache anything
-- Always include `tabId` in commands
-
-### Step 5: Save to Knowledge
-
-Use the save script (handles slug, filename, slugs.yaml):
-
-```bash
-$SKILL_DIR/scripts/save-learning.ts "$TITLE" "$URL" "$VIDEO_ID" "$GEMINI_RESPONSE" "$CC_TEXT"
-```
-
-### Step 6: Index to Oracle
+### Step 4: Index to Oracle
 
 ```
 oracle_learn({
