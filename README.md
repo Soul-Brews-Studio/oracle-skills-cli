@@ -176,9 +176,9 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 23 | **rrr** | skill | Create session retrospective with AI diary |
 | 24 | **standup** | skill | Daily standup check |
 | 25 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 26 | **who-are-you** | skill | Know thyself |
+| 26 | **who-are-we** | skill | Know ourselves |
 
-*Generated: 2026-01-28 00:45:46 UTC*
+*Generated: 2026-01-29 03:31:20 UTC*
 
 ## Supported Agents
 
