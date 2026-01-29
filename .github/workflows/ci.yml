@@ -7,44 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  unit:
-    name: Unit Tests
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-      - run: bun test __tests__/utils.test.ts
-
-  integration:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
-      - run: bun test __tests__/index.test.ts
+      - run: bun test
 
   smoke:
-    name: Smoke Tests
+    name: Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - name: Install cal (Ubuntu)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ncal
       - run: bun install
-      - name: Run smoke tests (skip calendar on Windows)
-        run: bun test __tests__/smoke.test.ts
+      - run: bun test __tests__/smoke.test.ts
         env:
           SKIP_CAL: ${{ runner.os == 'Windows' && '1' || '' }}
 
   cli:
-    name: CLI Tests
+    name: CLI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +45,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [unit, integration, smoke, cli]
+    needs: [test, smoke, cli]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
