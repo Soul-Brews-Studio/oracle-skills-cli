@@ -1,2 +1,2 @@
 [test]
-root = "./test"
+root = "./__tests__"
