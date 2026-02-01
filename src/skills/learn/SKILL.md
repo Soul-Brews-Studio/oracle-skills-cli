@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Explore a codebase with 3 parallel Haiku agents and create documentation. Use when user says "learn [repo]", "explore codebase", "study this repo", or wants to understand a project.
+description: Explore a codebase with parallel Haiku agents. Modes - --fast (1 agent), default (3), --deep (5). Use when user says "learn [repo]", "explore codebase", "study this repo".
 ---
 
 # /learn - Deep Dive Learning Pattern
@@ -15,6 +15,20 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
 /learn [repo-path]       # Path to repo
 /learn [repo-name]       # Finds in ψ/learn/owner/repo
 /learn --init            # Restore all origins after git clone (like submodule init)
+```
+
+## Depth Modes
+
+| Flag | Agents | Files | Use Case |
+|------|--------|-------|----------|
+| `--fast` | 1 | 1 overview | Quick scan, "what is this?" |
+| (default) | 3 | 3 docs | Normal exploration |
+| `--deep` | 5 | 5 docs | Master complex codebases |
+
+```
+/learn --fast [target]   # Quick overview (1 agent, ~2 min)
+/learn [target]          # Standard (3 agents, ~5 min)
+/learn --deep [target]   # Deep dive (5 agents, ~10 min)
 ```
 
 ## Directory Structure
@@ -93,7 +107,32 @@ find ψ/learn -name "origin" -type l | xargs -I{} dirname {} | grep -i "$INPUT" 
 **For external repos**: Clone with script first, then explore via `origin/`
 **For local projects** (in `specs/`, `ψ/lib/`): Read directly
 
-## Step 1: Launch 3 Haiku Agents (PARALLEL)
+## Step 1: Detect Mode
+
+Check arguments for `--fast` or `--deep`:
+- `--fast` → Single overview agent
+- `--deep` → 5 parallel agents
+- (neither) → 3 parallel agents (default)
+
+---
+
+## Mode: --fast (1 agent)
+
+Target directory for docs: `ψ/learn/$OWNER/$REPO/`
+Source code path: `ψ/learn/$OWNER/$REPO/origin/`
+
+### Single Agent: Quick Overview
+- What is this project? (1 sentence)
+- Key files to look at
+- How to use it (install + basic example)
+- Notable patterns or tech
+- Output: `[TODAY]_OVERVIEW.md`
+
+**Skip to Step 2 (fast)** after this agent completes.
+
+---
+
+## Mode: Default (3 agents)
 
 Target directory for docs: `ψ/learn/$OWNER/$REPO/`
 Source code path: `ψ/learn/$OWNER/$REPO/origin/`
@@ -115,7 +154,56 @@ Source code path: `ψ/learn/$OWNER/$REPO/origin/`
 - Key features
 - Usage patterns
 
+---
+
+## Mode: --deep (5 agents)
+
+Target directory for docs: `ψ/learn/$OWNER/$REPO/`
+Source code path: `ψ/learn/$OWNER/$REPO/origin/`
+
+### Agent 1: Architecture Explorer
+- Directory structure & organization philosophy
+- Entry points (all of them)
+- Core abstractions & their relationships
+- Dependencies (direct + transitive patterns)
+
+### Agent 2: Code Snippets Collector
+- Main entry point code
+- Core implementations with context
+- Interesting patterns & idioms
+- Error handling examples
+
+### Agent 3: Quick Reference Builder
+- What it does (comprehensive)
+- Installation (all methods)
+- Key features with examples
+- Configuration options
+
+### Agent 4: Testing & Quality Patterns
+- Test structure and conventions
+- Test utilities and helpers
+- Mocking patterns
+- Coverage approach
+- Output: `[TODAY]_TESTING.md`
+
+### Agent 5: API & Integration Surface
+- Public API documentation
+- Extension points / hooks
+- Integration patterns
+- Plugin/middleware architecture
+- Output: `[TODAY]_API-SURFACE.md`
+
 ## Step 2: Main Agent Writes Files
+
+### --fast mode (1 file)
+
+```bash
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_OVERVIEW.md << 'EOF'
+[Single agent output]
+EOF
+```
+
+### Default mode (3 files)
 
 ```bash
 cat > ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
@@ -131,7 +219,31 @@ cat > ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
 EOF
 ```
 
-## Step 3: Create Hub File ([REPO].md)
+### --deep mode (5 files)
+
+```bash
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
+[Agent 1 output]
+EOF
+
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
+[Agent 2 output]
+EOF
+
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
+[Agent 3 output]
+EOF
+
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_TESTING.md << 'EOF'
+[Agent 4 output]
+EOF
+
+cat > ψ/learn/$OWNER/$REPO/[TODAY]_API-SURFACE.md << 'EOF'
+[Agent 5 output]
+EOF
+```
+
+## Step 3: Create/Update Hub File ([REPO].md)
 
 ```markdown
 # [REPO] Learning Index
@@ -142,26 +254,50 @@ EOF
 
 ## Latest Exploration
 **Date**: [TODAY]
+**Mode**: [fast|default|deep]
 
 **Files**:
+<!-- --fast mode -->
+- [[YYYY-MM-DD_OVERVIEW|Overview]]
+
+<!-- default mode -->
 - [[YYYY-MM-DD_ARCHITECTURE|Architecture]]
 - [[YYYY-MM-DD_CODE-SNIPPETS|Code Snippets]]
 - [[YYYY-MM-DD_QUICK-REFERENCE|Quick Reference]]
 
+<!-- --deep mode adds -->
+- [[YYYY-MM-DD_TESTING|Testing Patterns]]
+- [[YYYY-MM-DD_API-SURFACE|API Surface]]
+
 ## Timeline
-### YYYY-MM-DD (First exploration)
-- Initial discovery
-- Core: [main pattern]
+### YYYY-MM-DD ([mode] exploration)
+- [Key insights from this run]
 ```
 
 ## Output Summary
 
+### --fast mode
+```markdown
+## 📚 Quick Learn: [REPO]
+
+**Mode**: fast (1 agent)
+**Files**: 2
+
+| File | Description |
+|------|-------------|
+| [REPO].md | Hub + timeline |
+| [TODAY]_OVERVIEW.md | Quick overview |
+
+ψ/learn/$OWNER/$REPO/
+```
+
+### Default mode
 ```markdown
 ## 📚 Learning Complete: [REPO]
 
-**Date**: [TODAY]
+**Mode**: default (3 agents)
+**Files**: 4
 
-### Created Documentation
 | File | Description |
 |------|-------------|
 | [REPO].md | Hub + timeline |
@@ -172,7 +308,31 @@ EOF
 ### Key Insights
 [2-3 interesting things learned]
 
-### Location
+ψ/learn/$OWNER/$REPO/
+```
+
+### --deep mode
+```markdown
+## 📚 Deep Learning Complete: [REPO]
+
+**Mode**: deep (5 agents)
+**Files**: 6
+
+| File | Description |
+|------|-------------|
+| [REPO].md | Hub + timeline |
+| [TODAY]_ARCHITECTURE.md | Structure & design |
+| [TODAY]_CODE-SNIPPETS.md | Code examples |
+| [TODAY]_QUICK-REFERENCE.md | Usage guide |
+| [TODAY]_TESTING.md | Test patterns |
+| [TODAY]_API-SURFACE.md | Public API |
+
+### Key Insights
+[3-5 interesting things learned]
+
+### Deep Dive Notes
+[Notable patterns, gotchas, or insights worth remembering]
+
 ψ/learn/$OWNER/$REPO/
 ```
 
@@ -190,7 +350,9 @@ For Oracles that want to commit docs but ignore source:
 
 ## Notes
 
-- 3 agents in parallel = fast
+- `--fast`: 1 agent, quick scan for "what is this?"
+- Default: 3 agents in parallel, good balance
+- `--deep`: 5 agents, comprehensive for complex repos
 - Haiku for exploration = cost effective
 - Main reviews = quality gate
 - `origin/` structure allows easy offload

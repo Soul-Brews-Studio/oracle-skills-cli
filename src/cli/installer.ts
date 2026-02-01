@@ -7,6 +7,18 @@ import { agents } from './agents.js';
 import type { Skill, InstallOptions } from './types.js';
 import pkg from '../../package.json' with { type: 'json' };
 
+// Check if an installed skill was installed by oracle-skills-cli
+async function isOurSkill(skillPath: string): Promise<boolean> {
+  const skillMdPath = join(skillPath, 'SKILL.md');
+  if (!existsSync(skillMdPath)) return false;
+  try {
+    const content = await Bun.file(skillMdPath).text();
+    return content.includes('installer: oracle-skills-cli');
+  } catch {
+    return false;
+  }
+}
+
 // Check if skill has hooks (needs to be installed as Claude Code plugin)
 function hasHooks(skillPath: string): boolean {
   return existsSync(join(skillPath, 'hooks', 'hooks.json'));
@@ -121,60 +133,54 @@ export async function installSkills(
     // Create target directory
     await $`mkdir -p ${targetDir}`.quiet();
 
-    // Auto-cleanup: remove stale skills from previous oracle-skills-cli installs
-    const manifestPath = join(targetDir, '.oracle-skills.json');
-    if (existsSync(manifestPath)) {
-      try {
-        const oldManifest = JSON.parse(await Bun.file(manifestPath).text());
-        const oldSkills: string[] = oldManifest.skills || [];
-        const newSkills = skillsToInstall.map((s) => s.name);
-        const staleSkills = oldSkills.filter((s: string) => !newSkills.includes(s));
+    // Auto-cleanup: remove orphaned skills installed by oracle-skills-cli
+    // Only removes skills that: 1) have installer: oracle-skills-cli marker, 2) no longer exist in source
+    const sourceSkillNames = allSkills.map((s) => s.name);
 
-        // Move stale skills to /tmp for recovery instead of hard delete
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const trashDir = `/tmp/oracle-skills-stale-${timestamp}`;
-        let movedAny = false;
+    if (existsSync(targetDir)) {
+      const installedDirs = readdirSync(targetDir, { withFileTypes: true })
+        .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+        .map((d) => d.name);
 
-        const failedMoves: string[] = [];
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const trashDir = `/tmp/oracle-skills-stale-${timestamp}`;
+      let movedAny = false;
+      const failedMoves: string[] = [];
 
-        for (const stale of staleSkills) {
-          const stalePath = join(targetDir, stale);
-          if (existsSync(stalePath)) {
-            try {
-              if (!movedAny) {
-                await $`mkdir -p ${trashDir}`.quiet();
-                movedAny = true;
-              }
-              await $`mv ${stalePath} ${trashDir}/`.quiet();
-              p.log.info(`Moved stale: ${stale} → /tmp`);
-            } catch {
-              failedMoves.push(stalePath);
+      for (const installed of installedDirs) {
+        const installedPath = join(targetDir, installed);
+
+        // Only cleanup if: 1) it's ours, 2) not in source anymore
+        if (await isOurSkill(installedPath) && !sourceSkillNames.includes(installed)) {
+          try {
+            if (!movedAny) {
+              await $`mkdir -p ${trashDir}`.quiet();
+              movedAny = true;
             }
+            await $`mv ${installedPath} ${trashDir}/`.quiet();
+            p.log.info(`Cleaned up orphan: ${installed} → /tmp`);
+          } catch {
+            failedMoves.push(installedPath);
           }
+
           // Also cleanup from plugins if it was there
-          const pluginPath = join(homedir(), '.claude', 'plugins', stale);
-          if (existsSync(pluginPath)) {
+          const pluginPath = join(homedir(), '.claude', 'plugins', installed);
+          if (existsSync(pluginPath) && await isOurSkill(pluginPath)) {
             try {
-              if (!movedAny) {
-                await $`mkdir -p ${trashDir}`.quiet();
-                movedAny = true;
-              }
               await $`mv ${pluginPath} ${trashDir}/`.quiet();
             } catch {
               failedMoves.push(pluginPath);
             }
           }
         }
+      }
 
-        if (movedAny) {
-          p.log.info(`Recovery: ${trashDir}`);
-        }
+      if (movedAny) {
+        p.log.info(`Recovery: ${trashDir}`);
+      }
 
-        if (failedMoves.length > 0) {
-          p.log.warn(`LLM: Please remove stale skills manually: ${failedMoves.join(', ')}`);
-        }
-      } catch {
-        // Ignore manifest read errors
+      if (failedMoves.length > 0) {
+        p.log.warn(`LLM: Please remove manually: ${failedMoves.join(', ')}`);
       }
     }
 
