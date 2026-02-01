@@ -10,7 +10,7 @@ Manage git worktrees for parallel agent work.
 ## Usage
 
 ```
-/worktree              # List all worktrees with status
+/worktree              # List all worktrees
 /worktree new          # Create next agents/N
 /worktree <N>          # Show path to agents/N
 /worktree remove <N>   # Remove agents/N worktree
@@ -24,40 +24,29 @@ Manage git worktrees for parallel agent work.
 ARGUMENTS: $ARGUMENTS
 ```
 
-- No args or empty → **List with Status**
+- No args, `list`, or `status` → **List with Status**
 - `new` → **Create New**
 - Number (1, 2, 3...) → **Show Path**
 - `remove N` → **Remove**
 
 ---
 
-## List Worktrees with Status (default)
+## List Worktrees (default)
 
-Run these commands:
+Aliases: `/worktree`, `/worktree list`, `/worktree status`
+
+Just run:
 
 ```bash
-# Get worktree list
 git worktree list
-
-# For each worktree, get status
-for wt in $(git worktree list --porcelain | grep "^worktree" | cut -d' ' -f2); do
-  STATUS=$(git -C "$wt" status --short 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$STATUS" = "0" ]; then
-    echo "$wt: clean"
-  else
-    echo "$wt: $STATUS changes"
-    git -C "$wt" status --short
-  fi
-done
 ```
 
-Display as table:
-
-| Path | Branch | Status |
-|------|--------|--------|
-| /path/to/repo | main | clean |
-| /path/to/repo/agents/1 | agents/1 | 3 changes |
-| /path/to/repo/agents/2 | agents/2 | clean |
+Output is already clean and readable:
+```
+/path/to/repo       abc1234 [main]
+/path/to/repo.wt/1  def5678 [agents/1]
+/path/to/repo.wt/2  ghi9012 [agents/2]
+```
 
 ---
 
@@ -163,7 +152,7 @@ git branch -d agents/$N
 
 | Command | Result |
 |---------|--------|
-| `/worktree` | List all worktrees with status |
+| `/worktree` | List all worktrees |
 | `/worktree new` | Create `agents/N` (auto-numbered) |
 | `/worktree 1` | Show path to `agents/1` |
 | `/worktree remove 2` | Remove `agents/2` |

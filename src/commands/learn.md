@@ -1,5 +1,5 @@
 ---
-description: v1.5.49 | Explore a codebase with parallel Haiku agents. Modes - --fast (1 agent), default (3), --deep (5). Use when user says "learn [repo]", "explore codebase", "study this repo".
+description: v1.5.50 | Explore a codebase with parallel Haiku agents. Modes - --fast (1 agent), default (3), --deep (5). Use when user says "learn [repo]", "explore codebase", "study this repo".
 ---
 
 # /learn
@@ -21,4 +21,4 @@ Execute the `learn` skill with the provided arguments.
 - Global: `~/.claude/skills/learn/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.49*
+*oracle-skills-cli v1.5.50*
