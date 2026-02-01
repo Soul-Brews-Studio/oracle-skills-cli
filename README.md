@@ -177,8 +177,9 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 24 | **standup** | skill | Daily standup check |
 | 25 | **where-we-are** | skill | Session awareness - what we're doing now |
 | 26 | **who-we-are** | skill | Know ourselves |
+| 27 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-01 05:15:20 UTC*
+*Generated: 2026-02-01 06:08:01 UTC*
 
 ## Supported Agents
 
