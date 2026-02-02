@@ -1,5 +1,5 @@
 ---
-description: v1.5.50 | Create new skills with Oracle philosophy. Use when user says "create skill", "new skill", "make a skill for X", or wants to build custom Claude Code skills.
+description: v1.5.51 | Create new skills with Oracle philosophy. Use when user says "create skill", "new skill", "make a skill for X", or wants to build custom Claude Code skills.
 ---
 
 # /skill-creator
@@ -21,4 +21,4 @@ Execute the `skill-creator` skill with the provided arguments.
 - Global: `~/.claude/skills/skill-creator/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.50*
+*oracle-skills-cli v1.5.51*
