@@ -10,45 +10,76 @@ Find + Log + Dig + Distill
 ## Usage
 
 ```
-/trace [query]              # --smart (default): Oracle first, auto-escalate
-/trace [query] --oracle     # Oracle only (fastest)
-/trace [query] --deep       # Full 5 parallel subagents
-/trace [url]                # Auto-clone GitHub URL, then trace locally
+/trace [query]                    # Current repo (default --smart)
+/trace [query] --oracle           # Oracle only (fastest)
+/trace [query] --deep             # 5 parallel subagents
+/trace [query] --repo [path]      # Search specific local repo
+/trace [query] --repo [url]       # Clone to ghq, then search
 ```
 
-## Step 0: Timestamp
+## Directory Structure
+
+```
+ψ/memory/traces/
+└── YYYY-MM-DD/              # Date folder
+    └── HHMM_[query-slug].md # Time-prefixed trace log
+```
+
+**Trace logs are committed** - they become Oracle memory for future searches.
+
+## Step 0: Timestamp + Calculate Paths
+
 ```bash
 date "+🕐 %H:%M %Z (%A %d %B %Y)"
+ROOT="$(pwd)"
+TODAY=$(date +%Y-%m-%d)
+TIME=$(date +%H%M)
 ```
 
 ---
 
-## URL Detection & Auto-Clone
+## Step 1: Detect Target Repo
 
-**If input is a GitHub URL**, clone AND symlink first:
-
+### Default: Current repo
 ```bash
-# Replace [URL] with actual URL
-ghq get -u [URL] && \
-  GHQ_ROOT=$(ghq root) && \
-  OWNER=$(echo "[URL]" | sed -E 's|.*github.com/([^/]+)/.*|\1|') && \
-  REPO=$(echo "[URL]" | sed -E 's|.*/([^/]+)(\.git)?$|\1|') && \
-  mkdir -p "ψ/learn/$OWNER" && \
-  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO" && \
-  echo "✓ Symlinked: ψ/learn/$OWNER/$REPO"
+TARGET_REPO="$ROOT"
+TARGET_NAME="$(basename $ROOT)"
 ```
 
-**Verify:** `ls -la ψ/learn/`
+### With --repo [path]: Local path
+```bash
+TARGET_REPO="[path]"
+TARGET_NAME="$(basename [path])"
+```
 
-Then trace using `ψ/learn/[owner]/[repo]` path.
+### With --repo [url]: Clone to ghq first
+```bash
+URL="[url]"
+ghq get -u "$URL"
+GHQ_ROOT=$(ghq root)
+OWNER=$(echo "$URL" | sed -E 's|.*github.com/([^/]+)/.*|\1|')
+REPO=$(echo "$URL" | sed -E 's|.*/([^/]+)(\.git)?$|\1|')
+TARGET_REPO="$GHQ_ROOT/github.com/$OWNER/$REPO"
+TARGET_NAME="$OWNER/$REPO"
+echo "✓ Cloned to ghq: $TARGET_REPO"
+```
 
-> **Note**: Grep tool doesn't follow symlinks. Use Bash: `rg -L "pattern" ψ/learn/`
+**Note**: `/trace` only clones to ghq. Use `/learn` to create docs in ψ/learn/.
+
+---
+
+## Step 2: Create Trace Log Directory
+
+```bash
+mkdir -p "$ROOT/ψ/memory/traces/$TODAY"
+TRACE_FILE="$ROOT/ψ/memory/traces/$TODAY/${TIME}_[query-slug].md"
+```
 
 ---
 
 ## Mode 1: --oracle (Oracle Only)
 
-**Fastest. Just Oracle MCP, no extension.**
+**Fastest. Just Oracle MCP, no subagents.**
 
 ```
 oracle_search("[query]", limit=15)
@@ -73,67 +104,103 @@ oracle_search("[query]", limit=10)
 
 ---
 
-## Mode 3: --deep (Explore Subagents)
+## Mode 3: --deep (5 Parallel Agents)
 
-**Launch 5 parallel Explore agents (Haiku) for thorough search.**
+**Launch 5 parallel Explore agents for thorough search.**
 
-| Agent | Searches |
-|-------|----------|
-| 1 | Current repo files |
-| 2 | Git history (commits, creates, deletes) |
-| 3 | GitHub issues |
-| 4 | Other repos (ghq, ~/Code) |
-| 5 | Retrospectives & learnings (ψ/memory/) |
-
-**Use Task tool with subagent_type="Explore" for each agent**
-
-After search, **auto-log to Oracle**:
+Each agent prompt must include (use LITERAL paths!):
 ```
-oracle_trace({
-  query: "[query]",
-  foundFiles: [...],
-  foundCommits: [...],
-  foundIssues: [...]
-})
+You are searching for: [query]
+TARGET REPO: [TARGET_REPO]
+
+Return your findings as text. The main agent will compile the trace log.
 ```
+
+### Agent 1: Current/Target Repo Files
+Search TARGET_REPO for:
+- Files matching query
+- Code containing query
+- Config/docs mentioning query
+
+### Agent 2: Git History
+Search TARGET_REPO git history:
+- Commits mentioning query
+- Files created/deleted matching query
+- Branch names matching query
+
+### Agent 3: GitHub Issues
+If TARGET_REPO has GitHub remote:
+```bash
+gh issue list --repo [owner/repo] --search "[query]" --limit 10
+gh pr list --repo [owner/repo] --search "[query]" --limit 10
+```
+
+### Agent 4: Other Repos (ghq, ~/Code)
+Search other locations:
+```bash
+find $(ghq root) -maxdepth 3 -name "*[query]*" 2>/dev/null | head -20
+```
+
+### Agent 5: Oracle Memory (ψ/)
+Search ψ/memory/ for:
+- Learnings mentioning query
+- Retrospectives mentioning query
+- Previous traces for same query
+
+**After all agents return**, main agent compiles results and writes trace log.
 
 ---
 
-## Trace Logging
+## Step 3: Write Trace Log
 
-**Always log traces** to: `ψ/memory/traces/YYYY-MM-DD-HHMM-query-slug.md`
-
-```bash
-# Create traces directory
-mkdir -p "$ROOT/ψ/memory/traces"
-
-# Generate filename
-# Example: 2026-01-23-1430-claude-code.md
-```
-
-**Write trace file** with this format:
 ```markdown
 ---
 query: "[query]"
+target: "[TARGET_NAME]"
 mode: [oracle|smart|deep]
 timestamp: YYYY-MM-DD HH:MM
-oracle_results: [count]
-escalated: [true|false]
 ---
 
 # Trace: [query]
 
+**Target**: [TARGET_NAME]
 **Mode**: [mode]
 **Time**: [timestamp]
 
 ## Oracle Results
 [list results or "None"]
 
-## Local Files
-[list files found or "None"]
+## Files Found
+[list files or "None"]
 
-## Git Commits
+## Git History
 [list commits or "None"]
+
+## GitHub Issues/PRs
+[list or "None"]
+
+## Cross-Repo Matches
+[list or "None"]
+
+## Oracle Memory
+[list or "None"]
+
+## Summary
+[Key findings, next steps]
+```
+
+---
+
+## Step 4: Log to Oracle MCP
+
+```
+oracle_trace({
+  query: "[query]",
+  project: "[TARGET_NAME]",
+  foundFiles: [...],
+  foundCommits: [...],
+  foundIssues: [...]
+})
 ```
 
 ---
@@ -151,19 +218,15 @@ escalated: [true|false]
 | `/trace X --deep` | Really need it | Go deep with subagents |
 | Found! | **RESONANCE** | Log to Oracle |
 
-### Auto-Escalation Flow
+### Skill Separation
 
-```
-/trace [query]     → Oracle search (what we know)
-      ↓
-  < 3 results?     → Auto-escalate to --deep
-      ↓
-/trace --deep      → 5 subagents explore everywhere
-      ↓
-  FOUND!           → 🔮 RESONANCE! Log to Oracle
-      ↓
-  Next session     → Easier to find (knowledge extended)
-```
+| Skill | Purpose | Writes to |
+|-------|---------|-----------|
+| `/trace` | Find things | ψ/memory/traces/ (logs) |
+| `/learn` | Study repos | ψ/learn/ (docs) |
+| `/project` | Develop repos | ψ/incubate/ or active/ |
+
+**Workflow**: `/trace` finds → `/learn` studies → `/project` develops
 
 ---
 
@@ -174,6 +237,11 @@ escalated: [true|false]
 | `--oracle` | Fast | Oracle only | No |
 | `--smart` | Medium | Oracle → maybe deep | Yes (< 3 results) |
 | `--deep` | Thorough | 5 parallel agents | N/A |
+
+| Flag | Effect |
+|------|--------|
+| `--repo [path]` | Search specific local repo |
+| `--repo [url]` | Clone to ghq, then search |
 
 ---
 

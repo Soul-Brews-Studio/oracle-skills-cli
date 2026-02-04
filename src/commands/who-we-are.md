@@ -1,5 +1,5 @@
 ---
-description: v1.5.61 | Know ourselves - show identity, model info, session stats, and Oracle philosophy. Use when user asks "who we are", "who", or wants to check current AI identity.
+description: v1.5.62 | Know ourselves - show identity, model info, session stats, and Oracle philosophy. Use when user asks "who we are", "who", or wants to check current AI identity.
 ---
 
 # /who-we-are
@@ -21,4 +21,4 @@ Execute the `who-we-are` skill with the provided arguments.
 - Global: `~/.claude/skills/who-we-are/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.61*
+*oracle-skills-cli v1.5.62*
