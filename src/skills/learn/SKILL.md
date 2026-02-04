@@ -73,11 +73,21 @@ done < "$ROOT/ψ/learn/.origins"
 date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
-**IMPORTANT: Capture ROOT directory first (before any cd):**
+**CRITICAL: Capture ABSOLUTE paths first (before spawning any agents):**
 ```bash
 ROOT="$(pwd)"
 echo "Learning from: $ROOT"
 ```
+
+**IMPORTANT FOR SUBAGENTS:**
+When spawning Haiku agents, you MUST:
+1. Replace `$ROOT` with the ACTUAL absolute path (e.g., `/home/user/myrepo`)
+2. Replace `$OWNER` and `$REPO` with actual values
+3. Tell agents the EXACT path to write files (not variables!)
+
+Example: If ROOT=/home/oracle/myrepo and learning laris-co/arthur-oracle:
+- Tell agent: "Write to `/home/oracle/myrepo/ψ/learn/laris-co/arthur-oracle/`"
+- NOT: "Write to `$ROOT/ψ/learn/$OWNER/$REPO/`"
 
 ### If URL (http* or owner/repo format)
 
@@ -115,19 +125,34 @@ find ψ/learn -name "origin" -type l | xargs -I{} dirname {} | grep -i "$INPUT" 
 **For external repos**: Clone with script first, then explore via `origin/`
 **For local projects** (in `specs/`, `ψ/lib/`): Read directly
 
-## Step 1: Detect Mode
+## Step 1: Detect Mode & Calculate Paths
 
 Check arguments for `--fast` or `--deep`:
 - `--fast` → Single overview agent
 - `--deep` → 5 parallel agents
 - (neither) → 3 parallel agents (default)
 
+**Calculate ACTUAL paths (replace variables with real values):**
+```
+DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/
+SOURCE_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/origin/
+
+Example:
+- ROOT = /home/oracle-arthur/ghq/github.com/laris-co/arthur-oracle
+- OWNER = laris-co
+- REPO = some-repo
+- DOCS_DIR = /home/oracle-arthur/ghq/github.com/laris-co/arthur-oracle/ψ/learn/laris-co/some-repo/
+```
+
+**When spawning agents, tell them the LITERAL paths, not variables!**
+
 ---
 
 ## Mode: --fast (1 agent)
 
-Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
-Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
+**Tell the agent these EXACT paths (substitute actual values):**
+- Target directory for docs: `[DOCS_DIR]` (the actual path!)
+- Source code path: `[SOURCE_DIR]` (the actual path!)
 
 ### Single Agent: Quick Overview
 - What is this project? (1 sentence)
@@ -142,8 +167,9 @@ Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ## Mode: Default (3 agents)
 
-Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
-Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
+**Tell each agent these EXACT paths (substitute actual values):**
+- Target directory for docs: `[DOCS_DIR]` (the actual path!)
+- Source code path: `[SOURCE_DIR]` (the actual path!)
 
 ### Agent 1: Architecture Explorer
 - Directory structure
@@ -166,8 +192,9 @@ Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ## Mode: --deep (5 agents)
 
-Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
-Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
+**Tell each agent these EXACT paths (substitute actual values):**
+- Target directory for docs: `[DOCS_DIR]` (the actual path!)
+- Source code path: `[SOURCE_DIR]` (the actual path!)
 
 ### Agent 1: Architecture Explorer
 - Directory structure & organization philosophy
@@ -203,10 +230,13 @@ Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ## Step 2: Main Agent Writes Files
 
+**CRITICAL: Use the ACTUAL DOCS_DIR path calculated in Step 1!**
+
 ### --fast mode (1 file)
 
 ```bash
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_OVERVIEW.md << 'EOF'
+# Use ACTUAL path, e.g.: /home/user/repo/ψ/learn/owner/repo/
+cat > [DOCS_DIR]/[TODAY]_OVERVIEW.md << 'EOF'
 [Single agent output]
 EOF
 ```
@@ -214,15 +244,16 @@ EOF
 ### Default mode (3 files)
 
 ```bash
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
+# Use ACTUAL path, e.g.: /home/user/repo/ψ/learn/owner/repo/
+cat > [DOCS_DIR]/[TODAY]_ARCHITECTURE.md << 'EOF'
 [Agent 1 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_CODE-SNIPPETS.md << 'EOF'
 [Agent 2 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_QUICK-REFERENCE.md << 'EOF'
 [Agent 3 output]
 EOF
 ```
@@ -230,23 +261,24 @@ EOF
 ### --deep mode (5 files)
 
 ```bash
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
+# Use ACTUAL path, e.g.: /home/user/repo/ψ/learn/owner/repo/
+cat > [DOCS_DIR]/[TODAY]_ARCHITECTURE.md << 'EOF'
 [Agent 1 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_CODE-SNIPPETS.md << 'EOF'
 [Agent 2 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_QUICK-REFERENCE.md << 'EOF'
 [Agent 3 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_TESTING.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_TESTING.md << 'EOF'
 [Agent 4 output]
 EOF
 
-cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_API-SURFACE.md << 'EOF'
+cat > [DOCS_DIR]/[TODAY]_API-SURFACE.md << 'EOF'
 [Agent 5 output]
 EOF
 ```

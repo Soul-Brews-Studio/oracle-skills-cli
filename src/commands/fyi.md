@@ -1,5 +1,5 @@
 ---
-description: v1.5.53 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
+description: v1.5.54 | Log information for future reference. Use when user says "fyi", "remember this", "note that", "for your info".
 ---
 
 # /fyi
@@ -21,4 +21,4 @@ Execute the `fyi` skill with the provided arguments.
 - Global: `~/.claude/skills/fyi/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.53*
+*oracle-skills-cli v1.5.54*
