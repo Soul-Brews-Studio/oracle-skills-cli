@@ -149,24 +149,24 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
-| 1 | **trace** | skill + subagent | Find projects across git history, repos |
+| 1 | **learn** | skill + subagent | Explore a codebase |
+| 2 | **trace** | skill + subagent | Find projects across git history, repos |
 | - |  |  |  |
-| 2 | **deep-research** | skill + code | Deep Research via Gemini |
-| 3 | **gemini** | skill + code | Control Gemini via MQTT WebSocket |
-| 4 | **physical** | skill + code | Physical location awareness from FindMy |
-| 5 | **project** | skill + code | Clone and track external repos |
-| 6 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
-| 7 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
-| 8 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
-| 9 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
-| 10 | **watch** | skill + code | Learn from YouTube videos |
+| 3 | **deep-research** | skill + code | Deep Research via Gemini |
+| 4 | **gemini** | skill + code | Control Gemini via MQTT WebSocket |
+| 5 | **physical** | skill + code | Physical location awareness from FindMy |
+| 6 | **project** | skill + code | Clone and track external repos |
+| 7 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 8 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 9 | **skill-creator** | skill + code | Create new skills with Oracle philosophy |
+| 10 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
+| 11 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 11 | **awaken** | skill | Guided Oracle birth |
-| 12 | **birth** | skill | Prepare birth props for a new Oracle repo |
-| 13 | **feel** | skill | Log emotions with optional structure |
-| 14 | **forward** | skill | Create handoff + enter plan mode for next |
-| 15 | **fyi** | skill | Log information for future reference |
-| 16 | **learn** | skill | Explore a codebase |
+| 12 | **awaken** | skill | Guided Oracle birth |
+| 13 | **birth** | skill | Prepare birth props for a new Oracle repo |
+| 14 | **feel** | skill | Log emotions with optional structure |
+| 15 | **forward** | skill | Create handoff + enter plan mode for next |
+| 16 | **fyi** | skill | Log information for future reference |
 | 17 | **merged** | skill | Post-Merge Cleanup |
 | 18 | **oracle-family-scan** | skill | oracle-family-scan skill |
 | 19 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
@@ -179,7 +179,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 26 | **who-we-are** | skill | Know ourselves |
 | 27 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-04 06:21:41 UTC*
+*Generated: 2026-02-04 06:36:35 UTC*
 
 ## Supported Agents
 
