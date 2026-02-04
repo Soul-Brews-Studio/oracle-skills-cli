@@ -80,16 +80,21 @@ echo "Learning from: $ROOT"
 ```
 
 **IMPORTANT FOR SUBAGENTS:**
-When spawning Haiku agents, you MUST:
-1. Replace `$ROOT` with the ACTUAL absolute path (e.g., `/home/user/my-project`)
-2. Replace `$OWNER` and `$REPO` with actual values
-3. Tell agents the EXACT path to READ from (not variables!)
-4. **Subagents do NOT write files** - they return text to main agent
+When spawning Haiku agents, you MUST give them TWO literal paths:
+1. **SOURCE_DIR** (where to READ code) - the `origin/` symlink
+2. **DOCS_DIR** (where to WRITE docs) - the parent directory, NOT inside origin/
+
+⚠️ **THE BUG**: If you only give agents `origin/` path, they cd into it and write there → files end up in WRONG repo!
+
+**FIX**: Always give BOTH paths as LITERAL absolute values (no variables!):
 
 Example: If ROOT=/home/user/ghq/github.com/my-org/my-oracle and learning acme-corp/cool-library:
-- Tell agent: "READ from `/home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/origin/`"
-- Tell agent: "Return your analysis as text. Do NOT write files."
-- Main agent then writes to `/home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/`
+```
+READ from:  /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/origin/
+WRITE to:   /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/
+```
+
+Tell each agent: "Read source from [SOURCE_DIR]. Write your output file to [DOCS_DIR] (NOT inside origin/)."
 
 ### If URL (http* or owner/repo format)
 
@@ -136,7 +141,7 @@ Check arguments for `--fast` or `--deep`:
 
 **Calculate ACTUAL paths (replace variables with real values):**
 ```
-DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/     ← WHERE MAIN AGENT WRITES DOCS
+DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/     ← WHERE AGENTS WRITE DOCS
 SOURCE_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/origin/  ← WHERE AGENTS READ CODE (symlink)
 
 Example:
@@ -147,185 +152,113 @@ Example:
 - SOURCE_DIR = (same)/origin/  ← SYMLINK to ghq clone of target repo
 ```
 
-**⚠️ CRITICAL ARCHITECTURE:**
-1. **Subagents ONLY READ** - they explore SOURCE_DIR and return text
-2. **Subagents NEVER WRITE** - no Write tool, no file creation
-3. **Main agent WRITES ALL FILES** - collects agent output, writes to DOCS_DIR
-4. Replace `[SOURCE_DIR]` with ACTUAL LITERAL path when prompting agents!
+**⚠️ CRITICAL: Create symlink FIRST, then spawn agents!**
+
+1. Run the clone + symlink script in Step 0 FIRST
+2. Capture DOCS_DIR and SOURCE_DIR as literal paths
+3. THEN spawn agents with both paths
+4. Agents READ from SOURCE_DIR, WRITE to DOCS_DIR (not inside origin/!)
 
 ---
 
 ## Mode: --fast (1 agent)
 
-⚠️ **SUBAGENTS DO NOT WRITE FILES** - They only RETURN text to main agent!
-
 ### Single Agent: Quick Overview
 
-**Prompt the agent with:**
+**Prompt the agent with (use LITERAL paths, not variables!):**
 ```
-You are exploring a codebase. READ files from: [SOURCE_DIR]
+You are exploring a codebase.
 
-DO NOT write any files. DO NOT use Write tool. Return your analysis as text.
+READ source code from: [SOURCE_DIR]
+WRITE your output to:   [DOCS_DIR]/[TODAY]_OVERVIEW.md
 
-Analyze and return:
+⚠️ IMPORTANT: Write to DOCS_DIR, NOT inside origin/ (origin is a symlink to another repo!)
+
+Analyze:
 - What is this project? (1 sentence)
 - Key files to look at
 - How to use it (install + basic example)
 - Notable patterns or tech
-
-Return your findings as markdown text. The main agent will write the file.
 ```
 
-**After agent returns**, main agent writes to `[DOCS_DIR]/[TODAY]_OVERVIEW.md`
-
-**Skip to Step 2 (fast)** after collecting agent output.
+**Skip to Step 2** after agent completes.
 
 ---
 
 ## Mode: Default (3 agents)
 
-⚠️ **SUBAGENTS DO NOT WRITE FILES** - They only RETURN text to main agent!
-
-Launch 3 agents in parallel. Each agent prompt must include:
+Launch 3 agents in parallel. Each prompt must include (use LITERAL paths!):
 ```
-You are exploring a codebase. READ files from: [SOURCE_DIR]
+READ source code from: [SOURCE_DIR]
+WRITE your output to:   [DOCS_DIR]/[filename]
 
-DO NOT write any files. DO NOT use Write tool. Return your analysis as text.
+⚠️ IMPORTANT: Write to DOCS_DIR, NOT inside origin/ (origin is a symlink to another repo!)
 ```
 
-### Agent 1: Architecture Explorer
-```
-Analyze and return:
+### Agent 1: Architecture Explorer → `[TODAY]_ARCHITECTURE.md`
 - Directory structure
 - Entry points
 - Core abstractions
 - Dependencies
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 2: Code Snippets Collector
-```
-Analyze and return:
+### Agent 2: Code Snippets Collector → `[TODAY]_CODE-SNIPPETS.md`
 - Main entry point code
 - Core implementations
 - Interesting patterns
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 3: Quick Reference Builder
-```
-Analyze and return:
+### Agent 3: Quick Reference Builder → `[TODAY]_QUICK-REFERENCE.md`
 - What it does
 - Installation
 - Key features
 - Usage patterns
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-**After all agents return**, main agent writes files to DOCS_DIR (Step 2).
+**Skip to Step 2** after all agents complete.
 
 ---
 
 ## Mode: --deep (5 agents)
 
-⚠️ **SUBAGENTS DO NOT WRITE FILES** - They only RETURN text to main agent!
-
-Launch 5 agents in parallel. Each agent prompt must include:
+Launch 5 agents in parallel. Each prompt must include (use LITERAL paths!):
 ```
-You are exploring a codebase. READ files from: [SOURCE_DIR]
+READ source code from: [SOURCE_DIR]
+WRITE your output to:   [DOCS_DIR]/[filename]
 
-DO NOT write any files. DO NOT use Write tool. Return your analysis as text.
+⚠️ IMPORTANT: Write to DOCS_DIR, NOT inside origin/ (origin is a symlink to another repo!)
 ```
 
-### Agent 1: Architecture Explorer
-```
-Analyze and return:
+### Agent 1: Architecture Explorer → `[TODAY]_ARCHITECTURE.md`
 - Directory structure & organization philosophy
 - Entry points (all of them)
 - Core abstractions & their relationships
 - Dependencies (direct + transitive patterns)
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 2: Code Snippets Collector
-```
-Analyze and return:
+### Agent 2: Code Snippets Collector → `[TODAY]_CODE-SNIPPETS.md`
 - Main entry point code
 - Core implementations with context
 - Interesting patterns & idioms
 - Error handling examples
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 3: Quick Reference Builder
-```
-Analyze and return:
+### Agent 3: Quick Reference Builder → `[TODAY]_QUICK-REFERENCE.md`
 - What it does (comprehensive)
 - Installation (all methods)
 - Key features with examples
 - Configuration options
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 4: Testing & Quality Patterns
-```
-Analyze and return:
+### Agent 4: Testing & Quality Patterns → `[TODAY]_TESTING.md`
 - Test structure and conventions
 - Test utilities and helpers
 - Mocking patterns
 - Coverage approach
 
-Return your findings as markdown text. The main agent will write the file.
-```
-
-### Agent 5: API & Integration Surface
-```
-Analyze and return:
+### Agent 5: API & Integration Surface → `[TODAY]_API-SURFACE.md`
 - Public API documentation
 - Extension points / hooks
 - Integration patterns
 - Plugin/middleware architecture
 
-Return your findings as markdown text. The main agent will write the file.
-```
+**Skip to Step 2** after all agents complete.
 
-**After all agents return**, main agent writes files to DOCS_DIR (Step 2).
-
-## Step 2: Main Agent Writes Files
-
-**CRITICAL: Only the MAIN agent writes files! Collect subagent output first.**
-
-Wait for all subagents to complete. Each returns markdown text (not files).
-Then use the Write tool to create files in DOCS_DIR.
-
-### --fast mode (1 file)
-
-Use Write tool to create:
-- `[DOCS_DIR]/[TODAY]_OVERVIEW.md` ← Agent 1 output
-
-### Default mode (3 files)
-
-Use Write tool to create:
-- `[DOCS_DIR]/[TODAY]_ARCHITECTURE.md` ← Agent 1 output
-- `[DOCS_DIR]/[TODAY]_CODE-SNIPPETS.md` ← Agent 2 output
-- `[DOCS_DIR]/[TODAY]_QUICK-REFERENCE.md` ← Agent 3 output
-
-### --deep mode (5 files)
-
-Use Write tool to create:
-- `[DOCS_DIR]/[TODAY]_ARCHITECTURE.md` ← Agent 1 output
-- `[DOCS_DIR]/[TODAY]_CODE-SNIPPETS.md` ← Agent 2 output
-- `[DOCS_DIR]/[TODAY]_QUICK-REFERENCE.md` ← Agent 3 output
-- `[DOCS_DIR]/[TODAY]_TESTING.md` ← Agent 4 output
-- `[DOCS_DIR]/[TODAY]_API-SURFACE.md` ← Agent 5 output
-
-## Step 3: Create/Update Hub File ([REPO].md)
+## Step 2: Create/Update Hub File ([REPO].md)
 
 ```markdown
 # [REPO] Learning Index

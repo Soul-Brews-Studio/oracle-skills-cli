@@ -1,5 +1,5 @@
 ---
-description: v1.5.55 | Display Oracle philosophy principles and guidance. Use when user asks about principles, "nothing deleted", Oracle philosophy, or needs alignment check.
+description: v1.5.56 | Display Oracle philosophy principles and guidance. Use when user asks about principles, "nothing deleted", Oracle philosophy, or needs alignment check.
 ---
 
 # /philosophy
@@ -21,4 +21,4 @@ Execute the `philosophy` skill with the provided arguments.
 - Global: `~/.claude/skills/philosophy/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.55*
+*oracle-skills-cli v1.5.56*
