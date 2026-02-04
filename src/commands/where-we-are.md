@@ -1,5 +1,5 @@
 ---
-description: v1.5.52 | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
+description: v1.5.53 | Session awareness - what we're doing now. Use when user asks "now", "where are we", "what are we doing", "status". Quick mode for timeline, deep mode for full context.
 ---
 
 # /where-we-are
@@ -21,4 +21,4 @@ Execute the `where-we-are` skill with the provided arguments.
 - Global: `~/.claude/skills/where-we-are/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.52*
+*oracle-skills-cli v1.5.53*

@@ -55,15 +55,16 @@ ghq rm owner/repo                  # Remove source
 Restore all origins after cloning (like `git submodule init`):
 
 ```bash
+ROOT="$(pwd)"
 # Read .origins manifest and restore symlinks
 while read repo; do
   ghq get -u "https://github.com/$repo"
   OWNER=$(dirname "$repo")
   REPO=$(basename "$repo")
-  mkdir -p "ψ/learn/$OWNER/$REPO"
-  ln -sf "$(ghq root)/github.com/$repo" "ψ/learn/$OWNER/$REPO/origin"
+  mkdir -p "$ROOT/ψ/learn/$OWNER/$REPO"
+  ln -sf "$(ghq root)/github.com/$repo" "$ROOT/ψ/learn/$OWNER/$REPO/origin"
   echo "✓ Restored: $repo"
-done < ψ/learn/.origins
+done < "$ROOT/ψ/learn/.origins"
 ```
 
 ## Step 0: Detect Input Type + Resolve Path
@@ -72,26 +73,33 @@ done < ψ/learn/.origins
 date "+🕐 %H:%M %Z (%A %d %B %Y)"
 ```
 
+**IMPORTANT: Capture ROOT directory first (before any cd):**
+```bash
+ROOT="$(pwd)"
+echo "Learning from: $ROOT"
+```
+
 ### If URL (http* or owner/repo format)
 
 **Clone, create docs dir, symlink origin, update manifest:**
 ```bash
 # Replace [URL] with actual URL
 URL="[URL]"
+ROOT="$(pwd)"  # CRITICAL: Save current directory!
 ghq get -u "$URL" && \
   GHQ_ROOT=$(ghq root) && \
   OWNER=$(echo "$URL" | sed -E 's|.*github.com/([^/]+)/.*|\1|') && \
   REPO=$(echo "$URL" | sed -E 's|.*/([^/]+)(\.git)?$|\1|') && \
-  mkdir -p "ψ/learn/$OWNER/$REPO" && \
-  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "ψ/learn/$OWNER/$REPO/origin" && \
-  echo "$OWNER/$REPO" >> ψ/learn/.origins && \
-  sort -u -o ψ/learn/.origins ψ/learn/.origins && \
-  echo "✓ Ready: ψ/learn/$OWNER/$REPO/origin → source"
+  mkdir -p "$ROOT/ψ/learn/$OWNER/$REPO" && \
+  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "$ROOT/ψ/learn/$OWNER/$REPO/origin" && \
+  echo "$OWNER/$REPO" >> "$ROOT/ψ/learn/.origins" && \
+  sort -u -o "$ROOT/ψ/learn/.origins" "$ROOT/ψ/learn/.origins" && \
+  echo "✓ Ready: $ROOT/ψ/learn/$OWNER/$REPO/origin → source"
 ```
 
 **Verify:**
 ```bash
-ls -la ψ/learn/$OWNER/$REPO/
+ls -la "$ROOT/ψ/learn/$OWNER/$REPO/"
 ```
 
 > **Note**: Grep tool doesn't follow symlinks. Use: `rg -L "pattern" ψ/learn/owner/repo/origin/`
@@ -118,8 +126,8 @@ Check arguments for `--fast` or `--deep`:
 
 ## Mode: --fast (1 agent)
 
-Target directory for docs: `ψ/learn/$OWNER/$REPO/`
-Source code path: `ψ/learn/$OWNER/$REPO/origin/`
+Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
+Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ### Single Agent: Quick Overview
 - What is this project? (1 sentence)
@@ -134,8 +142,8 @@ Source code path: `ψ/learn/$OWNER/$REPO/origin/`
 
 ## Mode: Default (3 agents)
 
-Target directory for docs: `ψ/learn/$OWNER/$REPO/`
-Source code path: `ψ/learn/$OWNER/$REPO/origin/`
+Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
+Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ### Agent 1: Architecture Explorer
 - Directory structure
@@ -158,8 +166,8 @@ Source code path: `ψ/learn/$OWNER/$REPO/origin/`
 
 ## Mode: --deep (5 agents)
 
-Target directory for docs: `ψ/learn/$OWNER/$REPO/`
-Source code path: `ψ/learn/$OWNER/$REPO/origin/`
+Target directory for docs: `$ROOT/ψ/learn/$OWNER/$REPO/`
+Source code path: `$ROOT/ψ/learn/$OWNER/$REPO/origin/`
 
 ### Agent 1: Architecture Explorer
 - Directory structure & organization philosophy
@@ -198,7 +206,7 @@ Source code path: `ψ/learn/$OWNER/$REPO/origin/`
 ### --fast mode (1 file)
 
 ```bash
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_OVERVIEW.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_OVERVIEW.md << 'EOF'
 [Single agent output]
 EOF
 ```
@@ -206,15 +214,15 @@ EOF
 ### Default mode (3 files)
 
 ```bash
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
 [Agent 1 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
 [Agent 2 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
 [Agent 3 output]
 EOF
 ```
@@ -222,23 +230,23 @@ EOF
 ### --deep mode (5 files)
 
 ```bash
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_ARCHITECTURE.md << 'EOF'
 [Agent 1 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_CODE-SNIPPETS.md << 'EOF'
 [Agent 2 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_QUICK-REFERENCE.md << 'EOF'
 [Agent 3 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_TESTING.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_TESTING.md << 'EOF'
 [Agent 4 output]
 EOF
 
-cat > ψ/learn/$OWNER/$REPO/[TODAY]_API-SURFACE.md << 'EOF'
+cat > $ROOT/ψ/learn/$OWNER/$REPO/[TODAY]_API-SURFACE.md << 'EOF'
 [Agent 5 output]
 EOF
 ```
@@ -249,7 +257,7 @@ EOF
 # [REPO] Learning Index
 
 ## Source
-- **Origin**: ψ/learn/$OWNER/$REPO/origin/
+- **Origin**: $ROOT/ψ/learn/$OWNER/$REPO/origin/
 - **GitHub**: https://github.com/$OWNER/$REPO
 
 ## Latest Exploration
@@ -288,7 +296,7 @@ EOF
 | [REPO].md | Hub + timeline |
 | [TODAY]_OVERVIEW.md | Quick overview |
 
-ψ/learn/$OWNER/$REPO/
+$ROOT/ψ/learn/$OWNER/$REPO/
 ```
 
 ### Default mode
@@ -308,7 +316,7 @@ EOF
 ### Key Insights
 [2-3 interesting things learned]
 
-ψ/learn/$OWNER/$REPO/
+$ROOT/ψ/learn/$OWNER/$REPO/
 ```
 
 ### --deep mode
@@ -333,7 +341,7 @@ EOF
 ### Deep Dive Notes
 [Notable patterns, gotchas, or insights worth remembering]
 
-ψ/learn/$OWNER/$REPO/
+$ROOT/ψ/learn/$OWNER/$REPO/
 ```
 
 ## .gitignore Pattern
