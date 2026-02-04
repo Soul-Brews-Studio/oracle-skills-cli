@@ -353,15 +353,17 @@ $ROOT/ψ/learn/$OWNER/$REPO/
 
 ## .gitignore Pattern
 
-For Oracles that want to commit docs but ignore source:
+For Oracles that want to commit docs but ignore symlinks:
 
 ```gitignore
-# Keep learned docs
-!ψ/learn/
+# Ignore origin symlinks only (source lives in ghq)
+ψ/learn/**/origin/
 
-# Ignore origin symlinks (source in ghq)
-ψ/learn/**/origin
+# Keep everything else in learn/ (the docs)
+!ψ/learn/**/*.md
 ```
+
+**After running /learn**, check your repo's `.gitignore` has these patterns so docs are committed but symlinks are ignored.
 
 ## Notes
 
