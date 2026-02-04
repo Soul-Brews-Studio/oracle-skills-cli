@@ -1,5 +1,5 @@
 ---
-description: v1.5.60 | oracle-family-scan skill
+description: v1.5.61 | oracle-family-scan skill
 ---
 
 # /oracle-family-scan
@@ -21,4 +21,4 @@ Execute the `oracle-family-scan` skill with the provided arguments.
 - Global: `~/.claude/skills/oracle-family-scan/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.60*
+*oracle-skills-cli v1.5.61*

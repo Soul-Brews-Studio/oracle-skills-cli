@@ -39,17 +39,16 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
 └── owner/
     └── repo/
         ├── origin       # Symlink to ghq source (gitignored)
-        ├── repo.md      # Hub file - links to all dates (committed)
-        └── YYYY-MM-DD/  # Date folder for each learning session
-            ├── ARCHITECTURE.md
-            ├── CODE-SNIPPETS.md
-            ├── QUICK-REFERENCE.md
-            ├── TESTING.md       # --deep only
-            └── API-SURFACE.md   # --deep only
+        ├── repo.md      # Hub file - links to all sessions (committed)
+        └── YYYY-MM-DD/  # Date folder
+            ├── 1349_ARCHITECTURE.md      # Time-prefixed files
+            ├── 1349_CODE-SNIPPETS.md
+            ├── 1349_QUICK-REFERENCE.md
+            ├── 1520_ARCHITECTURE.md      # Second run same day
+            └── ...
 ```
 
-**Multiple learnings**: Run `/learn` again → new date folder, history preserved.
-**Same day re-run**: Agents read existing docs first, then add new insights.
+**Multiple learnings**: Each run gets time-prefixed files (HHMM_), nested in date folder.
 
 **Offload source, keep docs:**
 ```bash
@@ -96,13 +95,13 @@ When spawning Haiku agents, you MUST give them TWO literal paths:
 
 **FIX**: Always give BOTH paths as LITERAL absolute values (no variables!):
 
-Example: If ROOT=/home/user/ghq/github.com/my-org/my-oracle, learning acme-corp/cool-library, TODAY=2026-02-04:
+Example: ROOT=/home/user/ghq/.../my-oracle, learning acme-corp/cool-library, TODAY=2026-02-04, TIME=1349:
 ```
-READ from:  /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/origin/
-WRITE to:   /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/2026-02-04/
+READ from:  .../ψ/learn/acme-corp/cool-library/origin/
+WRITE to:   .../ψ/learn/acme-corp/cool-library/2026-02-04/1349_[FILENAME].md
 ```
 
-Tell each agent: "Read source from [SOURCE_DIR]. Write to [DOCS_DIR] (the date folder, NOT inside origin/)."
+Tell each agent: "Read from [SOURCE_DIR]. Write to [DOCS_DIR]/[TIME]_[FILENAME].md"
 
 ### If URL (http* or owner/repo format)
 
@@ -150,37 +149,30 @@ Check arguments for `--fast` or `--deep`:
 **Calculate ACTUAL paths (replace variables with real values):**
 ```
 TODAY = YYYY-MM-DD (e.g., 2026-02-04)
+TIME = HHMM (e.g., 1349)
 REPO_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/
-DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/[TODAY]/   ← WHERE AGENTS WRITE DOCS (date folder!)
-SOURCE_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/origin/  ← WHERE AGENTS READ CODE (symlink)
+DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/[TODAY]/   ← date folder
+SOURCE_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/origin/  ← symlink
+FILE_PREFIX = [TIME]_                               ← time prefix for files
 
 Example:
 - ROOT = /home/user/ghq/github.com/my-org/my-oracle
 - OWNER = acme-corp
 - REPO = cool-library
-- TODAY = 2026-02-04
-- REPO_DIR = /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/
-- DOCS_DIR = /home/user/ghq/github.com/my-org/my-oracle/ψ/learn/acme-corp/cool-library/2026-02-04/
-- SOURCE_DIR = .../origin/  ← SYMLINK to ghq clone
+- TODAY = 2026-02-04, TIME = 1349
+- DOCS_DIR = .../ψ/learn/acme-corp/cool-library/2026-02-04/
+- Files: 1349_ARCHITECTURE.md, 1349_CODE-SNIPPETS.md, etc.
 ```
 
 **⚠️ CRITICAL: Create symlink AND date folder FIRST, then spawn agents!**
 
 1. Run the clone + symlink script in Step 0 FIRST
-2. Check if today's folder already exists: `ls "$REPO_DIR/$TODAY/" 2>/dev/null`
-3. **If exists**: Read existing docs first, tell agents to build on prior work
-4. **If new**: Create the date folder: `mkdir -p "$DOCS_DIR"`
-5. Capture DOCS_DIR and SOURCE_DIR as literal paths
-6. THEN spawn agents with both paths
+2. Capture TIME: `date +%H%M` (e.g., 1349)
+3. Create the date folder: `mkdir -p "$DOCS_DIR"`
+4. Capture DOCS_DIR, SOURCE_DIR, and TIME as literal values
+5. THEN spawn agents with paths including TIME prefix
 
-**Re-learning same day?** If `$REPO_DIR/$TODAY/` exists, add to agent prompts:
-```
-PRIOR WORK EXISTS: Read [DOCS_DIR]/*.md first.
-Summarize what's already documented, then focus on:
-- Gaps or areas not covered
-- Updates since last exploration
-- Deeper dives into interesting areas
-```
+**Multiple runs same day?** Each run gets unique TIME prefix → no overwrites.
 
 ---
 
@@ -193,7 +185,7 @@ Summarize what's already documented, then focus on:
 You are exploring a codebase.
 
 READ source code from: [SOURCE_DIR]
-WRITE your output to:   [DOCS_DIR]/OVERVIEW.md
+WRITE your output to:   [DOCS_DIR]/[TIME]_OVERVIEW.md
 
 ⚠️ IMPORTANT: Write to DOCS_DIR (the date folder), NOT inside origin/!
 
@@ -213,23 +205,23 @@ Analyze:
 Launch 3 agents in parallel. Each prompt must include (use LITERAL paths!):
 ```
 READ source code from: [SOURCE_DIR]
-WRITE your output to:   [DOCS_DIR]/[filename]
+WRITE your output to:   [DOCS_DIR]/[TIME]_[filename].md
 
 ⚠️ IMPORTANT: Write to DOCS_DIR (the date folder), NOT inside origin/!
 ```
 
-### Agent 1: Architecture Explorer → `ARCHITECTURE.md`
+### Agent 1: Architecture Explorer → `[TIME]_ARCHITECTURE.md`
 - Directory structure
 - Entry points
 - Core abstractions
 - Dependencies
 
-### Agent 2: Code Snippets Collector → `CODE-SNIPPETS.md`
+### Agent 2: Code Snippets Collector → `[TIME]_CODE-SNIPPETS.md`
 - Main entry point code
 - Core implementations
 - Interesting patterns
 
-### Agent 3: Quick Reference Builder → `QUICK-REFERENCE.md`
+### Agent 3: Quick Reference Builder → `[TIME]_QUICK-REFERENCE.md`
 - What it does
 - Installation
 - Key features
@@ -244,36 +236,36 @@ WRITE your output to:   [DOCS_DIR]/[filename]
 Launch 5 agents in parallel. Each prompt must include (use LITERAL paths!):
 ```
 READ source code from: [SOURCE_DIR]
-WRITE your output to:   [DOCS_DIR]/[filename]
+WRITE your output to:   [DOCS_DIR]/[TIME]_[filename].md
 
 ⚠️ IMPORTANT: Write to DOCS_DIR (the date folder), NOT inside origin/!
 ```
 
-### Agent 1: Architecture Explorer → `ARCHITECTURE.md`
+### Agent 1: Architecture Explorer → `[TIME]_ARCHITECTURE.md`
 - Directory structure & organization philosophy
 - Entry points (all of them)
 - Core abstractions & their relationships
 - Dependencies (direct + transitive patterns)
 
-### Agent 2: Code Snippets Collector → `CODE-SNIPPETS.md`
+### Agent 2: Code Snippets Collector → `[TIME]_CODE-SNIPPETS.md`
 - Main entry point code
 - Core implementations with context
 - Interesting patterns & idioms
 - Error handling examples
 
-### Agent 3: Quick Reference Builder → `QUICK-REFERENCE.md`
+### Agent 3: Quick Reference Builder → `[TIME]_QUICK-REFERENCE.md`
 - What it does (comprehensive)
 - Installation (all methods)
 - Key features with examples
 - Configuration options
 
-### Agent 4: Testing & Quality Patterns → `TESTING.md`
+### Agent 4: Testing & Quality Patterns → `[TIME]_TESTING.md`
 - Test structure and conventions
 - Test utilities and helpers
 - Mocking patterns
 - Coverage approach
 
-### Agent 5: API & Integration Surface → `API-SURFACE.md`
+### Agent 5: API & Integration Surface → `[TIME]_API-SURFACE.md`
 - Public API documentation
 - Extension points / hooks
 - Integration patterns
@@ -292,22 +284,16 @@ WRITE your output to:   [DOCS_DIR]/[filename]
 
 ## Explorations
 
-### [TODAY] ([mode])
-<!-- --fast mode -->
-- [[YYYY-MM-DD/OVERVIEW|Overview]]
-
-<!-- default mode -->
-- [[YYYY-MM-DD/ARCHITECTURE|Architecture]]
-- [[YYYY-MM-DD/CODE-SNIPPETS|Code Snippets]]
-- [[YYYY-MM-DD/QUICK-REFERENCE|Quick Reference]]
-
-<!-- --deep mode adds -->
-- [[YYYY-MM-DD/TESTING|Testing]]
-- [[YYYY-MM-DD/API-SURFACE|API Surface]]
+### [TODAY] [TIME] ([mode])
+- [[YYYY-MM-DD/HHMM_ARCHITECTURE|Architecture]]
+- [[YYYY-MM-DD/HHMM_CODE-SNIPPETS|Code Snippets]]
+- [[YYYY-MM-DD/HHMM_QUICK-REFERENCE|Quick Reference]]
+- [[YYYY-MM-DD/HHMM_TESTING|Testing]]        <!-- --deep only -->
+- [[YYYY-MM-DD/HHMM_API-SURFACE|API Surface]] <!-- --deep only -->
 
 **Key insights**: [2-3 things learned]
 
-### [OLDER-DATE] ([mode])
+### [TODAY] [EARLIER-TIME] ([mode])
 ...
 ```
 
@@ -318,12 +304,12 @@ WRITE your output to:   [DOCS_DIR]/[filename]
 ## 📚 Quick Learn: [REPO]
 
 **Mode**: fast (1 agent)
-**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/
+**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/[TIME]_*.md
 
 | File | Description |
 |------|-------------|
-| [REPO].md | Hub (links all dates) |
-| [TODAY]/OVERVIEW.md | Quick overview |
+| [REPO].md | Hub (links all sessions) |
+| [TODAY]/[TIME]_OVERVIEW.md | Quick overview |
 ```
 
 ### Default mode
@@ -331,14 +317,14 @@ WRITE your output to:   [DOCS_DIR]/[filename]
 ## 📚 Learning Complete: [REPO]
 
 **Mode**: default (3 agents)
-**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/
+**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/[TIME]_*.md
 
 | File | Description |
 |------|-------------|
-| [REPO].md | Hub (links all dates) |
-| [TODAY]/ARCHITECTURE.md | Structure |
-| [TODAY]/CODE-SNIPPETS.md | Code examples |
-| [TODAY]/QUICK-REFERENCE.md | Usage guide |
+| [REPO].md | Hub (links all sessions) |
+| [TODAY]/[TIME]_ARCHITECTURE.md | Structure |
+| [TODAY]/[TIME]_CODE-SNIPPETS.md | Code examples |
+| [TODAY]/[TIME]_QUICK-REFERENCE.md | Usage guide |
 
 **Key Insights**: [2-3 things learned]
 ```
@@ -348,16 +334,16 @@ WRITE your output to:   [DOCS_DIR]/[filename]
 ## 📚 Deep Learning Complete: [REPO]
 
 **Mode**: deep (5 agents)
-**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/
+**Location**: ψ/learn/$OWNER/$REPO/[TODAY]/[TIME]_*.md
 
 | File | Description |
 |------|-------------|
-| [REPO].md | Hub (links all dates) |
-| [TODAY]/ARCHITECTURE.md | Structure & design |
-| [TODAY]/CODE-SNIPPETS.md | Code examples |
-| [TODAY]/QUICK-REFERENCE.md | Usage guide |
-| [TODAY]/TESTING.md | Test patterns |
-| [TODAY]/API-SURFACE.md | Public API |
+| [REPO].md | Hub (links all sessions) |
+| [TODAY]/[TIME]_ARCHITECTURE.md | Structure & design |
+| [TODAY]/[TIME]_CODE-SNIPPETS.md | Code examples |
+| [TODAY]/[TIME]_QUICK-REFERENCE.md | Usage guide |
+| [TODAY]/[TIME]_TESTING.md | Test patterns |
+| [TODAY]/[TIME]_API-SURFACE.md | Public API |
 
 **Key Insights**: [3-5 things learned]
 ```
