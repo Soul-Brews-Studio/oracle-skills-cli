@@ -164,7 +164,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 11 | **awaken** | skill | Guided Oracle birth |
 | 12 | **birth** | skill | Prepare birth props for a new Oracle repo |
 | 13 | **feel** | skill | Log emotions with optional structure |
-| 14 | **forward** | skill | Create handoff for next session |
+| 14 | **forward** | skill | Create handoff + enter plan mode for next |
 | 15 | **fyi** | skill | Log information for future reference |
 | 16 | **learn** | skill | Explore a codebase |
 | 17 | **merged** | skill | Post-Merge Cleanup |
@@ -179,7 +179,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 26 | **who-we-are** | skill | Know ourselves |
 | 27 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-04 05:16:29 UTC*
+*Generated: 2026-02-04 05:40:11 UTC*
 
 ## Supported Agents
 
