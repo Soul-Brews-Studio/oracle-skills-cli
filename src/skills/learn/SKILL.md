@@ -357,10 +357,8 @@ For Oracles that want to commit docs but ignore symlinks:
 
 ```gitignore
 # Ignore origin symlinks only (source lives in ghq)
-ψ/learn/**/origin/
-
-# Keep everything else in learn/ (the docs)
-!ψ/learn/**/*.md
+# Note: no trailing slash - origin is a symlink, not a directory
+ψ/learn/**/origin
 ```
 
 **After running /learn**, check your repo's `.gitignore` has these patterns so docs are committed but symlinks are ignored.

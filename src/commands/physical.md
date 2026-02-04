@@ -1,5 +1,5 @@
 ---
-description: v1.5.57 | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
+description: v1.5.58 | Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
 ---
 
 # /physical
@@ -21,4 +21,4 @@ Execute the `physical` skill with the provided arguments.
 - Global: `~/.claude/skills/physical/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.57*
+*oracle-skills-cli v1.5.58*
