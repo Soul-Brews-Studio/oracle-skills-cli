@@ -48,7 +48,8 @@ Explore a codebase with 3 parallel Haiku agents → create organized documentati
             └── API-SURFACE.md   # --deep only
 ```
 
-**Multiple learnings**: Run `/learn` again later → new date folder, history preserved.
+**Multiple learnings**: Run `/learn` again → new date folder, history preserved.
+**Same day re-run**: Agents read existing docs first, then add new insights.
 
 **Offload source, keep docs:**
 ```bash
@@ -166,10 +167,20 @@ Example:
 **⚠️ CRITICAL: Create symlink AND date folder FIRST, then spawn agents!**
 
 1. Run the clone + symlink script in Step 0 FIRST
-2. Create the date folder: `mkdir -p "$DOCS_DIR"`
-3. Capture DOCS_DIR and SOURCE_DIR as literal paths
-4. THEN spawn agents with both paths
-5. Agents READ from SOURCE_DIR, WRITE to DOCS_DIR (the date folder!)
+2. Check if today's folder already exists: `ls "$REPO_DIR/$TODAY/" 2>/dev/null`
+3. **If exists**: Read existing docs first, tell agents to build on prior work
+4. **If new**: Create the date folder: `mkdir -p "$DOCS_DIR"`
+5. Capture DOCS_DIR and SOURCE_DIR as literal paths
+6. THEN spawn agents with both paths
+
+**Re-learning same day?** If `$REPO_DIR/$TODAY/` exists, add to agent prompts:
+```
+PRIOR WORK EXISTS: Read [DOCS_DIR]/*.md first.
+Summarize what's already documented, then focus on:
+- Gaps or areas not covered
+- Updates since last exploration
+- Deeper dives into interesting areas
+```
 
 ---
 
