@@ -81,6 +81,40 @@ skills/[name]/
 name: [skill-name]
 description: [One line]. Use when user says "[trigger1]", "[trigger2]", or "[trigger3]".
 ---
+```
+
+### Frontmatter Options
+
+| Option | Values | Effect |
+|--------|--------|--------|
+| `name` | string | **Required**. Folder name, command name |
+| `description` | string | **Required**. One-line + trigger words |
+| `user-invocable` | `false` | Hide from `/` menu (background-only skills) |
+| `disable-model-invocation` | `true` | Prevent Claude from auto-invoking |
+| `allowed-tools` | `Read, Grep, ...` | Restrict which tools skill can use |
+| `context` | `fork` | Run skill in isolated subagent |
+
+**Example - Background skill:**
+```yaml
+---
+name: internal-helper
+description: Internal helper for other skills
+user-invocable: false
+---
+```
+
+**Example - Restricted skill:**
+```yaml
+---
+name: read-only-skill
+description: Read-only analysis skill
+allowed-tools: Read, Grep, Glob
+---
+```
+
+### Template continued
+
+```markdown
 
 # /[skill-name] - [Title]
 

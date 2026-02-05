@@ -169,7 +169,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 16 | **forward** | skill | Create handoff + enter plan mode for next |
 | 17 | **fyi** | skill | Log information for future reference |
 | 18 | **merged** | skill | Post-Merge Cleanup |
-| 19 | **oracle-family-scan** | skill | oracle-family-scan skill |
+| 19 | **oracle-family-scan** | skill | Manage Oracle family |
 | 20 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
 | 21 | **philosophy** | skill | Display Oracle philosophy principles |
 | 22 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
@@ -179,7 +179,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 26 | **who-we-are** | skill | Know ourselves |
 | 27 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-05 03:43:00 UTC*
+*Generated: 2026-02-05 03:54:14 UTC*
 
 ## Supported Agents
 

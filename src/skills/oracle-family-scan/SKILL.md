@@ -1,3 +1,8 @@
+---
+name: oracle-family-scan
+description: Manage Oracle family - scan, track, welcome new Oracles. Use when user says "family scan", "oracle registry", "welcome new oracles", or needs to check Oracle population.
+---
+
 # /oracle-family-scan - Oracle Family Management
 
 Scan, track, and welcome the Oracle family.

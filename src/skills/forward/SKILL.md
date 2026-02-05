@@ -55,17 +55,27 @@ After creating handoff:
 2. Push: `git push origin main`
 3. **Enter plan mode** for next session planning
 
-## Auto Plan Mode
+## Auto Plan Mode (REQUIRED)
 
-**IMPORTANT**: After commit & push, automatically enter plan mode:
+**CRITICAL**: After commit & push succeeds, you MUST enter plan mode:
 
-1. Use the `EnterPlanMode` tool
-2. In plan mode, create a plan that:
-   - References the handoff file just created
-   - Lists pending tasks from handoff
-   - Defines next session scope
+### Step 1: Call EnterPlanMode Tool
 
-**Plan should include:**
+```
+⚠️ REQUIRED ACTION: Call the EnterPlanMode tool NOW
+```
+
+Do NOT skip this step. Do NOT ask user if they want plan mode.
+Just call `EnterPlanMode` tool immediately after push.
+
+### Step 2: In Plan Mode
+
+Write a plan file that:
+- References the handoff file just created
+- Lists pending tasks from handoff
+- Defines next session scope
+
+**Plan template:**
 ```markdown
 # Plan: [Next Session Focus]
 
@@ -82,7 +92,10 @@ After creating handoff:
 - Handoff: ψ/inbox/handoff/YYYY-MM-DD_HH-MM_slug.md
 ```
 
-3. After plan is approved → Ready for `/compact` then `/clear`
+### Step 3: Exit Plan Mode
+
+Call `ExitPlanMode` tool when plan is complete.
+After approval → Ready for `/compact` then `/clear`
 
 ## Skip Plan Mode
 
