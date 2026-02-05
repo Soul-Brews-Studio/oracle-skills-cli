@@ -20,6 +20,7 @@ import { program } from 'commander';
 import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents, getAgentNames } from './agents.js';
 import { listSkills, installSkills, uninstallSkills } from './installer.js';
+import type { ShellMode } from './fs-utils.js';
 import pkg from '../../package.json' with { type: 'json' };
 
 const VERSION = pkg.version;
@@ -38,6 +39,8 @@ program
   .option('-s, --skill <skills...>', 'Install specific skills by name')
   .option('-l, --list', 'List available skills without installing')
   .option('-y, --yes', 'Skip confirmation prompts')
+  .option('--shell', 'Force Bun.$ shell commands (use on Windows to test shell compatibility)')
+  .option('--no-shell', 'Force Node.js fs operations (use on Unix if Bun.$ causes issues)')
   .action(async (options) => {
     p.intro(`🔮 Oracle Skills Installer v${VERSION}`);
 
@@ -107,11 +110,17 @@ program
         return;
       }
 
+      // Determine shell mode
+      const shellMode: ShellMode = options.shell ? 'shell'
+        : options.noShell ? 'no-shell'
+        : 'auto';
+
       // Install skills
       await installSkills(targetAgents, {
         global: options.global,
         skills: options.skill,
         yes: options.yes,
+        shellMode,
       });
 
       p.outro('✨ Oracle skills installed! Restart your agent to activate.');
@@ -129,6 +138,8 @@ program
   .option('-a, --agent <agents...>', 'Target specific agents')
   .option('-s, --skill <skills...>', 'Remove specific skills only')
   .option('-y, --yes', 'Skip confirmation prompts')
+  .option('--shell', 'Force Bun.$ shell commands')
+  .option('--no-shell', 'Force Node.js fs operations')
   .action(async (options) => {
     p.intro(`🔮 Oracle Skills Uninstaller v${VERSION}`);
 
@@ -168,10 +179,16 @@ program
       const spinner = p.spinner();
       spinner.start('Removing skills');
 
+      // Determine shell mode
+      const shellMode: ShellMode = options.shell ? 'shell'
+        : options.noShell ? 'no-shell'
+        : 'auto';
+
       const result = await uninstallSkills(targetAgents, {
         global: options.global,
         skills: options.skill,
         yes: options.yes,
+        shellMode,
       });
 
       spinner.stop(`Removed ${result.removed} skills from ${result.agents} agent(s)`);

@@ -1,10 +1,10 @@
-import { $ } from 'bun';
 import { existsSync, readdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { homedir } from 'os';
+import { join, dirname, basename } from 'path';
+import { homedir, tmpdir } from 'os';
 import * as p from '@clack/prompts';
 import { agents } from './agents.js';
 import type { Skill, InstallOptions } from './types.js';
+import { mkdirp, rmrf, cpr, mv, rmf, cp, type ShellMode } from './fs-utils.js';
 import pkg from '../../package.json' with { type: 'json' };
 
 // Check if an installed skill was installed by oracle-skills-cli
@@ -129,9 +129,10 @@ export async function installSkills(
     }
 
     const targetDir = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
+    const shellMode: ShellMode = options.shellMode || 'auto';
 
     // Create target directory
-    await $`mkdir -p ${targetDir}`.quiet();
+    await mkdirp(targetDir, shellMode);
 
     // Auto-cleanup: remove orphaned skills installed by oracle-skills-cli
     // Only removes skills that: 1) have installer: oracle-skills-cli marker, 2) no longer exist in source
@@ -143,7 +144,7 @@ export async function installSkills(
         .map((d) => d.name);
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const trashDir = `/tmp/oracle-skills-stale-${timestamp}`;
+      const trashDir = join(tmpdir(), `oracle-skills-stale-${timestamp}`);
       let movedAny = false;
       const failedMoves: string[] = [];
 
@@ -154,11 +155,11 @@ export async function installSkills(
         if (await isOurSkill(installedPath) && !sourceSkillNames.includes(installed)) {
           try {
             if (!movedAny) {
-              await $`mkdir -p ${trashDir}`.quiet();
+              await mkdirp(trashDir, shellMode);
               movedAny = true;
             }
-            await $`mv ${installedPath} ${trashDir}/`.quiet();
-            p.log.info(`Cleaned up orphan: ${installed} → /tmp`);
+            await mv(installedPath, join(trashDir, basename(installedPath)), shellMode);
+            p.log.info(`Cleaned up orphan: ${installed} → ${trashDir}`);
           } catch {
             failedMoves.push(installedPath);
           }
@@ -167,7 +168,7 @@ export async function installSkills(
           const pluginPath = join(homedir(), '.claude', 'plugins', installed);
           if (existsSync(pluginPath) && await isOurSkill(pluginPath)) {
             try {
-              await $`mv ${pluginPath} ${trashDir}/`.quiet();
+              await mv(pluginPath, join(trashDir, basename(pluginPath)), shellMode);
             } catch {
               failedMoves.push(pluginPath);
             }
@@ -201,11 +202,11 @@ export async function installSkills(
 
         // Remove existing if present
         if (existsSync(destPath)) {
-          await $`rm -rf ${destPath}`.quiet();
+          await rmrf(destPath, shellMode);
         }
 
         // Copy skill folder
-        await $`cp -r ${skill.path} ${destPath}`.quiet();
+        await cpr(skill.path, destPath, shellMode);
 
         // Inject version into SKILL.md frontmatter and description
         const skillMdPath = join(destPath, 'SKILL.md');
@@ -231,24 +232,24 @@ export async function installSkills(
     // Install skills with hooks as Claude Code plugins
     if (skillsWithHooks.length > 0) {
       const pluginsDir = join(homedir(), '.claude', 'plugins');
-      await $`mkdir -p ${pluginsDir}`.quiet();
+      await mkdirp(pluginsDir, shellMode);
 
       for (const skill of skillsWithHooks) {
         const pluginDest = join(pluginsDir, skill.name);
 
         // Remove existing plugin if present
         if (existsSync(pluginDest)) {
-          await $`rm -rf ${pluginDest}`.quiet();
+          await rmrf(pluginDest, shellMode);
         }
 
         // Copy entire skill as plugin
-        await $`cp -r ${skill.path} ${pluginDest}`.quiet();
+        await cpr(skill.path, pluginDest, shellMode);
 
         // Create .claude-plugin/plugin.json if not exists
         const pluginJsonDir = join(pluginDest, '.claude-plugin');
         const pluginJsonPath = join(pluginJsonDir, 'plugin.json');
         if (!existsSync(pluginJsonPath)) {
-          await $`mkdir -p ${pluginJsonDir}`.quiet();
+          await mkdirp(pluginJsonDir, shellMode);
           const pluginJson = {
             name: skill.name,
             description: skill.description,
@@ -300,9 +301,9 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v1.5.36 inst
 
     // OpenCode only: also install flat command files to commands/
     if (agentName === 'opencode' && agent.commandsDir) {
-      const home = require('os').homedir();
+      const home = homedir();
       const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
-      await $`mkdir -p ${commandsDir}`.quiet();
+      await mkdirp(commandsDir, shellMode);
 
       const scopeChar = scope === 'Global' ? 'G' : 'L';
       const skillsPath = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
@@ -345,10 +346,10 @@ Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
       const pluginDir = options.global
         ? join(home, '.config/opencode/plugins')
         : join(process.cwd(), '.opencode/plugins');
-      await $`mkdir -p ${pluginDir}`.quiet();
+      await mkdirp(pluginDir, shellMode);
       const hookSrc = join(dirname(import.meta.path), '..', 'hooks', 'opencode', 'oracle-skills.ts');
       if (existsSync(hookSrc)) {
-        await $`cp ${hookSrc} ${join(pluginDir, 'oracle-skills.ts')}`.quiet();
+        await cp(hookSrc, join(pluginDir, 'oracle-skills.ts'), shellMode);
         p.log.success(`OpenCode plugin: ${pluginDir}/oracle-skills.ts`);
       }
     }
@@ -361,10 +362,11 @@ Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
 
 export async function uninstallSkills(
   targetAgents: string[],
-  options: { global: boolean; skills?: string[]; yes?: boolean }
+  options: { global: boolean; skills?: string[]; yes?: boolean; shellMode?: ShellMode }
 ): Promise<{ removed: number; agents: number }> {
   let totalRemoved = 0;
   let agentsProcessed = 0;
+  const shellMode: ShellMode = options.shellMode || 'auto';
 
   for (const agentName of targetAgents) {
     const agent = agents[agentName as keyof typeof agents];
@@ -401,25 +403,25 @@ export async function uninstallSkills(
     // Remove skills
     for (const skill of toRemove) {
       const skillPath = join(targetDir, skill);
-      await $`rm -rf ${skillPath}`.quiet();
+      await rmrf(skillPath, shellMode);
 
       // OpenCode: also clean up commands/ flat files
       if (isOpenCode && agent.commandsDir) {
         const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
         const flatFile = join(commandsDir, `${skill}.md`);
-        if (existsSync(flatFile)) await $`rm -f ${flatFile}`.quiet();
+        if (existsSync(flatFile)) await rmf(flatFile, shellMode);
         // Also clean up old command/ directory format if exists (legacy cleanup)
         const oldCommandDir = commandsDir.replace('/commands', '/command');
         const oldFlatFile = join(oldCommandDir, `${skill}.md`);
         const oldDir = join(oldCommandDir, skill);
-        if (existsSync(oldFlatFile)) await $`rm -f ${oldFlatFile}`.quiet();
-        if (existsSync(oldDir)) await $`rm -rf ${oldDir}`.quiet();
+        if (existsSync(oldFlatFile)) await rmf(oldFlatFile, shellMode);
+        if (existsSync(oldDir)) await rmrf(oldDir, shellMode);
       }
 
       // Also clean up from ~/.claude/plugins/ if it was installed there
       const pluginPath = join(homedir(), '.claude', 'plugins', skill);
       if (existsSync(pluginPath)) {
-        await $`rm -rf ${pluginPath}`.quiet();
+        await rmrf(pluginPath, shellMode);
         p.log.info(`Removed plugin: ~/.claude/plugins/${skill}`);
       }
 

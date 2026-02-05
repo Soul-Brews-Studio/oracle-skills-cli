@@ -31,9 +31,12 @@ export interface Skill {
   path: string;
 }
 
+import type { ShellMode } from './fs-utils.js';
+
 export interface InstallOptions {
   global?: boolean;
   skills?: string[];
   yes?: boolean;
   agents?: string[];
+  shellMode?: ShellMode;
 }
