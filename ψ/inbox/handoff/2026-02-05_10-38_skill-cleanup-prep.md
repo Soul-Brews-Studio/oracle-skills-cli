@@ -38,6 +38,7 @@ User requested: "next session we will cleanup some our skills!"
 - [ ] Add `user-invocable: false` to background-only skills
 - [ ] Update skill descriptions for better trigger words
 - [ ] Consider consolidating similar skills
+- [ ] **Fix /forward** - Should auto-enter plan mode but didn't!
 
 ## Key Files
 
