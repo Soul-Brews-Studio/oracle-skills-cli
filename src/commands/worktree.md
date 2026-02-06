@@ -1,5 +1,5 @@
 ---
-description: v1.5.67 | Git worktree for parallel work. Use when user says "worktree", "parallel work", "new agent", "start parallel".
+description: v1.5.68 | Git worktree for parallel work. Use when user says "worktree", "parallel work", "new agent", "start parallel".
 ---
 
 # /worktree
@@ -21,4 +21,4 @@ Execute the `worktree` skill with the provided arguments.
 - Global: `~/.claude/skills/worktree/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.67*
+*oracle-skills-cli v1.5.68*
