@@ -41,9 +41,9 @@ describe("integration: OpenCode global install", () => {
     const content = await readFile(rrrPath, "utf-8");
     expect(content).toContain("G-SKLL");
     expect(content).toContain("installer: oracle-skills-cli");
-    expect(content).toContain("# RRR");
-    expect(content).toContain("## Step 0:");
-    expect(content.length).toBeGreaterThan(500);
+    expect(content).toContain("# /rrr");
+    expect(content).toContain("## /rrr (Default)");
+    expect(content.length).toBeGreaterThan(100);
   });
 
   it("should have commands directory with stub files", async () => {
