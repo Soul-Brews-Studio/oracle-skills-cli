@@ -21,6 +21,10 @@ export const agents: Record<AgentType, AgentConfig> = {
     displayName: 'Claude Code',
     skillsDir: '.claude/skills',
     globalSkillsDir: join(home, '.claude/skills'),
+    commandsDir: '.claude/commands',
+    globalCommandsDir: join(home, '.claude/commands'),
+    useFlatFiles: true,
+    commandsOptIn: true, // Only install commands with --commands flag
     detectInstalled: () => existsSync(join(home, '.claude')),
   },
   codex: {

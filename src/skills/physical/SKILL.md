@@ -1,6 +1,7 @@
 ---
 name: physical
 description: Physical location awareness from FindMy. Use when user says "physical", "where am I", "location", "where is nat", or needs to check current physical location.
+user-invocable: false
 ---
 
 # /physical - Physical Location Awareness

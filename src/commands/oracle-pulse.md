@@ -1,5 +1,5 @@
 ---
-description: v1.5.69 | Quantitative heartbeat from ~/.claude/ session data. Use when user says "pulse", "stats", "usage", "how much have I used", "session count", "activity".
+description: v1.5.70 | Quantitative heartbeat from ~/.claude/ session data. Use when user says "pulse", "stats", "usage", "how much have I used", "session count", "activity".
 ---
 
 # /oracle-pulse
@@ -21,4 +21,4 @@ Execute the `oracle-pulse` skill with the provided arguments.
 - Global: `~/.claude/skills/oracle-pulse/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.69*
+*oracle-skills-cli v1.5.70*

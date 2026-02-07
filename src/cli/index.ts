@@ -39,6 +39,7 @@ program
   .option('-s, --skill <skills...>', 'Install specific skills by name')
   .option('-l, --list', 'List available skills without installing')
   .option('-y, --yes', 'Skip confirmation prompts')
+  .option('--commands', 'Also install command stubs to ~/.claude/commands/')
   .option('--shell', 'Force Bun.$ shell commands (use on Windows to test shell compatibility)')
   .option('--no-shell', 'Force Node.js fs operations (use on Unix if Bun.$ causes issues)')
   .action(async (options) => {
@@ -120,6 +121,7 @@ program
         global: options.global,
         skills: options.skill,
         yes: options.yes,
+        commands: options.commands,
         shellMode,
       });
 

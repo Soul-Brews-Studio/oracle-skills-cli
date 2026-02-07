@@ -6,6 +6,7 @@ export interface AgentConfig {
   commandsDir?: string; // Separate commands directory (OpenCode uses .opencode/command/)
   globalCommandsDir?: string;
   useFlatFiles?: boolean; // Use skillname.md instead of skillname/SKILL.md (OpenCode commands)
+  commandsOptIn?: boolean; // Only install commands with --commands flag (default: false = always install)
   detectInstalled: () => boolean;
 }
 
@@ -38,5 +39,6 @@ export interface InstallOptions {
   skills?: string[];
   yes?: boolean;
   agents?: string[];
+  commands?: boolean; // Also install command stubs (for agents with commandsOptIn)
   shellMode?: ShellMode;
 }

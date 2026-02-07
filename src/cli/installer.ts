@@ -299,9 +299,9 @@ bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v${pkg.versi
 `;
     await Bun.write(join(targetDir, 'VERSION.md'), versionMd);
 
-    // OpenCode only: also install flat command files to commands/
-    if (agentName === 'opencode' && agent.commandsDir) {
-      const home = homedir();
+    // Install flat command files to commands/ (OpenCode, Claude Code, etc.)
+    // Agents with commandsOptIn only get commands when --commands flag is passed
+    if (agent.commandsDir && (!agent.commandsOptIn || options.commands)) {
       const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
       await mkdirp(commandsDir, shellMode);
 
@@ -340,11 +340,14 @@ Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
           await Bun.write(commandPath, stubContent);
         }
       }
-      p.log.success(`OpenCode commands: ${commandsDir}`);
+      p.log.success(`${agent.displayName} commands: ${commandsDir}`);
 
-      // Install plugin if exists
+    }
+
+    // OpenCode only: install plugin if exists
+    if (agentName === 'opencode') {
       const pluginDir = options.global
-        ? join(home, '.config/opencode/plugins')
+        ? join(homedir(), '.config/opencode/plugins')
         : join(process.cwd(), '.opencode/plugins');
       await mkdirp(pluginDir, shellMode);
       const hookSrc = join(dirname(import.meta.path), '..', 'hooks', 'opencode', 'oracle-skills.ts');
@@ -383,8 +386,6 @@ export async function uninstallSkills(
 
     // Get installed skills (all agents use directories now)
     const entries = readdirSync(targetDir, { withFileTypes: true });
-    const isOpenCode = agentName === 'opencode';
-    
     const installed = entries
       .filter((d) => {
         if (d.name.startsWith('.')) return false;
@@ -405,8 +406,8 @@ export async function uninstallSkills(
       const skillPath = join(targetDir, skill);
       await rmrf(skillPath, shellMode);
 
-      // OpenCode: also clean up commands/ flat files
-      if (isOpenCode && agent.commandsDir) {
+      // Clean up commands/ flat files (OpenCode, Claude Code, etc.)
+      if (agent.commandsDir) {
         const commandsDir = options.global ? agent.globalCommandsDir! : join(process.cwd(), agent.commandsDir);
         const flatFile = join(commandsDir, `${skill}.md`);
         if (existsSync(flatFile)) await rmf(flatFile, shellMode);
