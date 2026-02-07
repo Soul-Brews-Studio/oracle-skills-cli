@@ -172,14 +172,13 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 19 | **oracle-pulse** | skill | Quantitative heartbeat from ~/.claude/ |
 | 20 | **oracle-soul-sync-calibrate-update** | skill | Sync Oracle instruments with the family |
 | 21 | **philosophy** | skill | Display Oracle philosophy principles |
-| 22 | **ralph-loop-soulbrews** | skill | Self-referential AI loops |
-| 23 | **retrospective** | skill | Create session retrospective with AI diary |
-| 24 | **standup** | skill | Daily standup check |
-| 25 | **where-we-are** | skill | Session awareness - what we're doing now |
-| 26 | **who-we-are** | skill | Know ourselves |
-| 27 | **worktree** | skill | Git worktree for parallel work |
+| 22 | **retrospective** | skill | Create session retrospective with AI diary |
+| 23 | **standup** | skill | Daily standup check |
+| 24 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 25 | **who-we-are** | skill | Know ourselves |
+| 26 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-07 05:12:23 UTC*
+*Generated: 2026-02-07 05:13:16 UTC*
 
 ## Supported Agents
 

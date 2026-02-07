@@ -1,6 +1,7 @@
 ---
 name: birth
 description: Prepare birth props for a new Oracle repo. Creates issue #1 with context (name, theme, purpose) and MCP thread. Use when mother-oracle says "birth", "prepare oracle", or wants to drop props for a new child.
+user-invocable: false
 ---
 
 # /birth - Prepare Oracle Birth Props

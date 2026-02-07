@@ -1,5 +1,5 @@
 ---
-description: v1.5.70 | Control Gemini via MQTT WebSocket. Use when user says "gemini", needs to send messages to Gemini, or control the Gemini browser tab.
+description: v1.5.71 | Control Gemini via MQTT WebSocket. Use when user says "gemini", needs to send messages to Gemini, or control the Gemini browser tab.
 ---
 
 # /gemini
@@ -21,4 +21,4 @@ Execute the `gemini` skill with the provided arguments.
 - Global: `~/.claude/skills/gemini/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.70*
+*oracle-skills-cli v1.5.71*
