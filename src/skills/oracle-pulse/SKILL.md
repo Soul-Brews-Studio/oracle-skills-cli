@@ -211,19 +211,23 @@ for f in sorted(glob.glob(os.path.join(project_dir, '*.jsonl'))):
                     first_ts = ts
                 if not last_ts or ts > last_ts:
                     last_ts = ts
-            if obj.get('type') == 'summary':
+            t = obj.get('type', '')
+            if t == 'summary':
                 summary = obj.get('summary', '')
                 branch = obj.get('gitBranch', '')
                 is_sidechain = obj.get('isSidechain', False)
-            if not first_prompt and obj.get('role') == 'human':
-                content = obj.get('content', '')
+            if not first_prompt and t == 'user':
+                content = obj.get('message', {}).get('content', [])
+                text = ''
                 if isinstance(content, list):
                     for c in content:
                         if isinstance(c, dict) and c.get('type') == 'text':
-                            first_prompt = c.get('text', '')[:80]
+                            text = c.get('text', '').strip()
                             break
                 elif isinstance(content, str):
-                    first_prompt = content[:80]
+                    text = content.strip()
+                if text and len(text) > 5 and not text.startswith('[Request interrupted'):
+                    first_prompt = text[:80]
 
     if msgs > 0:
         sessions.append({

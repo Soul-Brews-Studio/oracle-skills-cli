@@ -1,5 +1,5 @@
 ---
-description: v1.5.72 | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
+description: v1.5.73 | Daily standup check - pending tasks, appointments, recent progress. Use when user says "standup", "morning check", "what's pending".
 ---
 
 # /standup
@@ -21,4 +21,4 @@ Execute the `standup` skill with the provided arguments.
 - Global: `~/.claude/skills/standup/SKILL.md`
 
 ---
-*oracle-skills-cli v1.5.72*
+*oracle-skills-cli v1.5.73*
