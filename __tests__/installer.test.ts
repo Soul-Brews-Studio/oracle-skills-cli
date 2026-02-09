@@ -64,9 +64,8 @@ describe("installer stub format", () => {
     expect(content).toContain("## Instructions");
     expect(content).toContain("Read the skill file");
 
-    // Skill location section
-    expect(content).toContain("## Skill Location");
-    expect(content).toContain("{skillPath}");
+    // Skill path in instructions
+    expect(content).toContain("~/.claude/skills/fyi/SKILL.md");
 
     // Arguments (inline)
     expect(content).toContain("$ARGUMENTS");
@@ -88,20 +87,14 @@ describe("installer stub format", () => {
     expect(existsSync(join(claudeSkillsDir, "trace", "SKILL.md"))).toBe(true);
   });
 
-  it("stub skillPath placeholder should be replaceable", async () => {
+  it("stub should contain hardcoded skill path", async () => {
     const content = await readFile(
       join(process.cwd(), "src/commands", "trace.md"),
       "utf-8"
     );
 
-    // Should have placeholder
-    expect(content).toContain("{skillPath}");
-
-    // Test replacement
-    const globalPath = content.replace("{skillPath}", "~/.claude/skills");
-    expect(globalPath).toContain("~/.claude/skills/trace/SKILL.md");
-
-    const localPath = content.replace("{skillPath}", ".claude/skills");
-    expect(localPath).toContain(".claude/skills/trace/SKILL.md");
+    // Should have hardcoded path (no placeholder)
+    expect(content).toContain("~/.claude/skills/trace/SKILL.md");
+    expect(content).not.toContain("{skillPath}");
   });
 });

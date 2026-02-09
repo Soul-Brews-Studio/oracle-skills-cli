@@ -63,8 +63,7 @@ This is the test skill content.
       "utf-8"
     );
 
-    expect(output).toContain("## Skill Location");
-    expect(output).toContain("/trace/SKILL.md");
+    expect(output).toContain("~/.claude/skills/trace/SKILL.md");
   });
 
   it("should include ARGUMENTS in load line", async () => {

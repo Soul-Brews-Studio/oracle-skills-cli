@@ -47,8 +47,7 @@ describe("installer behavior by agent type", () => {
       );
 
       // Should tell agent where to find full skill
-      expect(stubContent).toContain("## Skill Location");
-      expect(stubContent).toContain("/fyi/SKILL.md");
+      expect(stubContent).toContain("~/.claude/skills/fyi/SKILL.md");
     });
   });
 
@@ -99,33 +98,15 @@ describe("installer behavior by agent type", () => {
     });
   });
 
-  describe("path replacement in stubs", () => {
-    it("should replace {skillPath} for global install", async () => {
+  describe("hardcoded paths in stubs", () => {
+    it("should have hardcoded skill path (no placeholder)", async () => {
       const stub = await readFile(
         join(process.cwd(), "src/commands", "trace.md"),
         "utf-8"
       );
 
-      const globalInstall = stub.replace(
-        /\{skillPath\}/g,
-        "~/.claude/skills"
-      );
-
-      expect(globalInstall).toContain("~/.claude/skills/trace/SKILL.md");
-    });
-
-    it("should replace {skillPath} for local install", async () => {
-      const stub = await readFile(
-        join(process.cwd(), "src/commands", "trace.md"),
-        "utf-8"
-      );
-
-      const localInstall = stub.replace(
-        /\{skillPath\}/g,
-        ".claude/skills"
-      );
-
-      expect(localInstall).toContain(".claude/skills/trace/SKILL.md");
+      expect(stub).toContain("~/.claude/skills/trace/SKILL.md");
+      expect(stub).not.toContain("{skillPath}");
     });
   });
 });

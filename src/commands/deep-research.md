@@ -1,5 +1,5 @@
 ---
-description: v1.5.73 | Deep Research via Gemini. Use when user says "deep research", "research this topic", or needs comprehensive analysis with sources.
+description: v1.5.74 | Deep Research via Gemini. Use when user says "deep research", "research this topic", or needs comprehensive analysis with sources.
 ---
 
 # /deep-research
@@ -11,14 +11,11 @@ Execute the `deep-research` skill with the provided arguments.
 **If you have a Skill tool available**: Use it directly with `skill: "deep-research"` instead of reading the file manually.
 
 **Otherwise**:
-1. Read the skill file: `{skillPath}/deep-research/SKILL.md`
+1. Read the skill file at this exact path: `~/.claude/skills/deep-research/SKILL.md`
 2. Follow all instructions in the skill file
 3. Pass these arguments to the skill: `$ARGUMENTS`
 
-## Skill Location
-
-- Local: `.claude/skills/deep-research/SKILL.md`
-- Global: `~/.claude/skills/deep-research/SKILL.md`
+**IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "deep-research" in the name.
 
 ---
-*oracle-skills-cli v1.5.73*
+*oracle-skills-cli v1.5.74*

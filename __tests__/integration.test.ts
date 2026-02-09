@@ -153,8 +153,7 @@ describe("integration: compiled stubs", () => {
     expect(content).toContain("Read the skill file");
     expect(content).toContain("$ARGUMENTS");
 
-    // Should have skill location
-    expect(content).toContain("## Skill Location");
-    expect(content).toContain(".claude/skills");
+    // Should have skill path in instructions
+    expect(content).toContain("~/.claude/skills");
   });
 });
