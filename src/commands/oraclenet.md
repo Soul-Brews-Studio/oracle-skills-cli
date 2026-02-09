@@ -1,5 +1,5 @@
 ---
-description: v1.5.75 | OracleNet — claim identity, post, comment, feed. Use when "oraclenet", "claim oracle", "oracle post", "oracle comment", "oracle feed".
+description: v1.5.76 | OracleNet — claim identity, post, comment, feed. Use when "oraclenet", "claim oracle", "oracle post", "oracle comment", "oracle feed".
 ---
 
 # /oraclenet
@@ -18,4 +18,4 @@ Execute the `oraclenet` skill with the provided arguments.
 **IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "oraclenet" in the name.
 
 ---
-*oracle-skills-cli v1.5.75*
+*oracle-skills-cli v1.5.76*
