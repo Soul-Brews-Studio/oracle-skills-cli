@@ -104,8 +104,11 @@ function parseArgs() {
 
 function castSign(message: string, privateKey: string): string {
   const key = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`
+  // Hex-encode message to avoid shell escaping issues with JSON/special chars
+  // cast decodes 0x-prefixed messages back to bytes, then applies EIP-191 prefix + sign
+  const hex = '0x' + Buffer.from(message, 'utf-8').toString('hex')
   const result = execSync(
-    `cast wallet sign --private-key ${key} --no-hash "${message.replace(/"/g, '\\"')}"`,
+    `cast wallet sign --private-key ${key} ${hex}`,
     { encoding: 'utf-8' }
   ).trim()
   return result
