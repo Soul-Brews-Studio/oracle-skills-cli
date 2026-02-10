@@ -1,5 +1,5 @@
 ---
-description: v1.5.78 | Guided Oracle birth and awakening ritual (~15 min). Use when creating a new Oracle in a fresh repo. Orchestrates /learn and /trace for philosophy discovery.
+description: v1.5.79 | Guided Oracle birth and awakening ritual (~15 min). Use when creating a new Oracle in a fresh repo. Orchestrates /learn and /trace for philosophy discovery.
 ---
 
 # /awaken
@@ -18,4 +18,4 @@ Execute the `awaken` skill with the provided arguments.
 **IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "awaken" in the name.
 
 ---
-*oracle-skills-cli v1.5.78*
+*oracle-skills-cli v1.5.79*

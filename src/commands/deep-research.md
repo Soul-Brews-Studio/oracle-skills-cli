@@ -1,5 +1,5 @@
 ---
-description: v1.5.78 | Deep Research via Gemini. Use when user says "deep research", "research this topic", or needs comprehensive analysis with sources.
+description: v1.5.79 | Deep Research via Gemini. Use when user says "deep research", "research this topic", or needs comprehensive analysis with sources.
 ---
 
 # /deep-research
@@ -18,4 +18,4 @@ Execute the `deep-research` skill with the provided arguments.
 **IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "deep-research" in the name.
 
 ---
-*oracle-skills-cli v1.5.78*
+*oracle-skills-cli v1.5.79*
