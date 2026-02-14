@@ -1,5 +1,5 @@
 ---
-description: v1.5.79 | Learn from YouTube videos via Gemini transcription. Use when user says "watch", "transcribe youtube", "learn from video", or shares a YouTube URL to study.
+description: v1.5.80 | Learn from YouTube videos via Gemini transcription. Use when user says "watch", "transcribe youtube", "learn from video", or shares a YouTube URL to study.
 ---
 
 # /watch
@@ -18,4 +18,4 @@ Execute the `watch` skill with the provided arguments.
 **IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "watch" in the name.
 
 ---
-*oracle-skills-cli v1.5.79*
+*oracle-skills-cli v1.5.80*

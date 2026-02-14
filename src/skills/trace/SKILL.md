@@ -1,6 +1,6 @@
 ---
 name: trace
-description: Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history". Supports --oracle (fast), --smart (default), --deep (5 subagents).
+description: Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history", "dig", "sessions", "past sessions". Supports --oracle (fast), --smart (default), --deep (5 subagents), --dig (session goldminer).
 ---
 
 # /trace - Unified Discovery System
@@ -15,6 +15,8 @@ Find + Log + Dig + Distill
 /trace [query] --deep             # 5 parallel subagents
 /trace [query] --repo [path]      # Search specific local repo
 /trace [query] --repo [url]       # Clone to ghq, then search
+/trace --dig                      # Session goldminer: scan Claude Code .jsonl files
+/trace --dig [N]                  # Scan N most recent sessions (default 10)
 ```
 
 ## Directory Structure
@@ -205,6 +207,55 @@ oracle_trace({
 
 ---
 
+## Mode 4: --dig (Session Goldminer)
+
+**Mine Claude Code session data. No subagents. No query needed.**
+
+Scans `~/.claude/projects/` session `.jsonl` files to build a timeline of recent sessions — filling gaps that git log alone can't show (conversations, research, abandoned branches, sidechains).
+
+### Step 1: Discover Project Dirs
+
+```bash
+PROJECT_BASE=$(ls -d "$HOME/.claude/projects/"*"$(basename "$(pwd)")" 2>/dev/null | head -1)
+export PROJECT_DIRS="$PROJECT_BASE"
+for wt in "${PROJECT_BASE}"-wt*; do [ -d "$wt" ] && export PROJECT_DIRS="$PROJECT_DIRS:$wt"; done
+```
+
+Uses `basename` of `pwd` to match the repo name suffix (avoids `github.com` vs `github-com` encoding mismatch). Also picks up worktree dirs (`-wt`, `-wt-1`, etc.).
+
+### Step 2: Extract Session Data
+
+Run the dig script (pass N if user specified a count, default 10):
+
+```bash
+python3 ~/.claude/skills/trace/scripts/dig.py [N]
+```
+
+### Step 3: Display Timeline
+
+Read the JSON output and display as a table:
+
+```markdown
+## Session Timeline (from --dig)
+
+| # | Date | Time | ~Min | Branch | Msgs | Focus |
+|---|------|------|------|--------|------|-------|
+| 1 | 2026-02-14 | 14:30 | 102 | main | 8 | Wire /rrr to read pulse data |
+| 2 | 2026-02-14 | 12:00 | 20 | main | 5 | oracle-pulse birth + CLI flag |
+| ... |
+
+**Dirs scanned**: [list PROJECT_DIRS]
+**Total sessions found**: [count]
+```
+
+"Msgs" = real typed human messages (not tool approvals).
+
+### Step 4: No trace log for --dig
+
+`--dig` does NOT write a trace log file or call oracle_trace. It's a read-only goldmine scan. Output goes to screen only.
+
+---
+
 ## Philosophy
 
 > Trace → Dig → Trace Deeper → Distill → Awakening
@@ -237,6 +288,7 @@ oracle_trace({
 | `--oracle` | Fast | Oracle only | No |
 | `--smart` | Medium | Oracle → maybe deep | Yes (< 3 results) |
 | `--deep` | Thorough | 5 parallel agents | N/A |
+| `--dig` | Fast | Claude Code sessions | No |
 
 | Flag | Effect |
 |------|--------|

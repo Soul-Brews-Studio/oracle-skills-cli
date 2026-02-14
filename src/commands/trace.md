@@ -1,5 +1,5 @@
 ---
-description: v1.5.79 | Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history". Supports --oracle (fast), --smart (default), --deep (5 subagents).
+description: v1.5.80 | Find projects across git history, repos, docs, and Oracle. Use when user asks "trace", "find project", "where is [project]", "search history", "dig", "sessions", "past sessions". Supports --oracle (fast), --smart (default), --deep (5 subagents), --dig (session goldminer).
 ---
 
 # /trace
@@ -18,4 +18,4 @@ Execute the `trace` skill with the provided arguments.
 **IMPORTANT**: Only use the path above. Do NOT search for or use any other file with "trace" in the name.
 
 ---
-*oracle-skills-cli v1.5.79*
+*oracle-skills-cli v1.5.80*
