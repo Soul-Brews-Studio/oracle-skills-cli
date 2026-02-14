@@ -1,6 +1,7 @@
 ---
 name: philosophy
 description: Display Oracle philosophy principles and guidance. Use when user asks about principles, "nothing deleted", Oracle philosophy, or needs alignment check.
+disable-model-invocation: true
 ---
 
 # /philosophy - Oracle Principles

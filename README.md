@@ -158,7 +158,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 6 | **oraclenet** | skill + code | OracleNet — claim identity, post, comment |
 | 7 | **physical** | skill + code | Physical location awareness from FindMy |
 | 8 | **project** | skill + code | Clone and track external repos |
-| 9 | **recap** | skill + code | Fresh-start orientation—adaptive synthesis |
+| 9 | **recap** | skill + code | Session orientation and awareness |
 | 10 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
 | 11 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
 | 12 | **watch** | skill + code | Learn from YouTube videos |
@@ -174,11 +174,11 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 21 | **philosophy** | skill | Display Oracle philosophy principles |
 | 22 | **retrospective** | skill | Create session retrospective with AI diary |
 | 23 | **standup** | skill | Daily standup check |
-| 24 | **where-we-are** | skill | Session awareness - what we're doing now |
+| 24 | **where-we-are** | skill | Session awareness - alias for /recap --now |
 | 25 | **who-we-are** | skill | Know ourselves |
 | 26 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-10 05:07:01 UTC*
+*Generated: 2026-02-14 02:57:44 UTC*
 
 ## Supported Agents
 

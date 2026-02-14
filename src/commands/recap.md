@@ -1,5 +1,5 @@
 ---
-description: v1.5.79 | Fresh-start orientation—adaptive synthesis with bulletproof edge case handling. Use when starting a session, after /jump, lost your place, or before switching context.
+description: v1.5.79 | Session orientation and awareness. Use when starting a session, after /jump, lost your place, switching context, or when user asks "now", "where are we", "what are we doing", "status".
 ---
 
 # /recap
