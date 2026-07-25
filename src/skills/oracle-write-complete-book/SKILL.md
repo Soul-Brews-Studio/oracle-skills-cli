@@ -2,6 +2,9 @@
 name: oracle-write-complete-book
 description: "Write a complete book from scratch — outline, parallel Sonnet drafting, Thai word break, typst PDF rendering, review, title brainstorm, publish to GitHub. Full pipeline proven on 'The Oracle Pattern' (15 chapters, 200+ pages). TRIGGER when: user says 'เขียนหนังสือ', 'write book', 'complete book', 'เขียนเล่มยาว', or wants a full book with PDF output. DO NOT TRIGGER for: short guides (use /oracle-write-book), cheatsheets (use /oracle-cheatsheet), single docs."
 created_at: 2026-06-09T13:40:00+07:00
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /oracle-write-complete-book — Complete Book Pipeline

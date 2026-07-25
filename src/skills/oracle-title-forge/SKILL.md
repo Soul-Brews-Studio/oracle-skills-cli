@@ -2,6 +2,9 @@
 name: oracle-title-forge
 description: "Forge a title + subtitle (or reframe) for a book, article, talk, or any technical piece so it has LIFE and honesty — not clinical/dated. The method that produced 'Claude Code Channel ปะทะ Hermes Gateway'. Describe-before-you-name, find the real tension, prism the candidates, calibrate register (eloquent but dev-natural, not poetic), name the real technical axes in the subtitle, refuse a fake winner. Use when: a title feels เชย/dead/generic, when naming a book or post, when reframing a comparison as a genuine contest, or when the user says 'ตั้งชื่อ', 'title', 'reframe', 'ชื่อมันเชย', 'คิดชื่อ'. DO NOT TRIGGER for: writing the body content itself (use kien-thai / the book skills)."
 argument-hint: "<what to title — topic, or the current dead title + what the piece is about>"
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /oracle-title-forge — forge a title that has life, honestly
