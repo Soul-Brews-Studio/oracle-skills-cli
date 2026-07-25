@@ -403,6 +403,31 @@ git merge "agents/$AGENT" --no-ff -m "merge: $AGENT from team $TEAM"
 
 ---
 
+## team-ops — the zero-token helper
+
+`scripts/team-ops.sh` drives the tmux side of a team in plain bash, so routine lifecycle work
+costs no model tokens. `team-ops help` prints the authoritative list; this is the map.
+
+```bash
+# Look
+team-ops status                              # team + panes + skills, all at once
+team-ops panes [team]                        # just the agent panes
+team-ops doctor [--fix]                      # find ghost panes and orphaned worktrees
+
+# Run a team
+team-ops spawn-skills <team> <agent>...      # give each agent its own /agent skill
+team-ops shutdown-skills <team> <agent>...   # retire those skills (archived, not deleted)
+team-ops shutdown-worktrees [repo]           # remove the agents' worktrees
+team-ops mailbox <cmd> [args]                # persistent notes between agents
+
+# Clean up
+team-ops cleanup [--dry-run]                 # close idle panes only — leaves live ones alone
+team-ops killshot                            # ⚠️ closes EVERY pane except the lead
+```
+
+Typical arc: `spawn-skills` → `panes` / `status` → `shutdown-skills` → `cleanup`.
+Reach for `killshot` only when the layout is beyond saving — it takes the whole team down.
+
 ## Base System Facts
 
 **Provides**: mailbox (JSON + file locking), 10 structured message types, permission escalation (worker→leader→user), auto-resume on SendMessage to stopped agent, task self-claim by idle agents, deterministic IDs (`name@team`), plan auto-approval, session resume (prior-session teams persist).
