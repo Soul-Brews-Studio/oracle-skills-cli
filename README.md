@@ -118,8 +118,8 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 
 | Profile | Count | Skills |
 |---------|-------|--------|
-| **minimal** | 6 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace` |
-| **standard** | 12 | `awaken`, `bampenpien`, `bud`, `dig`, `forward`, `go`, `learn`, `recap`, `rrr`, `talk-to`, `team-agents`, `trace` |
+| **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
+| **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `kien-thai`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
 | **full** | 30 | all |
 | **lab** | 30 | all |
 

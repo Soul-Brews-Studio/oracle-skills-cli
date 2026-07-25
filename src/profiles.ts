@@ -2,29 +2,52 @@
  * Skill profiles — 3 tiers, single source of truth.
  *
  * minimal: newcomer essentials — 6 skills (lifecycle + trace + update + upgrade)
- * standard: daily driver — 12 essential skills (data-driven, session 8+9)
+ * standard: daily driver — 13 essential skills (data-driven, session 8+9)
  * full: all stable skills (excludes lab-only experiments AND minimal-only lite variants)
  * lab: everything including experimental / bleeding edge (still excludes minimal-only lite variants)
  *
+ * TIER INVARIANT (Nat, 2026-07-25): **minimal ⊆ standard**. The tiers are a
+ * ladder — upgrading a profile must never REMOVE a skill you already had.
+ * Locked by __tests__/profiles.test.ts ("minimal is a subset of standard").
+ *
  * Profile audit: 120 sessions mined (2026-04-15). Skills earning standard
- * must have 10+ session appearances. Demoted: about-oracle (5), create-shortcut (6),
+ * must have 10+ session appearances. Demoted: create-shortcut (6),
  * oracle-soul-sync-update (6), standup (10), skills-list (3), oracle-family-scan (8).
  * These move to full (still installable, not lab-gated).
+ * about-oracle (5 appearances) was demoted the same way — but it lives in
+ * MINIMAL, so demoting it broke the ladder: `arra install -p standard` silently
+ * dropped a skill that `-p minimal` installs. Restored 2026-07-25; the usage
+ * threshold does not apply to skills minimal already ships.
  *
  * Lites killed 2026-05-14: forward-lite/recap-lite/rrr-lite moved to zombie.
  * 900 chars of description savings wasn't worth 4 PRs of cleanup bugs (#368, #382, #384, #387).
  * Minimal now uses full forward/recap/rrr — same skills, fewer of them.
  */
 
-/** Minimal profile — essential lifecycle + trace */
+/** Minimal profile — essential lifecycle + trace + identity.
+ *  about-oracle ("what is Oracle") and who-are-you ("who am I talking to")
+ *  are the orientation pair every newcomer asks first. */
 export const MINIMAL_SKILLS = [
-  'about-oracle', 'forward', 'go', 'recap', 'rrr', 'trace',
+  'about-oracle', 'forward', 'go', 'recap', 'rrr', 'trace', 'who-are-you',
 ] as const;
 
-/** Standard profile — daily driver skills (always installed) */
+/** Standard profile — daily driver skills (always installed).
+ *  MUST be a superset of MINIMAL_SKILLS — see TIER INVARIANT above.
+ *
+ *  Re-cut 2026-07-25 (Nat). Rule: **if the census says people use it, it ships
+ *  in standard** — the old "10+ appearances, else demote to full" threshold was
+ *  hiding daily-driver skills behind an opt-in nobody opts into. The only
+ *  exception is skills that can't work alone: talk-to and team-agents need
+ *  other oracles / a federation configured first, so they read as broken to a
+ *  newcomer with nobody to talk to — those moved OUT to full.
+ *  In (with census counts): oracle-prism 74, where-we-are 68,
+ *  oracle-family-scan 63, oracle-cheatsheet 51, create-shortcut 32,
+ *  resonance 25, incubate 20, kien-thai 15. */
 export const STANDARD_SKILLS = [
-  'awaken', 'bampenpien', 'bud', 'dig', 'forward', 'go',
-  'learn', 'recap', 'rrr', 'talk-to', 'team-agents', 'trace',
+  'about-oracle', 'awaken', 'bampenpien', 'bud', 'create-shortcut', 'dig',
+  'forward', 'go', 'incubate', 'kien-thai', 'learn', 'oracle-cheatsheet',
+  'oracle-family-scan', 'oracle-prism', 'recap', 'resonance', 'rrr', 'trace',
+  'where-we-are', 'who-are-you',
 ] as const;
 
 /** Lab-only skills — experimental, not in standard or full.

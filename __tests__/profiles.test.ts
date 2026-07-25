@@ -11,24 +11,35 @@ const ALL_SKILLS = [
   // (standup moved to zombie 2026-07-06 — now covered by the ZOMBIE_SKILLS spread)
   "about-oracle", "create-shortcut", "incubate",
   "oracle-family-scan", "project",
-  "where-we-are", "who-are-you",
+  "talk-to", "team-agents", "where-we-are", "who-are-you",
 ].sort();
 
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];
 
 describe("profiles", () => {
-  it("minimal has 6 skills", () => {
-    expect(MINIMAL_SKILLS).toHaveLength(6);
-    expect(profiles.minimal.include).toHaveLength(6);
+  it("minimal has 7 skills", () => {
+    expect(MINIMAL_SKILLS).toHaveLength(7);
+    expect(profiles.minimal.include).toHaveLength(7);
   });
 
   it("minimal includes go for upgrade path", () => {
     expect(MINIMAL_SKILLS).toContain("go");
   });
 
-  it("standard has 12 skills", () => {
-    expect(STANDARD_SKILLS).toHaveLength(12);
-    expect(profiles.standard.include).toHaveLength(12);
+  it("standard has 20 skills", () => {
+    expect(STANDARD_SKILLS).toHaveLength(20);
+    expect(profiles.standard.include).toHaveLength(20);
+  });
+
+  // TIER LADDER (Nat, 2026-07-25): upgrading a profile must never REMOVE a
+  // skill. about-oracle was demoted out of standard by the 2026-04 usage audit
+  // while staying in minimal, so `-p standard` silently shipped one skill FEWER
+  // than `-p minimal` — caught the day before a workshop that demoed
+  // /about-oracle with the standard profile.
+  it("minimal is a subset of standard (upgrading never loses a skill)", () => {
+    const std = new Set<string>(STANDARD_SKILLS);
+    const lost = [...MINIMAL_SKILLS].filter((s) => !std.has(s));
+    expect(lost).toEqual([]);
   });
 
   it("full excludes lab-only AND minimal-only skills (post-#285)", () => {
@@ -42,10 +53,6 @@ describe("profiles", () => {
 
   it("standard includes dig", () => {
     expect(STANDARD_SKILLS).toContain("dig");
-  });
-
-  it("standard includes team-agents", () => {
-    expect(STANDARD_SKILLS).toContain("team-agents");
   });
 
   it("standard does NOT include dream or feel", () => {
@@ -111,14 +118,14 @@ describe("profiles", () => {
 });
 
 describe("resolveProfile", () => {
-  it("minimal returns 6 skills", () => {
+  it("minimal returns 7 skills", () => {
     const result = resolveProfile("minimal", ALL_SKILLS);
-    expect(result).toHaveLength(6);
+    expect(result).toHaveLength(7);
   });
 
-  it("standard returns 12 skills", () => {
+  it("standard returns 20 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result).toHaveLength(12);
+    expect(result).toHaveLength(20);
   });
 
   it("full returns all minus lab-only, minimal-only, and zombies", () => {
