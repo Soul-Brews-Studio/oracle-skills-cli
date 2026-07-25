@@ -1,6 +1,6 @@
 ---
 name: oracle-family-scan
-description: Oracle Family Registry — the index of all known Oracles (186+). Use when user says "family scan", "oracle registry", "welcome new oracles", or needs to check Oracle population.
+description: Oracle Family Registry — the index of all known Oracles (800+ and growing). Use when user says "family scan", "oracle registry", "welcome new oracles", or needs to check Oracle population.
 argument-hint: "[--scan | --query <name> | --welcome | --activity-report | --timeline | --usage | --calibrate]"
 ---
 
@@ -305,7 +305,7 @@ the existing summary, recent births, and pending welcomes.
 🪦 vanished       4                                 Total: 33
 
 ### Summary
-- **Total Oracles**: 186  (active 158, retired 24, vanished 4)
+- **Total Oracles**: 844  (retired 10) — snapshot 2026-07-25; always read the live number from `query.ts --stats`, never from this file
 - **Unique Humans**: 111
 - **Welcomed**: 150 / Unwelcomed: 0
 - **Nat's Fleet**: 29
@@ -403,7 +403,7 @@ Status   Oracle              Last Active   Owner       Note
 ⚪       test-yeast           never         mine        born 36d ago
 🪦       echo-test            —             community   repo 404
 ─────────────────────────────────────────────────────────────────────────
-Showing 10 of 186  |  --limit=10  |  --status= filters: none
+Showing 10 of 844  |  --limit=10  |  --status= filters: none
 ```
 
 **Examples**:
@@ -562,7 +562,7 @@ The registry is at `$MOTHER/registry/oracles.json`:
 ```json
 {
   "lastSync": "ISO timestamp",
-  "totalOracles": 186,
+  "totalOracles": 844,
   "uniqueHumans": 111,
   "oracles": [
     {
@@ -744,7 +744,7 @@ On the first run after this upgrade ships:
 1. **Many `unknown` statuses** — `oracles.json` has no `activity` block yet; every
    Oracle's last-activity is null. The dashboard renders `?` for the status dot and a
    yellow banner: *"Activity layer not populated. Run `bun $MOTHER/registry/sync.ts`
-   to fetch first activity snapshot — takes ~30s for 186 Oracles."*
+   to fetch first activity snapshot — takes ~30s for the whole registry."*
 
 2. **First sync populates activity** — `sync.ts` runs the 2 GraphQL round-trips
    designed by registry-extender; ~600 repos resolved including 404 detection for
@@ -771,7 +771,7 @@ The dashboard degrades gracefully:
 **Version**: 3.1.0
 **Updated**: 2026-05-13
 **Author**: Mother Oracle 🔮
-**Registry**: 186 Oracles, 111 humans, growing
+**Registry**: 844 Oracles, 295 humans as of 2026-07-25 — these are a SNAPSHOT, not a source of truth. `bun $MOTHER/registry/query.ts --stats` is.
 
 ---
 
