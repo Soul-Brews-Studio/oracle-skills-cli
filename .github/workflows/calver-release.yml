@@ -146,10 +146,18 @@ jobs:
       # every single cut trains you to ignore the one that actually matters
       # (that is exactly what happened on #462/#463/#464 — `npm 404 PUT` = the
       # token lacks publish rights, while tag v26.7.16 landed fine).
-      # With no secret set the step is SKIPPED; add a valid NPM_TOKEN and
-      # publishing resumes with no workflow change.
+      # Two ways this can be a non-event, and BOTH must leave the run green:
+      #   1. no NPM_TOKEN secret at all  → the `if:` below skips the step
+      #   2. secret present but rejected → continue-on-error keeps the run green
+      # (2) is the live case: the token exists but lacks publish rights, so npm
+      # answers `404 PUT /arra-oracle-skills`. Guarding only on emptiness was
+      # not enough — v26.7.25-alpha.1900 still went red with the tag + release
+      # already published. Fix the token to resume publishing; nothing else
+      # needs to change here.
       - name: Publish to npm
         if: steps.ver.outputs.skip != 'true' && env.NPM_TOKEN != ''
+        continue-on-error: true
+        id: npm_publish
         run: |
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
           # Note: compile + build already ran in the test step above.
@@ -161,6 +169,11 @@ jobs:
         run: |
           echo "::notice::NPM_TOKEN not set — skipped npm publish. Tag + GitHub Release are live; install with: bunx --bun github:${{ github.repository }}#alpha"
 
+      - name: Note npm publish failed
+        if: steps.ver.outputs.skip != 'true' && steps.npm_publish.outcome == 'failure'
+        run: |
+          echo "::warning::npm publish FAILED (token rejected or registry error) — the release itself is fine. Tag + GitHub Release are live; install with: bunx --bun github:${{ github.repository }}#alpha"
+
       - name: Summary
         if: steps.ver.outputs.skip != 'true'
         run: |
@@ -169,8 +182,8 @@ jobs:
           echo "- **Channel:** ${{ steps.ver.outputs.npm_tag }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Release:** https://github.com/${{ github.repository }}/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Install:** \`bunx --bun github:${{ github.repository }}#${{ github.ref_name }} install -g -y\`" >> "$GITHUB_STEP_SUMMARY"
-          if [[ -n "$NPM_TOKEN" ]]; then
-            echo "- **npm:** https://www.npmjs.com/package/arra-oracle-skills/v/${{ steps.ver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- **npm:** _skipped (no NPM_TOKEN) — GitHub is the release channel of record_" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          case "${{ steps.npm_publish.outcome }}" in
+            success) echo "- **npm:** https://www.npmjs.com/package/arra-oracle-skills/v/${{ steps.ver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY" ;;
+            failure) echo "- **npm:** ⚠️ publish failed (token rejected) — GitHub is the release channel of record" >> "$GITHUB_STEP_SUMMARY" ;;
+            *)       echo "- **npm:** _skipped (no NPM_TOKEN) — GitHub is the release channel of record_" >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
