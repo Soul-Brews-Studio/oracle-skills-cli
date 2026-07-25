@@ -147,34 +147,45 @@ Skills with `hooks/hooks.json` are installed as Claude Code plugins:
 
 Currently `ralph-loop-soulbrews` has hooks.
 
-## Branch Strategy — **always alpha, never main**
+## Branch Strategy — **alpha only**
 
-**Every PR targets `alpha`. No exceptions for bug fixes or features.** `main` is reserved for stable cuts that happen as alpha → main release PRs (and only those).
-
-| Work Type | Branch | PR base |
-|-----------|--------|---------|
-| Anything (feature, fix, refactor, docs) | `feat/*` or `fix/*` | **always `--base alpha`** |
-| Stable cut | `alpha` | `--base main` (rare, deliberate, by /release-alpha or similar) |
-
-`gh pr create` defaults to the repo's default branch (`main`) — that default is the bug. You MUST pass `--base alpha` explicitly:
+**Everything targets `alpha`. There is no stable cut.** Not for features, not for
+fixes, not for releases (Nat, 2026-07-25).
 
 ```bash
 gh pr create --base alpha --head feat/my-thing --title "..."
 ```
 
-A PreToolUse safety hook at `~/.claude/hooks/safety-pr-base.sh` blocks any `gh pr create` against this repo that targets `main` or omits `--base`. If the hook fires, fix the flag — don't bypass it.
+`alpha` is now the repo's **default branch**, so `gh pr create` gets it right on its own —
+but pass `--base alpha` anyway. A PreToolUse hook at `~/.claude/hooks/safety-pr-base.sh`
+blocks any `gh pr create` here that targets `main` or omits `--base`; if it fires, fix the
+flag rather than bypassing it.
 
-```bash
-# Alpha work (default)
-git checkout alpha
-# ... work, commit, push, PR → alpha ...
+### Why `main` is dead, not just discouraged
 
-# Stable release (rare)
-gh pr create --base main --head alpha --title "release: vYY.M.D"
-```
+Every delivery path already reads `alpha`:
 
-**`/alpha-feature`** commits to `alpha` branch.
-**`/release-alpha`** tags from `alpha` branch (and only it should ever target main).
+| path | reads |
+|---|---|
+| `/plugin marketplace add …` | the **default branch** — i.e. alpha |
+| documented installs | `bunx --bun github:…#alpha` |
+| CI | runs on alpha |
+
+`main` has no consumer left, so cutting to it is ceremony that only adds ways to fail —
+two of which happened on 2026-07-25:
+
+- Merging `alpha → main` carries alpha's version onto main. `calver-release.yml` then
+  computes a tag that **already exists** (created when alpha bumped) and dies on its
+  collision guard — *after* the PR's own CI went green, because the collision only occurs
+  post-merge. That killed PR #474; #475 was closed under this rule.
+- A stale `bump:` riding inside a feature branch moves the version **backwards** (#467),
+  and merging such a branch cut an unwanted stable tag off alpha.
+
+So: no `alpha → main` PRs, no `release/*` branches, no `--stable` versions. If someone
+asks for "a release", that means an alpha cut.
+
+**`/alpha-feature`** commits to the `alpha` branch.
+**`/release-alpha`** tags from `alpha` — and only alpha.
 
 ## Version Workflow — always /calver, never manual
 
