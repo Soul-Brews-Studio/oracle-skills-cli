@@ -36,19 +36,31 @@ disable-model-invocation: true
 
 Before running any command, detect the CLI path. It may not be in `$PATH` on all machines.
 
+Two variables, because reading and writing have different safety requirements.
+
 ```bash
-# Try in order: global binary, bun global, bunx fallback
+# $ARRA — READ-ONLY commands (profiles, list, --version). The local binary is fine
+# here: it is fast, and a slightly stale profile listing is harmless.
 if command -v arra-oracle-skills &>/dev/null; then
   ARRA="arra-oracle-skills"
 elif [ -x "$HOME/.bun/bin/arra-oracle-skills" ]; then
   ARRA="$HOME/.bun/bin/arra-oracle-skills"
 else
-  # Not installed — use bunx (always works if bun exists)
-  ARRA="$HOME/.bun/bin/bunx --bun arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli"
+  ARRA="$HOME/.bun/bin/bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha"
 fi
+
+# $ARRA_INSTALL — anything that WRITES skills to disk. Always from GitHub.
+ARRA_INSTALL="$HOME/.bun/bin/bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha"
 ```
 
-Use `$ARRA` for all commands below.
+**Why they differ.** The installed binary carries its own frozen copy of every skill — the
+set as of the day you installed it. Installing through it therefore writes *those* skills
+over whatever you have now. Once the binary is older than your skills (normal after a few
+weeks) every "install" is really a downgrade; a `26.5.15` binary was seen overwriting
+`26.7.25` skills. Reading through it costs you nothing, so keep the fast path for reads and
+take the network hit only when writing.
+
+Use `$ARRA` for reads and `$ARRA_INSTALL` for installs/updates below.
 
 ---
 
@@ -187,15 +199,15 @@ echo " Switch:       /go standard | /go lab"
 ### `/go <profile>` — switch profile
 
 ```bash
-$ARRA install -g --profile <name> -y
+$ARRA_INSTALL install -g --profile <name> -y
 ```
 
 Profiles: `minimal`, `standard`, `full`, `lab`
 
-- `/go minimal` → `$ARRA install -g --profile minimal -y`
-- `/go standard` → `$ARRA install -g --profile standard -y`
-- `/go full` → `$ARRA install -g --profile full -y`
-- `/go lab` → `$ARRA install -g --profile lab -y`
+- `/go minimal` → `$ARRA_INSTALL install -g --profile minimal -y`
+- `/go standard` → `$ARRA_INSTALL install -g --profile standard -y`
+- `/go full` → `$ARRA_INSTALL install -g --profile full -y`
+- `/go lab` → `$ARRA_INSTALL install -g --profile lab -y`
 
 > Note: passing `--profile` explicitly triggers alignment — arra-managed skills NOT in the target
 > are removed automatically. External skills are never touched.
@@ -346,36 +358,62 @@ LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/arra-oracle-skil
 - Version mismatch (some v3.6.1, some v3.7.0)
 - Want a clean slate without losing personal skills
 
-### `/go update` — check for new version + upgrade in-place
+### `/go update` — pull the newest skills from GitHub
+
+**Never update through the installed `$ARRA` binary.** It ships its own copy of the skills,
+frozen at whatever version you installed it — so `$ARRA install` re-writes those frozen
+skills over your current ones. When the binary is older than your skills (the normal case
+after a few weeks), "update" quietly becomes a **downgrade**. Observed live: a
+`26.5.15` binary overwriting `26.7.25` skills.
+
+Always fetch from GitHub instead, so the newest skills come from the branch rather than
+from whatever is cached on disk:
 
 ```bash
 CURRENT=$($ARRA --version 2>/dev/null || echo "unknown")
 LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/arra-oracle-skills-cli/tags | grep -m1 '"name"' | cut -d'"' -f4)
-echo "  Installed: $CURRENT"
-echo "  Latest:    $LATEST"
+echo "  CLI binary:   $CURRENT"
+echo "  Latest tag:   $LATEST"
+
+# The update itself — always from GitHub, never from $ARRA
+$ARRA_INSTALL install -g -y
 ```
 
-If versions differ:
+`#alpha` is the branch every cut lands on first; it is also the repo's default branch, so
+this is the same code the plugin marketplace serves. Pin a tag (`#$LATEST`) instead when
+you deliberately want a specific release.
+
+**Already on the plugin?** If `claude plugin list` shows `oracle-skills@oracle-skills`, that
+install updates itself — run `/plugin update oracle-skills@oracle-skills` and stop here.
+Running both leaves two copies of every skill and it stops being obvious which one loads.
+
+**Refreshing a specific set** — `-s` takes a LIST of names, so each name must arrive as its
+own argument. In zsh (the default shell here) `$VAR` does **not** word-split, so a variable
+holding names collapses into one bogus argument and the CLI silently installs only the
+default profile:
 
 ```bash
-$ARRA install -g -y
+NAMES="dig learn talk-to"
+… install -g -y -s $NAMES      # zsh: ONE argument → wrong, installs default profile only
+… install -g -y -s ${=NAMES}   # zsh: three arguments → correct
+… install -g -y -s dig learn talk-to   # always correct, in any shell
 ```
 
-If already current: "Already on latest ($CURRENT). Nothing to do."
+Also note `-s` is **additive on top of the default profile** — it adds the named skills, it
+does not restrict the install to them.
 
-- `/go update` → check + upgrade to latest tag
-- Equivalent to `/oracle-soul-sync-update` but discoverable under `/go`
-- Does NOT change your profile — only bumps the version of currently installed skills
+- `/go update` → fetch latest from GitHub and reinstall in place
+- Does NOT change your profile — pass `-p <name>` only if you also want to switch tiers
 - Safe to run anytime — idempotent
 
 ### `/go install <skill...>` — cherry-pick specific skills
 
 ```bash
-$ARRA install -g -s <skill...> -y
+$ARRA_INSTALL install -g -s <skill...> -y
 ```
 
-- `/go install team-agents` → `$ARRA install -g -s team-agents -y`
-- `/go install dig hey xray` → `$ARRA install -g -s dig hey xray -y`
+- `/go install team-agents` → `$ARRA_INSTALL install -g -s team-agents -y`
+- `/go install dig hey xray` → `$ARRA_INSTALL install -g -s dig hey xray -y`
 
 Works for ANY skill — standard, lab, or even zombie. Does not change your profile; just adds the named skills on top of whatever you have.
 
