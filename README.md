@@ -4,67 +4,78 @@
 
 ## Install
 
-Installs run straight from the GitHub `alpha` branch — always the newest skills, no npm publish required:
+**Inside Claude Code** — nothing to install first, no bun, no git:
 
-```bash
-# Claude Code — standard profile (default)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent claude-code
-
-# Full profile (all skills)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full --agent claude-code
-
-# Lab profile (full + experimental)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p lab --agent claude-code
-
-# Specific skills only
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s recap rrr trace --agent claude-code
-
-# Other agents (skills + commands)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent codex --with-commands
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent opencode --with-commands
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent cursor
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent gemini-cli --with-commands
-
-# Multiple agents
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y --agent claude-code codex opencode
-
-# thClaws (federated agent — explicit opt-in)
-bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g --with-thclaws
-# OR target thclaws directly:
-bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g -a thclaws
-# Skills install to ~/.config/thclaws/skills/ when --with-thclaws is passed
-
-# Install to ALL detected agents incl. federated (CI escape hatch)
-bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g --all-detected
+```
+/plugin marketplace add Soul-Brews-Studio/arra-oracle-skills-cli
+/plugin install oracle-skills@oracle-skills
 ```
 
-> **Claude Code plugin marketplace** (fewest prerequisites — no bun/git needed):
-> `/plugin marketplace add Soul-Brews-Studio/arra-oracle-skills-cli` inside Claude Code installs the curated set from `.claude-plugin/marketplace.json`.
->
-> **npm**: published releases may lag behind the `alpha` branch (publishing is manual). If you prefer npm: `npx arra-oracle-skills@latest install -g -y --agent claude-code`. Never pin an exact alpha version from git history — not every CalVer bump is published.
-
-> **#330 note**: as of v26.5.14+, federated agents (thClaws, OpenCode, GitHub Copilot, OpenClaw) are NOT auto-installed by default — they require explicit `-a <name>`, `--with-<name>`, or `--all-detected`. Host Anthropic agents (Claude Code, Codex) continue to auto-detect.
-
-### Local project install
-
-By default (no `-g` flag), skills install to the current project's `.claude/skills/` instead of `~/.claude/skills/`:
+**From the terminal** — for any other agent, or to pick a profile:
 
 ```bash
-# Local install (current project)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -a claude-code -s trace -y
-
-# Same with explicit -l flag (symmetric to -g)
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -l -a claude-code -s trace -y
+bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y
 ```
 
-Use when:
-- Testing skill changes before global rollout
-- Different repos want different skill versions
-- Committing project-specific skills to `.claude/skills/` in version control
+That is the whole thing. Everything below is a variation on that one command.
 
-The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed skills from globally-installed ones (which get `G-SKLL`).
+<details>
+<summary><strong>Variations</strong> — profiles, other agents, local installs</summary>
 
-19 agents: Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
+Append flags to the command above:
+
+| want | add |
+|---|---|
+| a different profile | `-p standard` · `-p full` · `-p lab` (default: `minimal`) |
+| just a few skills | `-s recap rrr trace` — adds them **on top of** the profile |
+| a specific agent | `--agent claude-code` · `codex` · `cursor` · `opencode` · `gemini-cli` |
+| several agents at once | `--agent claude-code codex opencode` |
+| slash-command stubs too | `--with-commands` (Codex, OpenCode, Gemini need these) |
+| this project only | drop `-g` — installs to `./.claude/skills/` instead of `~/.claude/skills/` |
+
+So a full install for Codex with command stubs reads:
+
+```bash
+bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full --agent codex --with-commands
+```
+
+**Shell note:** `-s` needs each name as its own word. zsh does not split `$VARS`, so
+`-s $NAMES` arrives as one bogus argument and you silently get only the profile — write the
+names literally, or use `${=NAMES}`.
+
+**Federated agents** (thClaws, OpenCode, GitHub Copilot, OpenClaw) are never auto-detected —
+ask for them by name (#330):
+
+```bash
+… install -g -y --with-thclaws     # or: -a thclaws        → ~/.config/thclaws/skills/
+… install -g -y --all-detected     # every detected agent (CI escape hatch)
+```
+
+</details>
+
+<details>
+<summary><strong>Updating</strong>, and why npm is not the channel</summary>
+
+Update the way you installed:
+
+| installed via | update with |
+|---|---|
+| plugin | `/plugin update oracle-skills@oracle-skills` |
+| terminal | re-run the install command |
+
+Don't update through an already-installed `arra-oracle-skills` binary. It carries its own
+frozen copy of the skills, so once it is older than what you have, "update" writes the old
+set back over the new one. Always fetch from GitHub.
+
+npm exists as a mirror (`npx arra-oracle-skills@latest …`) but publishing is manual, so it
+lags `alpha`. Never pin an exact `-alpha` version from git history — not every CalVer bump is
+published, and unpublished versions 404.
+
+</details>
+
+**19 agents supported:** Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
+
+Skills carry a marker in their description showing where they came from: `G-SKLL` global, `L-SKLL` local.
 
 ## Skills
 
@@ -194,31 +205,6 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | `/mailbox` | Persistent agent mailbox — store findings, standing order... |
 | `/inbox` | Read and write to Oracle inbox — notes, tasks, messages, ... |
 <!-- secret-skills:end -->
-
-## Team Agent Scripts
-
-`/team-agents` ships `team-ops` — plain bash for driving a team of agents in tmux panes,
-so routine lifecycle work costs no tokens. Run `team-ops help` for the built-in reference.
-
-```bash
-# Look
-team-ops status                              # team + panes + skills, all at once
-team-ops panes [team]                        # just the agent panes
-team-ops doctor [--fix]                      # find ghost panes and orphaned worktrees
-
-# Run a team
-team-ops spawn-skills <team> <agent>...      # give each agent its own /agent skill
-team-ops shutdown-skills <team> <agent>...   # retire those skills (archived, not deleted)
-team-ops shutdown-worktrees [repo]           # remove the agents' worktrees
-team-ops mailbox <cmd> [args]                # persistent notes between agents
-
-# Clean up
-team-ops cleanup [--dry-run]                 # close idle panes only — leaves live ones alone
-team-ops killshot                            # ⚠️ closes EVERY pane except the lead
-```
-
-Typical arc: `spawn-skills` → `panes` / `status` → `shutdown-skills` → `cleanup`.
-Reach for `killshot` only when the layout is beyond saving — it takes the whole team down.
 
 ## Origin
 
