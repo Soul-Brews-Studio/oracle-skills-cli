@@ -33,6 +33,10 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Job-level so the npm step's `if:` can test it — the env context in a
+    # step's `if` cannot see that same step's own `env:` block.
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,15 +136,30 @@ jobs:
           fi
           gh release create "$TAG" $FLAGS
 
+      # GitHub is the release channel of record: every documented install path
+      # reads this repo, not npm — `bunx --bun github:<org>/<repo>#alpha`, and
+      # the Claude Code plugin marketplace (.claude-plugin/marketplace.json).
+      # npm is a courtesy mirror for `npx` users without bun.
+      #
+      # So a dead/expired NPM_TOKEN must NOT fail the release: the tag and the
+      # GitHub Release are already published by the steps above, and a red X on
+      # every single cut trains you to ignore the one that actually matters
+      # (that is exactly what happened on #462/#463/#464 — `npm 404 PUT` = the
+      # token lacks publish rights, while tag v26.7.16 landed fine).
+      # With no secret set the step is SKIPPED; add a valid NPM_TOKEN and
+      # publishing resumes with no workflow change.
       - name: Publish to npm
-        if: steps.ver.outputs.skip != 'true'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: steps.ver.outputs.skip != 'true' && env.NPM_TOKEN != ''
         run: |
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
           # Note: compile + build already ran in the test step above.
           # Skipping prepublishOnly to avoid redundant work (per review).
           npm publish --access public --tag "${{ steps.ver.outputs.npm_tag }}"
+
+      - name: Note npm publish skipped
+        if: steps.ver.outputs.skip != 'true' && env.NPM_TOKEN == ''
+        run: |
+          echo "::notice::NPM_TOKEN not set — skipped npm publish. Tag + GitHub Release are live; install with: bunx --bun github:${{ github.repository }}#alpha"
 
       - name: Summary
         if: steps.ver.outputs.skip != 'true'
@@ -149,4 +168,9 @@ jobs:
           echo "### 🎉 Released $TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Channel:** ${{ steps.ver.outputs.npm_tag }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Release:** https://github.com/${{ github.repository }}/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **npm:** https://www.npmjs.com/package/arra-oracle-skills/v/${{ steps.ver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Install:** \`bunx --bun github:${{ github.repository }}#${{ github.ref_name }} install -g -y\`" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -n "$NPM_TOKEN" ]]; then
+            echo "- **npm:** https://www.npmjs.com/package/arra-oracle-skills/v/${{ steps.ver.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- **npm:** _skipped (no NPM_TOKEN) — GitHub is the release channel of record_" >> "$GITHUB_STEP_SUMMARY"
+          fi
