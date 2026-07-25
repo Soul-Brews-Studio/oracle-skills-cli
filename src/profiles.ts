@@ -1,8 +1,8 @@
 /**
  * Skill profiles — 3 tiers, single source of truth.
  *
- * minimal: newcomer essentials — 6 skills (lifecycle + trace + update + upgrade)
- * standard: daily driver — 13 essential skills (data-driven, session 8+9)
+ * minimal: newcomer essentials — 7 skills (lifecycle + trace + identity)
+ * standard: daily driver — 20 skills (usage-driven, re-cut 2026-07-25)
  * full: all stable skills (excludes lab-only experiments AND minimal-only lite variants)
  * lab: everything including experimental / bleeding edge (still excludes minimal-only lite variants)
  *
@@ -42,12 +42,18 @@ export const MINIMAL_SKILLS = [
  *  newcomer with nobody to talk to — those moved OUT to full.
  *  In (with census counts): oracle-prism 74, where-we-are 68,
  *  oracle-family-scan 63, oracle-cheatsheet 51, create-shortcut 32,
- *  resonance 25, incubate 20, kien-thai 15. */
+ *  resonance 25, incubate 20, oracle-write-complete-book 20.
+ *
+ *  NOT ours to ship: kien-thai was briefly added here and to skills/ on
+ *  2026-07-25 — it is a third-party skill that happened to be installed in
+ *  ~/.claude/skills on this machine, and it was packaged without checking
+ *  authorship. Removed the same day. Before promoting anything out of a local
+ *  skills dir, confirm WE wrote it. */
 export const STANDARD_SKILLS = [
   'about-oracle', 'awaken', 'bampenpien', 'bud', 'create-shortcut', 'dig',
-  'forward', 'go', 'incubate', 'kien-thai', 'learn', 'oracle-cheatsheet',
-  'oracle-family-scan', 'oracle-prism', 'recap', 'resonance', 'rrr', 'trace',
-  'where-we-are', 'who-are-you',
+  'forward', 'go', 'incubate', 'learn', 'oracle-cheatsheet',
+  'oracle-family-scan', 'oracle-prism', 'oracle-write-complete-book', 'recap',
+  'resonance', 'rrr', 'trace', 'where-we-are', 'who-are-you',
 ] as const;
 
 /** Lab-only skills — experimental, not in standard or full.

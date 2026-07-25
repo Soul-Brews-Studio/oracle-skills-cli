@@ -11,7 +11,7 @@ const ALL_SKILLS = [
   // (standup moved to zombie 2026-07-06 — now covered by the ZOMBIE_SKILLS spread)
   "about-oracle", "create-shortcut", "incubate",
   "oracle-family-scan", "project",
-  "talk-to", "team-agents", "where-we-are", "who-are-you",
+  "talk-to", "team-agents", "oracle-write-complete-book", "where-we-are", "who-are-you",
 ].sort();
 
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];

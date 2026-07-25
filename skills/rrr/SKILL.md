@@ -1,7 +1,7 @@
 ---
 name: rrr
 description: Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
-argument-hint: "[--quick | --detail | --deep]"
+argument-hint: "[--bg | --quick | --detail | --deep]"
 ---
 
 # /rrr
@@ -10,6 +10,7 @@ argument-hint: "[--quick | --detail | --deep]"
 
 ```
 /rrr                      # Retro + 1 background dig subagent (parallel, fast)
+/rrr --bg                 # Hand the WHOLE retro to a background Sonnet — returns instantly
 /rrr --quick              # No dig, no subagent — memory only (fastest)
 /rrr --detail             # Full template + background dig
 /rrr --deep               # 5 parallel subagents
@@ -289,6 +290,103 @@ Same flow as default but use full template:
 ```
 
 Then steps 3-5 same as default.
+
+---
+
+## /rrr --bg
+
+**Fire-and-forget.** Hands the entire retrospective to a background Sonnet subagent and
+returns immediately — the session keeps moving while the retro gets written.
+
+Use it mid-session to snapshot progress without stopping, or at the end when you'd rather
+start the next thing than wait. For the full interactive retro, use plain `/rrr`.
+
+> **Why Sonnet, not Haiku:** the Timeline mining is mechanical (the subagent runs
+> `dig-session.py`), but the AI Diary + Lessons are *writing*. Fleet tier: Haiku gathers,
+> Sonnet drafts, Opus synthesizes. Sonnet is where a retro earns its keep.
+
+### Resolve first, then spawn
+
+```bash
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
+PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
+LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
+SESSION_ID=$(basename "$LATEST_JSONL" .jsonl | cut -c1-8)
+PSI=$(readlink -f "$ORACLE_ROOT/ψ" 2>/dev/null || echo "$ORACLE_ROOT/ψ")
+REPO_NAME=$(basename "$ORACLE_ROOT")
+YM=$(date +%Y-%m); DD=$(date +%d); HHMM=$(date +%H.%M)
+```
+
+Substitute every `<PLACEHOLDER>` with the real value before spawning — the subagent
+cannot see your shell.
+
+### Spawn ONE background Agent (`model: "sonnet"`, `run_in_background: true`)
+
+```
+You are a session retrospective writer. Write a retrospective for the current session.
+
+JSONL: <LATEST_JSONL>
+Vault (PSI): <PSI>
+Session: <SESSION_ID> | <REPO_NAME> | Date: <YYYY-MM-DD HH:MM>
+
+Steps:
+1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
+   (real timestamps for the Timeline — never guess or approximate times)
+2. mkdir -p "<PSI>/memory/retrospectives/<YYYY-MM>/<DD>"
+3. git -C <ORACLE_ROOT> status --short   (for an "Uncommitted" note)
+4. Write the retrospective to:
+   <PSI>/memory/retrospectives/<YYYY-MM>/<DD>/<HH.MM>_<slug>.md
+
+Format:
+
+# Retrospective: <session focus>
+
+**Date**: <YYYY-MM-DD HH:MM> · **Session**: <SESSION_ID> | <REPO_NAME>
+**Source**: /rrr --bg (JSONL-mined, Sonnet)
+
+## Timeline
+<real `YYYY-MM-DD HH:MM | what` rows from the mining. Same-day → date once in the
+header, HH:MM in rows. Multi-day → group under ### YYYY-MM-DD subheaders.>
+
+## AI Diary
+<150+ words, FIRST-PERSON. Honest reflection. MUST contain one line labeled
+`[→ AGENT DECISION]` naming a choice YOU (the AI) made WRONG — overconfidence, a
+repeated wrong proposal, a misread requirement. Tool failures and env issues are
+friction, not this.>
+
+## Honest Feedback
+<100+ words, exactly 3 friction points — SESSION-SPECIFIC only. Anything that
+generalizes belongs in Lessons instead.>
+
+## Lessons Learned
+<GENERALIZABLE only — state each as a rule you would tell another Oracle on a
+DIFFERENT project. If it only applies here, it is friction, not a lesson.>
+
+## Uncommitted Files
+<from git status --short, or "none">
+
+5. Append one line to <PSI>/memory/learnings/session-metrics.md if it exists
+   (date | session | one-line outcome). If a lesson is clearly generalizable, also
+   write <PSI>/memory/learnings/<YYYY-MM-DD>_<slug>.md with frontmatter
+   (pattern, date, source, concepts).
+
+After writing, print: "📓 Retro written: <absolute_path>".
+Do NOT enter plan mode. Do NOT commit.
+```
+
+### After spawning
+
+Tell the user where it will land, then **keep working — don't wait**:
+
+```
+📓 /rrr --bg launched — retrospective writing in background (Sonnet).
+   Session: <SESSION_ID>
+   Will write to: <PSI>/memory/retrospectives/<YYYY-MM>/<DD>/<HH.MM>_<slug>.md
+```
+
+Sibling: `/forward --bg` (handoff for the next session). Running both at session end
+gives you the pair — `/rrr --bg` looks back, `/forward --bg` looks forward.
 
 ---
 

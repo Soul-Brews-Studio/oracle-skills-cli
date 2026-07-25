@@ -94,11 +94,11 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 | 15 | **fyi** | skill | Log information for future reference |
 | 16 | **go** | skill | Manage Oracle skills |
 | 17 | **incubate** | skill | Clone or create repos for active development |
-| 18 | **kien-thai** | skill | Write Thai-language prose (technical |
-| 19 | **oracle-cheatsheet** | skill | "Generate a copy-paste cheat sheet from the |
-| 20 | **oracle-combine-blogs** | skill | "Combine EXISTING finished blog posts into |
-| 21 | **oracle-prism** | skill | 'Multi-perspective analysis |
-| 22 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
+| 18 | **oracle-cheatsheet** | skill | "Generate a copy-paste cheat sheet from the |
+| 19 | **oracle-combine-blogs** | skill | "Combine EXISTING finished blog posts into |
+| 20 | **oracle-prism** | skill | 'Multi-perspective analysis |
+| 21 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
+| 22 | **oracle-write-complete-book** | skill | "Write a complete book from scratch |
 | 23 | **resonance** | skill | Capture a resonance moment |
 | 24 | **talk-to** | skill | Talk to another Oracle agent |
 | 25 | **team-agents** | skill | Spin up coordinated agent teams for any task |
@@ -119,7 +119,7 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 | Profile | Count | Skills |
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
-| **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `kien-thai`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
+| **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
 | **full** | 30 | all |
 | **lab** | 30 | all |
 
