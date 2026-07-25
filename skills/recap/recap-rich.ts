@@ -17,13 +17,17 @@ const month = now.toISOString().slice(0, 7);
 let sessionLine = "";
 try {
   const encodedPwd = ROOT.replace(/^\//, '-').replace(/[\/.]/g, '-');
-  const projectDir = `${process.env.HOME}/.claude/projects/${encodedPwd}`;
+  const claudeHome = process.env.CLAUDE_CONFIG_DIR || `${process.env.HOME}/.claude`;
+  const projectDir = `${claudeHome}/projects/${encodedPwd}`;
   if (existsSync(projectDir)) {
     const jsonls = (await $`ls -t ${projectDir}/*.jsonl 2>/dev/null`.text()).trim().split('\n').filter(Boolean);
     if (jsonls.length) {
-      const sessionId = jsonls[0].split('/').pop()!.replace('.jsonl', '');
+      const envSessionId = process.env.CLAUDE_CODE_SESSION_ID;
+      const envJsonl = envSessionId ? `${projectDir}/${envSessionId}.jsonl` : "";
+      const chosenJsonl = envJsonl && existsSync(envJsonl) ? envJsonl : jsonls[0];
+      const sessionId = chosenJsonl.split('/').pop()!.replace('.jsonl', '');
       const shortId = sessionId.slice(0, 8);
-      const firstLine = (await $`head -1 ${jsonls[0]}`.text()).trim();
+      const firstLine = (await $`head -1 ${chosenJsonl}`.text()).trim();
       let startStr = "";
       try {
         const ts = JSON.parse(firstLine).timestamp;
