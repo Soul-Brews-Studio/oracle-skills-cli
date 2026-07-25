@@ -95,6 +95,31 @@ else
 fi
 ```
 
+### Replying to a message another oracle sent you (#434)
+
+A ping arrives in your context looking like `[m5:digger] …`. The reflex is to
+answer in your own transcript — but that text goes to Nat, not to digger, who is
+sitting in a different pane waiting. Reply with `maw hey` or the conversation is
+one-sided and nobody notices for hours.
+
+```bash
+maw hey <their-oracle-name> 'your reply'     # name, not a pane id
+```
+
+**Never reply to a pane id.** `maw peek %3001` works, so it is tempting to paste
+that same `%3001` into `maw hey` — it hard-errors (`bare target '%3001' not found
+locally`). Pane ids are a peek-only handle. `maw ls -v` is the source of truth
+for targets; a bare `maw ls | grep` finds the row but not the addressable name,
+which is why the auto-detect above should be treated as a hint, not an answer:
+
+```bash
+maw ls -v | grep -i <name>      # resolves the real target
+maw hey <target> ping --dry-run # confirm it resolves BEFORE sending
+```
+
+`--dry-run` is the cheap check. It costs nothing and catches a wrong target
+before the message goes somewhere confusing.
+
 When using `--maw`:
 1. Compose message from intent
 2. Use contacts maw name if available: `maw hey {MAW or agent-oracle} '{message}'`
