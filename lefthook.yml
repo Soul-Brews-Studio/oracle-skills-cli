@@ -24,3 +24,9 @@ pre-commit:
       # every commit — mode drift can arrive via checkout/rebase, not just
       # script edits.
       run: bash scripts/check_skill_scripts_exec.sh
+    registry-snapshot:
+      # /oracle-family-scan advertised "186+ Oracles" while the real registry
+      # passed 800 — a number in prose has nothing checking it. This keeps the
+      # quoted figures tied to registry-snapshot.json, and fails when that
+      # snapshot itself goes stale.
+      run: bash scripts/check_registry_snapshot.sh

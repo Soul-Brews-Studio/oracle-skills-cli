@@ -1,11 +1,6 @@
 ---
 name: philosophy
 description: Display Oracle philosophy — the 5 Principles + Rule 6. Use when user asks about principles, "nothing deleted", "patterns over intentions", Oracle philosophy, or needs alignment check. Do NOT trigger for "who are you" (use /who-are-you), "what is oracle" (use /about-oracle), or session status questions.
-zombie: true
-archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
-archived_date: 2026-05-13
-metadata:
-  internal: true
 ---
 
 # /philosophy - Oracle Principles
