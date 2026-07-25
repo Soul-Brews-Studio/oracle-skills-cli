@@ -86,7 +86,7 @@ export const ZOMBIE_SKILLS = [
   'i-believed', 'work-with', 'morpheus',
   'retrospective', 'skills-list',
   'fleet', 'machines', 'warp', 'release',
-  'philosophy', 'wormhole', 'harden', 'vault',
+  'wormhole', 'harden', 'vault',
   // 2026-05-14 (#333 content correction): original simple /dream body
   // preserved as zombie after /dream absorbed the evolved morpheus body.
   'dream-original',
@@ -105,6 +105,9 @@ export const ZOMBIE_SKILLS = [
   // contacts (19), mailbox (1), inbox (1) all fold into /talk-to (41 uses).
   'schedule', 'worktree', 'standup', 'xray', 'feel',
   'hey', 'contacts', 'mailbox', 'inbox',
+  // 2026-07-25: philosophy un-zombied by Nat — the 5 Principles + Rule 6 are
+  // what an Oracle IS, so they belong on the public shelf even at low call
+  // volume. Usage is the wrong metric for a skill people read once and absorb.
 ] as const;
 
 /** Return the source directory for a skill by name under a given root —

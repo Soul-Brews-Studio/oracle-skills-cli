@@ -1,6 +1,6 @@
 # arra-oracle-skills-cli
 
-30 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
+31 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
@@ -71,7 +71,7 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 <!-- skills:start -->
 
 <details>
-<summary>📚 <strong>30 skills installed</strong> — click to expand</summary>
+<summary>📚 <strong>31 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -99,14 +99,15 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 | 20 | **oracle-prism** | skill | 'Multi-perspective analysis |
 | 21 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
 | 22 | **oracle-write-complete-book** | skill | "Write a complete book from scratch |
-| 23 | **resonance** | skill | Capture a resonance moment |
-| 24 | **talk-to** | skill | Talk to another Oracle agent |
-| 25 | **team-agents** | skill | Spin up coordinated agent teams for any task |
-| 26 | **trace** | skill | Find projects, code |
-| 27 | **verification-gate-fail-closed** | skill | Reference for building verification gates |
-| 28 | **watch** | skill | 'Extract YouTube video transcripts |
-| 29 | **where-we-are** | skill | Session awareness |
-| 30 | **who-are-you** | skill | Know ourselves |
+| 23 | **philosophy** | skill | Display Oracle philosophy |
+| 24 | **resonance** | skill | Capture a resonance moment |
+| 25 | **talk-to** | skill | Talk to another Oracle agent |
+| 26 | **team-agents** | skill | Spin up coordinated agent teams for any task |
+| 27 | **trace** | skill | Find projects, code |
+| 28 | **verification-gate-fail-closed** | skill | Reference for building verification gates |
+| 29 | **watch** | skill | 'Extract YouTube video transcripts |
+| 30 | **where-we-are** | skill | Session awareness |
+| 31 | **who-are-you** | skill | Know ourselves |
 
 </details>
 
@@ -120,8 +121,8 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
 | **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
-| **full** | 30 | all |
-| **lab** | 30 | all |
+| **full** | 31 | all |
+| **lab** | 31 | all |
 
 Switch anytime: `/go standard`, `/go full`, `/go lab`
 
@@ -143,7 +144,7 @@ about                   # version + status
 
 ## Zombie Skills
 
-41 skills excluded from all profiles. Install by name:
+40 skills excluded from all profiles. Install by name:
 
 ```bash
 bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>
@@ -173,7 +174,6 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | `/machines` | Fleet machines — discover nodes from contacts, ping to pr... |
 | `/warp` | Teleport to a remote oracle node via SSH+tmux. Interactiv... |
 | `/release` | Automated release flow — bump version, changelog, tag, pu... |
-| `/philosophy` | Display Oracle philosophy — the 5 Principles + Rule 6. Us... |
 | `/wormhole` | Federated query proxy — ask questions across oracle nodes... |
 | `/harden` | Audit Oracle configuration for safety, governance, and ha... |
 | `/vault` | Connect external knowledge bases (Obsidian, Logseq, markd... |
@@ -196,17 +196,28 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 
 ## Team Agent Scripts
 
-`/team-agents` includes zero-token bash scripts for tmux pane lifecycle:
+`/team-agents` ships `team-ops` — plain bash for driving a team of agents in tmux panes,
+so routine lifecycle work costs no tokens. Run `team-ops help` for the built-in reference.
 
 ```bash
-team-ops panes [team]      # See agent panes (/proc cmdline extraction)
-team-ops spawn <team> ...  # Create ephemeral /agent skills
-team-ops archive <team> .. # Archive skills to /tmp on shutdown
-team-ops sweep             # Kill idle panes (safe)
-team-ops nuke              # Kill ALL non-lead panes
-team-ops mailbox <cmd>     # Persistent agent memory
-team-ops status            # Show everything
+# Look
+team-ops status                              # team + panes + skills, all at once
+team-ops panes [team]                        # just the agent panes
+team-ops doctor [--fix]                      # find ghost panes and orphaned worktrees
+
+# Run a team
+team-ops spawn-skills <team> <agent>...      # give each agent its own /agent skill
+team-ops shutdown-skills <team> <agent>...   # retire those skills (archived, not deleted)
+team-ops shutdown-worktrees [repo]           # remove the agents' worktrees
+team-ops mailbox <cmd> [args]                # persistent notes between agents
+
+# Clean up
+team-ops cleanup [--dry-run]                 # close idle panes only — leaves live ones alone
+team-ops killshot                            # ⚠️ closes EVERY pane except the lead
 ```
+
+Typical arc: `spawn-skills` → `panes` / `status` → `shutdown-skills` → `cleanup`.
+Reach for `killshot` only when the layout is beyond saving — it takes the whole team down.
 
 ## Origin
 
