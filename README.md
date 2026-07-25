@@ -1,6 +1,6 @@
 # arra-oracle-skills-cli
 
-31 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
+32 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
@@ -71,7 +71,7 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 <!-- skills:start -->
 
 <details>
-<summary>📚 <strong>31 skills installed</strong> — click to expand</summary>
+<summary>📚 <strong>32 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -87,27 +87,28 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 | 8 | **bampenpien** | skill | "บำเพ็ญเพียร |
 | 9 | **bud** | skill | 'Create a new oracle via maw bud |
 | 10 | **calver** | skill | Show or bump the project's CalVer version |
-| 11 | **create-shortcut** | skill | Create local skills as shortcuts |
-| 12 | **dig** | skill | Mine Claude Code sessions |
-| 13 | **dream** | skill | 'Speculative dreaming |
-| 14 | **forward** | skill | Hand off the current session to the next one |
-| 15 | **fyi** | skill | Log information for future reference |
-| 16 | **go** | skill | Manage Oracle skills |
-| 17 | **incubate** | skill | Clone or create repos for active development |
-| 18 | **oracle-cheatsheet** | skill | "Generate a copy-paste cheat sheet from the |
-| 19 | **oracle-combine-blogs** | skill | "Combine EXISTING finished blog posts into |
-| 20 | **oracle-prism** | skill | 'Multi-perspective analysis |
-| 21 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
-| 22 | **oracle-write-complete-book** | skill | "Write a complete book from scratch |
-| 23 | **philosophy** | skill | Display Oracle philosophy |
-| 24 | **resonance** | skill | Capture a resonance moment |
-| 25 | **talk-to** | skill | Talk to another Oracle agent |
-| 26 | **team-agents** | skill | Spin up coordinated agent teams for any task |
-| 27 | **trace** | skill | Find projects, code |
-| 28 | **verification-gate-fail-closed** | skill | Reference for building verification gates |
-| 29 | **watch** | skill | 'Extract YouTube video transcripts |
-| 30 | **where-we-are** | skill | Session awareness |
-| 31 | **who-are-you** | skill | Know ourselves |
+| 11 | **codex-team** | skill | Spawn, lead |
+| 12 | **create-shortcut** | skill | Create local skills as shortcuts |
+| 13 | **dig** | skill | Mine Claude Code sessions |
+| 14 | **dream** | skill | 'Speculative dreaming |
+| 15 | **forward** | skill | Hand off the current session to the next one |
+| 16 | **fyi** | skill | Log information for future reference |
+| 17 | **go** | skill | Manage Oracle skills |
+| 18 | **incubate** | skill | Clone or create repos for active development |
+| 19 | **oracle-cheatsheet** | skill | "Generate a copy-paste cheat sheet from the |
+| 20 | **oracle-combine-blogs** | skill | "Combine EXISTING finished blog posts into |
+| 21 | **oracle-prism** | skill | 'Multi-perspective analysis |
+| 22 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
+| 23 | **oracle-write-complete-book** | skill | "Write a complete book from scratch |
+| 24 | **philosophy** | skill | Display Oracle philosophy |
+| 25 | **resonance** | skill | Capture a resonance moment |
+| 26 | **talk-to** | skill | Talk to another Oracle agent |
+| 27 | **team-agents** | skill | Spin up coordinated agent teams for any task |
+| 28 | **trace** | skill | Find projects, code |
+| 29 | **verification-gate-fail-closed** | skill | Reference for building verification gates |
+| 30 | **watch** | skill | 'Extract YouTube video transcripts |
+| 31 | **where-we-are** | skill | Session awareness |
+| 32 | **who-are-you** | skill | Know ourselves |
 
 </details>
 
@@ -121,8 +122,8 @@ The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed 
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
 | **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
-| **full** | 31 | all |
-| **lab** | 31 | all |
+| **full** | 32 | all |
+| **lab** | 32 | all |
 
 Switch anytime: `/go standard`, `/go full`, `/go lab`
 
