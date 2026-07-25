@@ -1,81 +1,46 @@
 # arra-oracle-skills-cli
 
-32 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
+32 skills for AI coding agents — persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
-**Inside Claude Code** — nothing to install first, no bun, no git:
+**In Claude Code** — no bun, no git, nothing installed first:
 
 ```
 /plugin marketplace add Soul-Brews-Studio/arra-oracle-skills-cli
 /plugin install oracle-skills@oracle-skills
 ```
 
-**From the terminal** — for any other agent, or to pick a profile:
+**In a terminal** — for any of the 19 supported agents:
 
 ```bash
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y
+bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full
 ```
 
-That is the whole thing. Everything below is a variation on that one command.
+`-p full` gives you all 32 stable skills. Everything else is a flag on that same command.
 
 <details>
-<summary><strong>Variations</strong> — profiles, other agents, local installs</summary>
-
-Append flags to the command above:
+<summary>Flags, other agents, updating</summary>
 
 | want | add |
 |---|---|
-| a different profile | `-p standard` · `-p full` · `-p lab` (default: `minimal`) |
-| just a few skills | `-s recap rrr trace` — adds them **on top of** the profile |
-| a specific agent | `--agent claude-code` · `codex` · `cursor` · `opencode` · `gemini-cli` |
-| several agents at once | `--agent claude-code codex opencode` |
-| slash-command stubs too | `--with-commands` (Codex, OpenCode, Gemini need these) |
-| this project only | drop `-g` — installs to `./.claude/skills/` instead of `~/.claude/skills/` |
+| a smaller set | `-p standard` (20) · `-p minimal` (7) · `-p lab` (+ experimental) |
+| a few extra skills | `-s recap rrr trace` — added **on top of** the profile |
+| a specific agent | `--agent codex` · `cursor` · `opencode` · `gemini-cli` · `claude-code` |
+| several at once | `--agent claude-code codex opencode` |
+| slash-command stubs | `--with-commands` — Codex, OpenCode and Gemini need these |
+| this project only | drop `-g` → installs to `./.claude/skills/` |
+| federated agents | `--with-thclaws` / `-a thclaws` / `--all-detected` — never auto-detected (#330) |
 
-So a full install for Codex with command stubs reads:
+**Update** the way you installed: plugin → `/plugin update oracle-skills@oracle-skills`; terminal → re-run the command. Don't update *through* an installed `arra-oracle-skills` binary — it carries its own frozen copy of the skills, so once it's older than yours, "update" writes the old set back. Always fetch from GitHub.
 
-```bash
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full --agent codex --with-commands
-```
+**npm** is a lagging mirror (publishing is manual). `npx arra-oracle-skills@latest` works; never pin an exact `-alpha` version from git history — not every bump is published.
 
-**Shell note:** `-s` needs each name as its own word. zsh does not split `$VARS`, so
-`-s $NAMES` arrives as one bogus argument and you silently get only the profile — write the
-names literally, or use `${=NAMES}`.
+**zsh note:** `-s` needs each name as its own word, and zsh doesn't split `$VARS` — write names literally or use `${=NAMES}`, or you'll silently get only the profile.
 
-**Federated agents** (thClaws, OpenCode, GitHub Copilot, OpenClaw) are never auto-detected —
-ask for them by name (#330):
-
-```bash
-… install -g -y --with-thclaws     # or: -a thclaws        → ~/.config/thclaws/skills/
-… install -g -y --all-detected     # every detected agent (CI escape hatch)
-```
+**19 agents:** Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
 
 </details>
-
-<details>
-<summary><strong>Updating</strong>, and why npm is not the channel</summary>
-
-Update the way you installed:
-
-| installed via | update with |
-|---|---|
-| plugin | `/plugin update oracle-skills@oracle-skills` |
-| terminal | re-run the install command |
-
-Don't update through an already-installed `arra-oracle-skills` binary. It carries its own
-frozen copy of the skills, so once it is older than what you have, "update" writes the old
-set back over the new one. Always fetch from GitHub.
-
-npm exists as a mirror (`npx arra-oracle-skills@latest …`) but publishing is manual, so it
-lags `alpha`. Never pin an exact `-alpha` version from git history — not every CalVer bump is
-published, and unpublished versions 404.
-
-</details>
-
-**19 agents supported:** Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
-
-Skills carry a marker in their description showing where they came from: `G-SKLL` global, `L-SKLL` local.
 
 ## Skills
 
@@ -87,37 +52,37 @@ Skills carry a marker in their description showing where they came from: `G-SKLL
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
 | 1 | **about-oracle** | skill + subagent | What is Oracle |
-| 2 | **learn** | skill + subagent | Explore a codebase |
-| 3 | **rrr** | skill + subagent | Create session retrospective with AI diary |
+| 2 | **learn** | skill + subagent | Explore a codebase with parallel Haiku… |
+| 3 | **rrr** | skill + subagent | Create session retrospective with AI diary… |
 | - |  |  |  |
 | 4 | **oracle-family-scan** | skill + code | Oracle Family Registry |
 | 5 | **project** | skill + code | Clone and track external repos |
 | 6 | **recap** | skill + code | Session orientation and awareness |
 | - |  |  |  |
-| 7 | **awaken** | skill | "Guided Oracle birth and awakening ritual |
-| 8 | **bampenpien** | skill | "บำเพ็ญเพียร |
-| 9 | **bud** | skill | 'Create a new oracle via maw bud |
+| 7 | **awaken** | skill | Guided Oracle birth and awakening ritual |
+| 8 | **bampenpien** | skill | บำเพ็ญเพียร |
+| 9 | **bud** | skill | Create a new oracle via maw bud |
 | 10 | **calver** | skill | Show or bump the project's CalVer version |
-| 11 | **codex-team** | skill | Spawn, lead |
+| 11 | **codex-team** | skill | Spawn, lead, and tear down a team of… |
 | 12 | **create-shortcut** | skill | Create local skills as shortcuts |
 | 13 | **dig** | skill | Mine Claude Code sessions |
-| 14 | **dream** | skill | 'Speculative dreaming |
+| 14 | **dream** | skill | Speculative dreaming |
 | 15 | **forward** | skill | Hand off the current session to the next one |
 | 16 | **fyi** | skill | Log information for future reference |
 | 17 | **go** | skill | Manage Oracle skills |
 | 18 | **incubate** | skill | Clone or create repos for active development |
-| 19 | **oracle-cheatsheet** | skill | "Generate a copy-paste cheat sheet from the |
-| 20 | **oracle-combine-blogs** | skill | "Combine EXISTING finished blog posts into |
-| 21 | **oracle-prism** | skill | 'Multi-perspective analysis |
-| 22 | **oracle-title-forge** | skill | "Forge a title + subtitle (or reframe) for a |
-| 23 | **oracle-write-complete-book** | skill | "Write a complete book from scratch |
+| 19 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
+| 20 | **oracle-combine-blogs** | skill | Combine EXISTING finished blog posts into… |
+| 21 | **oracle-prism** | skill | Multi-perspective analysis |
+| 22 | **oracle-title-forge** | skill | Forge a title + subtitle (or reframe) for a… |
+| 23 | **oracle-write-complete-book** | skill | Write a complete book from scratch |
 | 24 | **philosophy** | skill | Display Oracle philosophy |
 | 25 | **resonance** | skill | Capture a resonance moment |
-| 26 | **talk-to** | skill | Talk to another Oracle agent |
+| 26 | **talk-to** | skill | Talk to another Oracle agent via contacts +… |
 | 27 | **team-agents** | skill | Spin up coordinated agent teams for any task |
-| 28 | **trace** | skill | Find projects, code |
-| 29 | **verification-gate-fail-closed** | skill | Reference for building verification gates |
-| 30 | **watch** | skill | 'Extract YouTube video transcripts |
+| 28 | **trace** | skill | Find projects, code, and knowledge across… |
+| 29 | **verification-gate-fail-closed** | skill | Reference for building verification gates… |
+| 30 | **watch** | skill | Extract YouTube video transcripts via yt-dlp… |
 | 31 | **where-we-are** | skill | Session awareness |
 | 32 | **who-are-you** | skill | Know ourselves |
 
@@ -143,13 +108,13 @@ Switch anytime: `/go standard`, `/go full`, `/go lab`
 ## CLI
 
 ```
-install [options]       # install skills (default: standard)
-uninstall [options]     # remove installed skills
-select [options]        # interactive skill picker
-list [options]          # show installed skills
-profiles [name]         # list profiles
-agents                  # list 18 supported agents
-about                   # version + status
+install [options]     # install skills (default profile: minimal)
+uninstall [options]   # remove installed skills
+select [options]      # interactive skill picker
+list [options]        # show installed skills
+profiles [name]       # list profiles
+agents                # list supported agents
+about                 # version + status
 ```
 
 <!-- secret-skills:start -->
