@@ -402,6 +402,56 @@ NAMES="dig learn talk-to"
 Also note `-s` is **additive on top of the default profile** — it adds the named skills, it
 does not restrict the install to them.
 
+### MCP-server drift (#426)
+
+Skills are only half of what goes stale. The `arra-oracle` MCP server is wired
+separately in `~/.claude.json`, so it drifts on its own — a real case had it
+pinned **161 commits / 30 days** behind while `/go update` still reported
+everything synced, because the skills matched. Check both, or "synced" is a
+half-truth.
+
+```bash
+python3 - <<'PY'
+import json, os, re, subprocess
+cfg = (json.load(open(os.path.expanduser('~/.claude.json'))).get('mcpServers') or {}).get('arra-oracle')
+if not cfg:
+    print('  arra-oracle MCP: not configured — nothing to check'); raise SystemExit
+
+args = ' '.join(cfg.get('args') or [])
+
+# 1. Local checkout — drift is commits behind upstream.
+repo = next((a for a in (cfg.get('args') or []) if a.startswith('/')), None)
+if repo:
+    while repo != '/' and not os.path.isdir(os.path.join(repo, '.git')):
+        repo = os.path.dirname(repo)
+    if repo != '/':
+        subprocess.run(['git', '-C', repo, 'fetch', '--quiet', 'origin'], check=False)
+        behind = subprocess.run(['git', '-C', repo, 'rev-list', '--count', 'HEAD..@{u}'],
+                                capture_output=True, text=True).stdout.strip() or '?'
+        print(f'  arra-oracle MCP: local checkout {repo}')
+        print(f'    {"up to date" if behind == "0" else behind + " commits behind upstream — git -C " + repo + " pull"}')
+        raise SystemExit
+
+# 2. Git-pinned bunx — drift is the pinned ref vs upstream HEAD.
+m = re.search(r'github:([\w.-]+/[\w.-]+)#([\w.-]+)', args)
+if m:
+    slug, ref = m.groups()
+    head = subprocess.run(['git', 'ls-remote', f'https://github.com/{slug}', 'HEAD'],
+                          capture_output=True, text=True).stdout.split()
+    print(f'  arra-oracle MCP: pinned {slug}#{ref}')
+    print(f'    upstream HEAD {head[0][:12] if head else "unknown"} — repin if this is stale')
+    raise SystemExit
+
+# 3. Unpinned bunx — resolves from bun's cache, so version is whatever was cached.
+print('  arra-oracle MCP: unpinned bunx — resolves from cache, version unknowable')
+print('    pin a tag, or clear with: bun pm cache rm')
+PY
+```
+
+Report drift alongside the skills version; never auto-edit `~/.claude.json` —
+that file holds credentials for every MCP server the user has, and a wrong write
+costs more than a stale server. Print the fix and let them run it.
+
 - `/go update` → fetch latest from GitHub and reinstall in place
 - Does NOT change your profile — pass `-p <name>` only if you also want to switch tiers
 - Safe to run anytime — idempotent
