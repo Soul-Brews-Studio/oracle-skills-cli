@@ -74,3 +74,5 @@ jobs:
           npm pack --dry-run --json | sed -n '/^\[/,$p' | bun -e 'const files = JSON.parse(await Bun.stdin.text())[0].files.map(f => f.path); if (!files.some(p => p === "skills/rrr/SKILL.md")) { console.error("npm tarball is missing skills/ — check package.json files[]"); process.exit(1); } console.log("tarball ok: " + files.filter(p => p.startsWith("skills/")).length + " shelf files");'
       - name: Verify skill scripts are executable (mode 100755)
         run: bash scripts/check_skill_scripts_exec.sh
+      - name: Verify Oracle registry figures are current
+        run: bash scripts/check_registry_snapshot.sh

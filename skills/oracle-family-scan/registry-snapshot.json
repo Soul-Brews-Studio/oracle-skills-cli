@@ -1,0 +1,14 @@
+{
+  "_comment": "Snapshot of the Oracle family registry, used to keep the numbers quoted in SKILL.md honest. The LIVE source of truth is laris-co/mother-oracle: `bun registry/query.ts --stats`. scripts/check_registry_snapshot.sh fails CI when SKILL.md and this file disagree, or when this snapshot goes stale.",
+  "synced_at": "2026-07-25",
+  "source": "laris-co/mother-oracle registry/query.ts --stats",
+  "total_oracles": 844,
+  "retired": 10,
+  "unique_humans": 295,
+  "community": 754,
+  "nats_oracles": 90,
+  "welcomed": 732,
+  "unwelcomed": 22,
+  "with_repo": 466,
+  "max_age_days": 120
+}
