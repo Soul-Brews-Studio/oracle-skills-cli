@@ -2,6 +2,9 @@
 name: team-agents
 description: Spin up coordinated agent teams for any task. Reusable framework for TeamCreate/SendMessage/TaskList patterns. Use when user says "team-agents", "spin up a team", "use teammates", "parallel agents", "coordinate agents", "fan out", or wants multiple agents working together with coordination. Do NOT trigger for simple subagent work (use Agent tool directly) or inter-Oracle messaging (use /talk-to).
 argument-hint: "<task-description> [--roles N] [--model sonnet|opus|haiku] [--plan] [--worktree] | who | zoom <agent> | sync | merge <agent> | compile"
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /team-agents — Coordinated Agent Teams

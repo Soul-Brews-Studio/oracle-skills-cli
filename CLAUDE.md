@@ -69,6 +69,37 @@ frontmatter (and everything under `src/skills/.archive/`) are **never listed**.
 Note: unlisted ≠ private — files in this public repo are still readable by
 anyone; see issue #441.
 
+#### Deciding shelf vs vault — the day-one test
+
+Membership on the shelf IS the public promise, so apply one question before
+adding or keeping a skill there:
+
+> **Someone installs the plugin on a fresh machine — no oracle repo, no fleet,
+> no extra toolchain. Can they get value from this skill today?**
+
+If no, it belongs in the vault (`git mv skills/<name> src/skills/<name>`, then add
+`hidden: true` + `metadata: internal: true`). It stays installable by name and via
+profiles; it just stops being advertised. Four disqualifiers, each seen in the
+2026-07-25 curation that took the listing from 32 → 21:
+
+| disqualifier | examples |
+|---|---|
+| **Repo-specific** — operates on THIS repo, meaningless elsewhere | `calver` (bumps this package's version) |
+| **Needs a fleet first** — other oracles, maw, tmux panes, codex accounts | `talk-to`, `team-agents`, `codex-team` |
+| **Needs an external toolchain** — typst, pandoc, Thai fonts, omx | `oracle-write-complete-book`, `oracle-combine-blogs`, `oracle-title-forge` |
+| **Not actually a skill** — a reference doc, or a lab experiment we would not ask a stranger to run | `verification-gate-fail-closed`, `dream`, `fyi`, `watch` |
+
+A skill being *good* is not the test — `codex-team` is one of the strongest here
+and still belongs in the vault, because a newcomer with no codex accounts gets a
+wall of setup instead of a working command. Being *ours* is not the test either;
+that question is separate and comes first (never package a skill we did not
+write — see the kien-thai mistake, PR #470).
+
+Reverse direction is the same move: a vault skill that becomes self-sufficient
+gets `git mv`-ed to the shelf and its flags removed. `bun run compile` enforces
+the invariant both ways — a flagged skill on the shelf and an unflagged skill in
+the vault are both hard errors.
+
 **Deciding what to zombie/archive** is data-driven, not vibes. Run the usage
 census over your real Claude Code transcripts before demoting anything:
 

@@ -2,6 +2,9 @@
 name: oracle-combine-blogs
 description: "Combine EXISTING finished blog posts into ONE mini-book PDF — assemble, don't re-generate. Strips each blog's frontmatter + title + signature, stitches them as chapters with a hook/close, renders pandoc→typst with Thai word-break. Use when you ALREADY have several polished posts (in ψ/writing/blog or anywhere) and want them bound into a single book WITHOUT rewriting the prose. TRIGGER: 'รวมบล็อกเป็นเล่ม', 'combine blogs into a book', 'รวมโพสต์เป็น mini-book', 'bind these posts', '/oracle-combine-blogs'. DO NOT TRIGGER for: writing NEW book content from a session (use /oracle-booklet or /oracle-write-mini-book-v3); a 1-page cheatsheet (use /oracle-cheatsheet)."
 argument-hint: "<blog files or topic> — the finished posts to bind into one book"
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /oracle-combine-blogs — bind finished posts into one mini-book

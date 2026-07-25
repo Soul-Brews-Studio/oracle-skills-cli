@@ -3,6 +3,9 @@ name: watch
 description: 'Extract YouTube video transcripts via yt-dlp and pipe to /learn. Use when user says "watch", "youtube", "video", "transcript", or shares a YouTube URL.'
 argument-hint: "<youtube-url> [--raw | --learn | --summary]"
 
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /watch — YouTube → Knowledge Pipeline

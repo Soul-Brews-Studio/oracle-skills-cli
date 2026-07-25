@@ -1,6 +1,6 @@
 # arra-oracle-skills-cli
 
-32 skills for AI coding agents — persistent memory, session awareness, and collaborative tools.
+21 skills for AI coding agents — persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
@@ -47,7 +47,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 <!-- skills:start -->
 
 <details>
-<summary>📚 <strong>32 skills installed</strong> — click to expand</summary>
+<summary>📚 <strong>21 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -62,29 +62,18 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | 7 | **awaken** | skill | Guided Oracle birth and awakening ritual |
 | 8 | **bampenpien** | skill | บำเพ็ญเพียร |
 | 9 | **bud** | skill | Create a new oracle via maw bud |
-| 10 | **calver** | skill | Show or bump the project's CalVer version |
-| 11 | **codex-team** | skill | Spawn, lead, and tear down a team of… |
-| 12 | **create-shortcut** | skill | Create local skills as shortcuts |
-| 13 | **dig** | skill | Mine Claude Code sessions |
-| 14 | **dream** | skill | Speculative dreaming |
-| 15 | **forward** | skill | Hand off the current session to the next one |
-| 16 | **fyi** | skill | Log information for future reference |
-| 17 | **go** | skill | Manage Oracle skills |
-| 18 | **incubate** | skill | Clone or create repos for active development |
-| 19 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
-| 20 | **oracle-combine-blogs** | skill | Combine EXISTING finished blog posts into… |
-| 21 | **oracle-prism** | skill | Multi-perspective analysis |
-| 22 | **oracle-title-forge** | skill | Forge a title + subtitle (or reframe) for a… |
-| 23 | **oracle-write-complete-book** | skill | Write a complete book from scratch |
-| 24 | **philosophy** | skill | Display Oracle philosophy |
-| 25 | **resonance** | skill | Capture a resonance moment |
-| 26 | **talk-to** | skill | Talk to another Oracle agent via contacts +… |
-| 27 | **team-agents** | skill | Spin up coordinated agent teams for any task |
-| 28 | **trace** | skill | Find projects, code, and knowledge across… |
-| 29 | **verification-gate-fail-closed** | skill | Reference for building verification gates… |
-| 30 | **watch** | skill | Extract YouTube video transcripts via yt-dlp… |
-| 31 | **where-we-are** | skill | Session awareness |
-| 32 | **who-are-you** | skill | Know ourselves |
+| 10 | **create-shortcut** | skill | Create local skills as shortcuts |
+| 11 | **dig** | skill | Mine Claude Code sessions |
+| 12 | **forward** | skill | Hand off the current session to the next one |
+| 13 | **go** | skill | Manage Oracle skills |
+| 14 | **incubate** | skill | Clone or create repos for active development |
+| 15 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
+| 16 | **oracle-prism** | skill | Multi-perspective analysis |
+| 17 | **philosophy** | skill | Display Oracle philosophy |
+| 18 | **resonance** | skill | Capture a resonance moment |
+| 19 | **trace** | skill | Find projects, code, and knowledge across… |
+| 20 | **where-we-are** | skill | Session awareness |
+| 21 | **who-are-you** | skill | Know ourselves |
 
 </details>
 
@@ -98,8 +87,8 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
 | **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
-| **full** | 32 | all |
-| **lab** | 32 | all |
+| **full** | 21 | all |
+| **lab** | 21 | all |
 
 Switch anytime: `/go standard`, `/go full`, `/go lab`
 

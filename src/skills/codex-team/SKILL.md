@@ -1,6 +1,9 @@
 ---
 name: codex-team
 description: Spawn, lead, and tear down a team of omx/codex coders from a Claude lead — preflight the machine, pick the team shape, create isolated worktrees, heal the fresh-worktree boot pitfall, dispatch with done-criteria via `maw hey`, run the 10-minute peek/nudge loop, gate and merge PRs, then shut down without losing work. Trigger eagerly on "codex team", "spawn coders", "set up a team", "add codex N", "lead the team", "dispatch to coders", "peek the coders", "nudge the team", "team up", "tear down the team", "ตั้งทีม codex", "เปิดทีม", "สั่งงาน coder", "ส่องทีม", "ปลุกทีม", "ปิดทีม" — and also when the user simply describes parallel work ("split this across a few agents", "run these 4 issues at once", "แบ่งงานให้หลายตัวทำพร้อมกัน"). Supersedes /codex-lead, /codex-team-lessons and /peek-and-nudge-every-10m. Do NOT trigger for a single task with no parallelism (use `maw work . --wt WT-SLUG` or /flash), for in-session subagent fan-out (/sonnet), or for pure session mining (/dig, /trace).
+hidden: true
+metadata:
+  internal: true
 ---
 
 # /codex-team

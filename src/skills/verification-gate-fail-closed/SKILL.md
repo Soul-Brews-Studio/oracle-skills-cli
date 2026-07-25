@@ -1,6 +1,9 @@
 ---
 name: verification-gate-fail-closed
 description: Reference for building verification gates with fail-closed design - when verification tools fail, mark results as UNVERIFIED and report clearly, never silent pass-through
+hidden: true
+metadata:
+  internal: true
 ---
 
 # Verification Gate: Fail-Closed Design
