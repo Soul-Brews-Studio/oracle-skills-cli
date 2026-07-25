@@ -331,7 +331,10 @@ Vault (PSI): <PSI>
 Session: <SESSION_ID> | <REPO_NAME> | Date: <YYYY-MM-DD HH:MM>
 
 Steps:
-1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
+1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py \
+             ~/.claude/plugins/marketplaces/*/skills/forward/scripts/dig-session.py \
+             ~/.claude/plugins/cache/*/*/*/skills/forward/scripts/dig-session.py \
+             ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
    (real timestamps for the Timeline — never guess or approximate times)
 2. mkdir -p "<PSI>/memory/retrospectives/<YYYY-MM>/<DD>"
 3. git -C <ORACLE_ROOT> status --short   (for an "Uncommitted" note)

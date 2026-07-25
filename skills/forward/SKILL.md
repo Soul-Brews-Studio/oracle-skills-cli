@@ -58,7 +58,10 @@ Repo: <REPO_NAME>
 Date: <YYYY-MM-DD HH:MM>
 
 Steps:
-1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
+1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py \
+             ~/.claude/plugins/marketplaces/*/skills/forward/scripts/dig-session.py \
+             ~/.claude/plugins/cache/*/*/*/skills/forward/scripts/dig-session.py \
+             ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
 2. From the JSON output, write 4-8 bullets summarizing what happened. Be specific:
    skills invoked, teammates used, files changed, key outputs.
 3. Run: git -C <ORACLE_ROOT> status --short
