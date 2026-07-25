@@ -17,7 +17,13 @@ name: CalVer Release
 
 on:
   push:
-    branches: [main, alpha, beta]
+    # alpha ONLY. The standing rule is alpha-only releases (CLAUDE.md, 2026-07-25):
+    # no alpha->main PRs, no stable cuts, no beta channel. Leaving main and beta
+    # armed here made the rule a convention that one stray push could break — and
+    # one did: a docs branch accidentally cut from a release branch carried a
+    # stable version onto alpha and this workflow happily tagged v26.7.25 off it.
+    # Narrowing the trigger makes the rule structural instead of documented.
+    branches: [alpha]
     paths:
       - package.json
 
