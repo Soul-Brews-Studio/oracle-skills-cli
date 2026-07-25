@@ -15,7 +15,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "bun:test";
 import { readdir, readFile, rm, mkdir, writeFile } from "fs/promises";
 import { join } from "path";
-import { existsSync } from "fs";
+import { existsSync, mkdtempSync, rmSync, readdirSync, readFileSync } from "fs";
 import { tmpdir } from "os";
 import { agents } from "../src/cli/agents";
 import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/installer";
@@ -628,3 +628,41 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     });
   });
 }
+
+// #458: the manifest is a receipt, and it used to record only what THIS run
+// installed. Installing standard (20) then `-s dream` rewrote the manifest down
+// to 8 entries while 21 skills sat on disk — `about` reads that file, so the
+// tool reported a set that contradicted its own directory. It is now derived
+// from disk, which cannot drift regardless of which flags produced the install.
+describe("#458 — manifest reflects the directory, not just the last run", () => {
+  const cliPath = join(process.cwd(), "src/cli/index.ts");
+
+  it("keeps earlier skills after a follow-up -s install", () => {
+    const home = mkdtempSync(join(tmpdir(), "arra-458-"));
+    const run = (...args: string[]) =>
+      Bun.spawnSync(["bun", cliPath, "install", "-g", "-y", "-a", "claude-code", ...args], {
+        env: { ...process.env, HOME: home },
+        stdin: "ignore",
+      });
+
+    run("-p", "standard");
+    run("-s", "dream");
+
+    const skillsDir = join(home, ".claude/skills");
+    const onDisk = readdirSync(skillsDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !d.name.startsWith("."))
+      .map((d) => d.name)
+      .sort();
+    const manifest = JSON.parse(
+      readFileSync(join(skillsDir, ".arra-oracle-skills.json"), "utf-8"),
+    );
+
+    // the point of the fix: the receipt matches the directory it describes
+    expect(manifest.skills.sort()).toEqual(onDisk);
+    // and the earlier profile did not vanish from the record
+    expect(manifest.skills).toContain("recap");
+    expect(manifest.skills).toContain("dream");
+
+    rmSync(home, { recursive: true, force: true });
+  });
+});
