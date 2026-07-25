@@ -1,7 +1,7 @@
 ---
 name: forward
 description: Hand off the current session to the next one. Use when user says "forward", "handoff", "wrap up", or before ending a session.
-argument-hint: "[asap | --only]"
+argument-hint: "[--bg | asap | --only]"
 ---
 
 # /forward - Handoff to Next Session
@@ -12,9 +12,94 @@ Create context for next session, then enter plan mode to define next steps.
 
 ```
 /forward              # Create handoff, show plan, wait for approval
+/forward --bg         # Hand the whole handoff to a background Haiku — returns instantly
 /forward asap         # Create handoff + commit immediately (no approval needed)
 /forward --only       # Create handoff only, skip plan mode
 ```
+
+---
+
+## /forward --bg
+
+**Fire-and-forget.** A background Haiku subagent mines the session JSONL and writes the
+handoff file. Returns immediately — no plan mode, no blocking. Use it to snapshot progress
+mid-session, or at the end when you'd rather keep moving. For the full interactive flow
+with plan approval, use plain `/forward`.
+
+Haiku is the right tier here: this is bullet extraction from structured JSONL, not writing.
+(Its sibling `/rrr --bg` uses Sonnet — a retro's diary and lessons *are* writing.)
+
+### Resolve first, then spawn
+
+```bash
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
+PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
+LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
+SESSION_ID=$(basename "$LATEST_JSONL" .jsonl | cut -c1-8)
+PSI=$(readlink -f "$ORACLE_ROOT/ψ" 2>/dev/null || echo "$ORACLE_ROOT/ψ")
+REPO_NAME=$(basename "$ORACLE_ROOT")
+DATE_SLUG=$(date +%Y-%m-%d_%H-%M)
+```
+
+Substitute every `<PLACEHOLDER>` with the real value before spawning — the subagent
+cannot see your shell. Check whether the handoff directory exists; if not, tell the
+subagent to `mkdir -p` it.
+
+### Spawn ONE background Agent (`model: "haiku"`, `run_in_background: true`)
+
+```
+You are a session archivist. Write a handoff file for the current session.
+
+JSONL path: <LATEST_JSONL>
+Vault path (PSI): <PSI>
+Session ID: <SESSION_ID>
+Repo: <REPO_NAME>
+Date: <YYYY-MM-DD HH:MM>
+
+Steps:
+1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
+2. From the JSON output, write 4-8 bullets summarizing what happened. Be specific:
+   skills invoked, teammates used, files changed, key outputs.
+3. Run: git -C <ORACLE_ROOT> status --short
+4. Write the handoff to: <PSI>/inbox/handoff/<DATE_SLUG>_bg-forward.md
+
+Format:
+
+# Handoff: [session focus from the JSONL]
+
+**Date**: <YYYY-MM-DD HH:MM>
+**Source**: /forward --bg (JSONL-mined, not memory)
+📡 Session: <SESSION_ID> | <REPO_NAME>
+
+## What We Did
+<bullets from the JSONL analysis>
+
+## Uncommitted Files
+<from git status --short, or "none">
+
+## Pending
+<infer from the session: what was in progress? what was mentioned but not done?>
+
+## Next Session
+<1-3 specific actions based on where the session ended>
+
+After writing, print: "📤 Handoff written: <absolute_path>"
+Do NOT enter plan mode. Do NOT commit anything.
+```
+
+### After spawning
+
+Tell the user where it will land, then **keep working — don't wait**:
+
+```
+📤 /forward --bg launched — handoff writing in background.
+   Session: <SESSION_ID>
+   Will write to: <PSI>/inbox/handoff/<DATE_SLUG>_bg-forward.md
+```
+
+Sibling: `/rrr --bg` (retrospective). Run both at session end — `/rrr --bg` looks back,
+`/forward --bg` looks forward.
 
 ## Steps
 
