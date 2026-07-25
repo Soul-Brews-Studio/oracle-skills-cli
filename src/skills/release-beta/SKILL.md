@@ -7,6 +7,19 @@ metadata:
   internal: true
 ---
 
+> ## ⚠️ Retired — alpha-only since 2026-07-25
+>
+> The fleet ships from `alpha` and nowhere else: no `alpha → beta`, no
+> `beta → main`, no stable versions. `alpha` is the repo's default branch, the
+> plugin marketplace clones it, every documented install reads `#alpha`, and
+> `calver-release.yml` now only triggers on `alpha` — so the pipeline this skill
+> describes has no runway left. See CLAUDE.md → Branch Strategy.
+>
+> Kept rather than deleted (Nothing is Deleted) in case a beta channel is ever
+> wanted again; if so, re-check every command here against the current maw/CI
+> before trusting it.
+
+
 # /release-beta
 
 Cut a beta pre-release for the current repo.
