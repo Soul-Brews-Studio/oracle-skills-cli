@@ -700,11 +700,24 @@ export async function installSkills(
       }
     }
 
-    // Write manifest with version info
+    // Write manifest with version info.
+    //
+    // #458: this used to record only the skills THIS run installed, so a
+    // follow-up `install -s dream` rewrote a 20-entry manifest down to 8 while
+    // 21 skills sat on disk — a receipt that contradicts the thing it describes,
+    // and `about` reads it. Derive the list from the directory instead: disk is
+    // the fact, the manifest is just a record of it, so the two cannot drift no
+    // matter which flags produced the install.
+    const installedOnDisk = readdirSync(targetDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+      .map((d) => d.name)
+      .filter((name) => existsSync(join(targetDir, name, 'SKILL.md')))
+      .sort();
+
     const manifest = {
       version: pkg.version,
       installedAt: new Date().toISOString(),
-      skills: agentSkillsToInstall.map((s) => s.name),
+      skills: installedOnDisk,
       agent: agentName,
     };
     await Bun.write(join(targetDir, '.arra-oracle-skills.json'), JSON.stringify(manifest, null, 2));
