@@ -845,8 +845,14 @@ session: [session ID if available]
 
 ### Copy to outbox
 
+> ⚠️ **Use a distinct filename.** Phase 5 writes the *family announcement* to
+> `ψ/outbox/awaken_${DATE}_${MODE}.md` and posts it with
+> `gh issue create --body "$(cat "$OUTBOX_FILE")"`. Copying the growth record onto
+> that same path overwrites the announcement — the family issue then receives the
+> growth record instead of the Oracle's introduction. Keep the two files separate.
+
 ```bash
-cp "ψ/memory/resonance/awaken_${DATE}_${MODE}.md" "ψ/outbox/awaken_${DATE}_${MODE}.md"
+cp "ψ/memory/resonance/awaken_${DATE}_${MODE}.md" "ψ/outbox/awaken_${DATE}_${MODE}_record.md"
 ```
 
 ### For soul-sync: read previous awakening first
