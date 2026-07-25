@@ -14,8 +14,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "bun:test";
 import { readdir, readFile, rm, mkdir, writeFile } from "fs/promises";
 import { join } from "path";
-import { existsSync } from "fs";
-import { homedir } from "os";
+import { existsSync, mkdtempSync, rmSync } from "fs";
+import { homedir, tmpdir } from "os";
 import { $ } from "bun";
 import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/installer";
 import { profiles, labOnly, minimalOnly } from "../src/profiles";
@@ -624,3 +624,40 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
 
   });
 }
+
+// #459: `-y` promises "don't ask me". When no agent is detected the CLI used to
+// fall through to the interactive picker anyway, hit EOF on stdin, resolve to
+// nothing, and exit 0 having installed NOTHING — so CI and `/go update`
+// automation read a silent no-op as success. A fresh machine with no ~/.claude
+// is exactly the case the README's first command lands on.
+describe("#459 — non-interactive install with no detected agents", () => {
+  const cliPath = join(process.cwd(), "src/cli/index.ts");
+
+  it("exits non-zero instead of silently installing nothing", () => {
+    const emptyHome = mkdtempSync(join(tmpdir(), "arra-459-"));
+    const proc = Bun.spawnSync(
+      ["bun", cliPath, "install", "-g", "--profile", "minimal", "-y"],
+      { env: { ...process.env, HOME: emptyHome }, stdin: "ignore" },
+    );
+
+    expect(proc.exitCode).not.toBe(0);
+    // and it must say what to do about it, not just fail
+    const out = proc.stdout.toString() + proc.stderr.toString();
+    expect(out).toContain("-a claude-code");
+
+    rmSync(emptyHome, { recursive: true, force: true });
+  });
+
+  it("still succeeds when an agent is named explicitly", () => {
+    const home = mkdtempSync(join(tmpdir(), "arra-459-ok-"));
+    const proc = Bun.spawnSync(
+      ["bun", cliPath, "install", "-g", "--profile", "minimal", "-y", "-a", "claude-code"],
+      { env: { ...process.env, HOME: home }, stdin: "ignore" },
+    );
+
+    expect(proc.exitCode).toBe(0);
+    expect(existsSync(join(home, ".claude/skills/recap"))).toBe(true);
+
+    rmSync(home, { recursive: true, force: true });
+  });
+});

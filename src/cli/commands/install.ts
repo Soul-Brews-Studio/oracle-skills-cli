@@ -150,6 +150,21 @@ export function registerInstall(program: Command, version: string) {
           }
 
           if (targetAgents.length === 0) {
+            // #459: -y means "don't ask me". Falling through to the picker here
+            // made a non-interactive run hit EOF on stdin, resolve to nothing,
+            // and exit 0 having installed NOTHING — so CI and `/go update`
+            // automation read a silent no-op as success. Fail loudly instead,
+            // and say what to pass, since "no agents detected" is usually a
+            // fresh machine rather than a mistake.
+            if (options.yes) {
+              p.log.error(
+                'No agents detected, so there is nothing to install.\n' +
+                '  Name one explicitly, e.g.:  -a claude-code\n' +
+                `  Supported: ${getAgentNames().join(', ')}`
+              );
+              process.exit(1);
+            }
+
             const selected = await p.multiselect({
               message: 'Select agents to install to:',
               options: Object.entries(agents).map(([key, config]) => ({
