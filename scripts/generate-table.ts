@@ -30,39 +30,40 @@ async function countScripts(skillDir: string): Promise<number> {
 }
 
 function shortenDescription(desc: string): string {
-  // Remove "Use when..." and everything after
-  let short = desc.split(/\.\s*Use when/i)[0].trim();
-  
-  // Remove trailing period
-  short = short.replace(/\.$/, '');
-  
-  // If still too long, take first phrase before common separators
-  if (short.length > MAX_DESC_LENGTH) {
-    const separators = [' - ', ' — ', '. ', ', and ', ' and ', ' with ', ' via '];
-    for (const sep of separators) {
-      const idx = short.indexOf(sep);
-      if (idx > 10 && idx < MAX_DESC_LENGTH) {
-        short = short.substring(0, idx);
-        break;
-      }
-    }
+  let short = desc.trim();
+
+  // Strip the installer's own prefix — "[standard] v26.7.25-alpha.1900 G-SKLL | ..."
+  // gets prepended to installed copies and leaks back in when a skill is
+  // promoted from ~/.claude/skills into the repo.
+  short = short.replace(/^\[[^\]]+\]\s*/, '').replace(/^v[\d.]+\S*\s*/, '').replace(/^G-SKLL\s*\|\s*/, '');
+
+  // Strip YAML quoting. Without this, any description written as 'foo' or "foo"
+  // rendered with a dangling quote — the table showed `"บำเพ็ญเพียร` and
+  // `'Multi-perspective analysis`, which reads like the file is corrupted.
+  short = short.replace(/^['"]/, '').replace(/['"]$/, '');
+
+  // Drop the trigger half — everything from "Use when" / "TRIGGER" onward is
+  // for the model, not for a human skimming the table.
+  short = short.split(/\.\s*Use when/i)[0];
+  short = short.split(/\s*TRIGGER(?:\s+when)?[:\s]/i)[0];
+  short = short.trim().replace(/\.$/, '');
+
+  if (short.length <= MAX_DESC_LENGTH) return short.replace(/[,;:\s]+$/, '');
+
+  // Cut at a real clause boundary only. Earlier this also split on ", and",
+  // " and ", " with ", " via " — which turned "Spawn, lead, and tear down a
+  // team" into the meaningless "Spawn, lead".
+  for (const sep of [' — ', ' - ', '. ']) {
+    const idx = short.indexOf(sep);
+    if (idx > 10 && idx < MAX_DESC_LENGTH) return short.substring(0, idx).replace(/[,;:\s]+$/, '');
   }
-  
-  // Final truncation at word boundary if still too long
-  if (short.length > MAX_DESC_LENGTH) {
-    const truncated = short.substring(0, MAX_DESC_LENGTH);
-    const lastSpace = truncated.lastIndexOf(' ');
-    if (lastSpace > MAX_DESC_LENGTH * 0.6) {
-      short = truncated.substring(0, lastSpace);
-    } else {
-      short = truncated;
-    }
-  }
-  
-  // Clean up trailing punctuation
-  short = short.replace(/[,;:\s]+$/, '');
-  
-  return short;
+
+  // Otherwise truncate on a word boundary and SAY that it was truncated, so a
+  // clipped phrase doesn't read as the whole description.
+  const truncated = short.substring(0, MAX_DESC_LENGTH);
+  const lastSpace = truncated.lastIndexOf(' ');
+  const body = lastSpace > MAX_DESC_LENGTH * 0.6 ? truncated.substring(0, lastSpace) : truncated;
+  return body.replace(/[,;:\s]+$/, '') + '…';
 }
 
 function isSubagent(frontmatter: string, body: string): boolean {
