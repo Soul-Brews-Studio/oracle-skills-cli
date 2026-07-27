@@ -64,14 +64,22 @@ Restore all origins after cloning (like `git submodule init`):
 
 ```bash
 ROOT="$(pwd)"
-# Read .origins manifest and restore symlinks
-while read repo; do
-  ghq get -u "https://github.com/$repo"
-  OWNER=$(dirname "$repo")
-  REPO=$(basename "$repo")
+# .origins entries are "host/owner/repo" (new) or bare "owner/repo" (legacy, assumed github.com)
+while read entry; do
+  SLASHES=$(grep -o "/" <<< "$entry" | wc -l)
+  if [ "$SLASHES" -ge 2 ]; then
+    HOST=$(echo "$entry" | cut -d/ -f1)
+    OWNER=$(echo "$entry" | cut -d/ -f2)
+    REPO=$(echo "$entry" | cut -d/ -f3-)
+  else
+    HOST="github.com"
+    OWNER=$(dirname "$entry")
+    REPO=$(basename "$entry")
+  fi
+  ghq get -u "https://$HOST/$OWNER/$REPO"
   mkdir -p "$ROOT/ψ/learn/$OWNER/$REPO"
-  ln -sf "$(ghq root)/github.com/$repo" "$ROOT/ψ/learn/$OWNER/$REPO/origin"
-  echo "✓ Restored: $repo"
+  ln -sf "$(ghq root)/$HOST/$OWNER/$REPO" "$ROOT/ψ/learn/$OWNER/$REPO/origin"
+  echo "✓ Restored: $HOST/$OWNER/$REPO"
 done < "$ROOT/ψ/learn/.origins"
 ```
 
@@ -109,14 +117,17 @@ URL="[URL]"
 ROOT="$(pwd)"  # CRITICAL: Save current directory!
 ghq get -u "$URL" && \
   GHQ_ROOT=$(ghq root) && \
-  OWNER=$(echo "$URL" | sed -E 's|.*github.com/([^/]+)/.*|\1|') && \
+  HOST=$(echo "$URL" | sed -E 's|^https?://([^/]+)/.*|\1|') && \
+  OWNER=$(echo "$URL" | sed -E 's|^https?://[^/]+/([^/]+)/.*|\1|') && \
   REPO=$(echo "$URL" | sed -E 's|.*/([^/]+)(\.git)?$|\1|') && \
   mkdir -p "$ROOT/ψ/learn/$OWNER/$REPO" && \
-  ln -sf "$GHQ_ROOT/github.com/$OWNER/$REPO" "$ROOT/ψ/learn/$OWNER/$REPO/origin" && \
-  echo "$OWNER/$REPO" >> "$ROOT/ψ/learn/.origins" && \
+  ln -sf "$GHQ_ROOT/$HOST/$OWNER/$REPO" "$ROOT/ψ/learn/$OWNER/$REPO/origin" && \
+  echo "$HOST/$OWNER/$REPO" >> "$ROOT/ψ/learn/.origins" && \
   sort -u -o "$ROOT/ψ/learn/.origins" "$ROOT/ψ/learn/.origins" && \
-  echo "✓ Ready: $ROOT/ψ/learn/$OWNER/$REPO/origin → source"
+  echo "✓ Ready: $ROOT/ψ/learn/$OWNER/$REPO/origin → source (host: $HOST)"
 ```
+
+⚠️ **HOST matters**: `ghq` clones under a host-named directory (`github.com/owner/repo`, but `gist.github.com/owner/gist-hash` for gists). Deriving `HOST` from the URL instead of hardcoding `github.com` is what makes gist URLs (and any non-github.com git host) symlink correctly — a hardcoded `github.com` here silently produces a symlink pointing at a directory that doesn't exist for anything hosted elsewhere.
 
 **Verify:**
 ```bash
@@ -136,12 +147,32 @@ find ψ/learn -name "origin" -type l | xargs -I{} dirname {} | grep -i "$INPUT" 
 **For external repos**: Clone with script first, then explore via `origin/`
 **For local projects** (in `specs/`, `ψ/lib/`): Read directly
 
+## Step 0.5: Detect Single-File Target
+
+Gists and some repos are one file, not a codebase. Check before picking agents:
+
+```bash
+FILE_COUNT=$(find "$SOURCE_DIR" -type f -not -path '*/.git/*' | wc -l | tr -d ' ')
+echo "Files in source: $FILE_COUNT"
+```
+
+**If `FILE_COUNT` is 1 (or a small handful, all readable in one pass):**
+- **Skip spawning Haiku agents.** Read the file(s) yourself instead of delegating — parallel agents exist to divide a codebase too large to hold at once; re-reading a file you already hold in context wastes a full round-trip per agent for no gain.
+- **Skip the fixed Architecture / Code-Snippets / Testing / API-Surface categories.** Those assume a codebase. Read the file's actual sections and pick 3–5 doc names that match what's really there (e.g. a guideline/config doc → Structure, its core mechanism, Rules/Constraints, Templates, Lessons/Patterns).
+- Still produce the file *count* the requested mode implies (1 for `--fast`, 3 for default, 5 for `--deep`) — just content-adapted, not role-adapted.
+- Everything else is unchanged: Step 2 (hub file) and Trace Connection still apply normally.
+
+State plainly when this triggers, e.g.: *"This gist is a single N-line file, not a codebase — skipping multi-agent spawn, writing docs directly instead."*
+
+If `FILE_COUNT` is more than a handful, proceed to Step 1 as normal.
+
 ## Step 1: Detect Mode & Calculate Paths
 
 Check arguments for `--fast` or `--deep`:
 - `--fast` → Single overview agent
 - `--deep` → 5 parallel agents
 - (neither) → 3 parallel agents (default)
+- (single-file target, any mode) → no agents, see Step 0.5
 
 **Calculate ACTUAL paths (replace variables with real values):**
 ```
@@ -277,7 +308,7 @@ WRITE your output to:   [DOCS_DIR]/[TIME]_[filename].md
 
 ## Source
 - **Origin**: ./origin/
-- **GitHub**: https://github.com/$OWNER/$REPO
+- **URL**: https://$HOST/$OWNER/$REPO
 
 ## Explorations
 
@@ -349,7 +380,9 @@ This connects `/learn` to the shared knowledge layer — future `/trace` queries
 - `--fast`: 1 agent, quick scan for "what is this?"
 - Default: 3 agents in parallel, good balance
 - `--deep`: 5 agents, comprehensive for complex repos
+- Single-file target (gist, one-file repo): no agents — read + write directly, content-adapted doc names (see Step 0.5)
 - Haiku for exploration = cost effective
 - Main reviews = quality gate
 - `origin/` structure allows easy offload
 - `.origins` manifest enables `--init` restore
+- `.origins` entries are host-qualified (`host/owner/repo`) so non-github.com sources (e.g. `gist.github.com`) restore correctly
