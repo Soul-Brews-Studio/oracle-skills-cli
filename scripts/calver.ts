@@ -39,6 +39,11 @@ import { $ } from "bun";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
+// Anchor to THIS script's own location, not the caller's cwd — `bun scripts/calver.ts`
+// invoked from a different repo/directory must still read/write/git-tag-walk
+// arra-oracle-skills-cli's own package.json and git history, never the caller's.
+const REPO_ROOT = join(import.meta.dir, "..");
+
 export type Channel = "alpha" | "beta";
 type Args = { stable: boolean; channel?: Channel; check: boolean; now?: Date };
 
@@ -219,7 +224,7 @@ export function maxNFromPackageJson(
 }
 
 async function listChannelTags(base: string, channel: Channel): Promise<string[]> {
-  const res = await $`git tag --list ${`v${base}-${channel}.*`}`.nothrow().quiet();
+  const res = await $`git tag --list ${`v${base}-${channel}.*`}`.cwd(REPO_ROOT).nothrow().quiet();
   if (res.exitCode !== 0) return [];
   return res.stdout.toString().split("\n").map(s => s.trim()).filter(Boolean);
 }
@@ -252,7 +257,7 @@ export function computeVersion(args: Args, tags: string[] = [], packageVersion: 
 }
 
 async function tagExists(version: string): Promise<boolean> {
-  const res = await $`git rev-parse --verify --quiet ${`v${version}`}`.nothrow().quiet();
+  const res = await $`git rev-parse --verify --quiet ${`v${version}`}`.cwd(REPO_ROOT).nothrow().quiet();
   return res.exitCode === 0;
 }
 
@@ -263,7 +268,7 @@ async function main() {
 
   // #784: read package.json once up front so its version participates in the
   // source-of-truth set for the monotonic counter (see computeVersion).
-  const pkgPath = join(process.cwd(), "package.json");
+  const pkgPath = join(REPO_ROOT, "package.json");
   const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
 
   // #1015: auto-fix ghost dates in package.json. A ghost (e.g. April 53)
