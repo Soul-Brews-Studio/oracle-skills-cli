@@ -199,16 +199,43 @@ echo "📋 Outbox: $OUTBOX_FILE"
 
 ---
 
-## Then: Report to jan (family digest — fleet only)
+## Then: Report to jan (family digest — established family houses only)
 
-If this Oracle is part of the maw family fleet (`maw` is on PATH), send a one-shot
-digest to **jan**, the family's central index Oracle. This implements the family rule
-(Earth, 2026-06-16): every house reports to jan after /rrr + /forward, before closing —
-so family status is push-collected centrally, not pulled per-house. If `maw` is absent,
-skip this whole step silently.
+Send a one-shot digest to **jan**, the family's central index Oracle. This implements the
+family rule (Earth, 2026-06-16): every house reports to jan after /rrr + /forward, before
+closing — so family status is push-collected centrally, not pulled per-house.
 
-Send it (durable — `--inbox` is REQUIRED, otherwise maw only pane-injects into jan's
-shell and **no inbox file is created**):
+**GUARD — report ONLY if this Oracle is an established family house.** Reporting to jan is a
+cross-Oracle write; a fresh lab/bud must not do it silently just because it can. `maw` on PATH
+is NOT sufficient — every Oracle on a fleet machine has that. Skip this whole step (silently,
+no error) if ANY of these is true:
+
+```bash
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+CLAUDE_MD="$ORACLE_ROOT/CLAUDE.md"
+
+# (a) maw absent → not on the fleet at all
+command -v maw >/dev/null 2>&1 || SKIP_JAN=1
+# (b) fresh un-awakened bud — maw bud's placeholder CLAUDE.md, not yet a settled house
+grep -qiE "Budded from root|Run .?/awaken.? for the full identity" "$CLAUDE_MD" 2>/dev/null && SKIP_JAN=1
+# (c) explicit opt-out — a lab/disposable repo that DID awaken but is not a reporting house
+grep -qiE "^reports-to-jan:[[:space:]]*(false|no)|<!--[[:space:]]*no-jan-report" "$CLAUDE_MD" 2>/dev/null && SKIP_JAN=1
+
+if [ -n "$SKIP_JAN" ]; then
+  echo "↩︎  skipping jan family report — not an established family house"
+  echo "    (fresh bud, opted out, or maw absent). To enable: awaken this Oracle and remove any"
+  echo "    'reports-to-jan: false' marker from CLAUDE.md. See REPORT-PROTOCOL.md."
+  # …skip to the plan box; do NOT send the digest.
+fi
+```
+
+Rationale: crew-lab (a `maw bud --no-suffix` lab) reported to jan on its first /forward purely
+because the old guard was `maw on PATH` — true for every Oracle on the box. A cross-Oracle
+side-effect should be **opt-in by identity**, not fire-by-default. Established houses (all
+awakened, no opt-out marker) are unaffected — they keep reporting with zero migration.
+
+Only if NOT skipped, send it (durable — `--inbox` is REQUIRED, otherwise maw only pane-injects
+into jan's shell and **no inbox file is created**):
 
 ```bash
 command -v maw >/dev/null 2>&1 && \
