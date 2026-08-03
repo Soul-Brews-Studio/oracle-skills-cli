@@ -20,6 +20,7 @@ export type AgentType =
   | 'opencode'
   | 'claude-code'
   | 'codex'
+  | 'hermes'
   | 'cursor'
   | 'amp'
   | 'kilo'

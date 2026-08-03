@@ -10,6 +10,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "bun:test";
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
+import { homedir } from "os";
 import { existsSync } from "fs";
 import { agents, thClawsAvailable, defaultAgentNames } from "../src/cli/agents";
 import { installSkills } from "../src/cli/installer";
@@ -39,6 +40,23 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, "SKILL.md"), `---\nname: ${name}\ndescription: External skill\n---\n# /${name}\n`);
   }
+
+  describe("hermes: agent entry shape", () => {
+    it("agents map includes Hermes Agent with profile-scoped oracle path", () => {
+      const expectedHome = process.env.HERMES_HOME ?? join(homedir(), ".hermes");
+      const expectedProfile = process.env.HERMES_ACTIVE_PROFILE ?? process.env.HERMES_PROFILE ?? "default";
+
+      expect(agents.hermes).toBeDefined();
+      expect(agents.hermes.name).toBe("hermes");
+      expect(agents.hermes.displayName).toBe("Hermes Agent");
+      expect(agents.hermes.globalSkillsDir).toBe(
+        join(expectedHome, "profiles", expectedProfile, "skills", "oracle")
+      );
+      expect(agents.hermes.skillsDir).toBe(
+        `.hermes/profiles/${expectedProfile}/skills/oracle`
+      );
+    });
+  });
 
   describe("alignment: explicit --profile triggers removal of arra-managed skills not in target", () => {
     beforeEach(() => fx.cleanup());

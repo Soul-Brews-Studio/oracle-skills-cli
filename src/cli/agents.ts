@@ -5,6 +5,9 @@ import { execSync } from 'child_process';
 import type { AgentConfig, AgentType } from './types.js';
 
 const home = homedir();
+const hermesHome = process.env.HERMES_HOME || join(home, '.hermes');
+const hermesProfile =
+  process.env.HERMES_ACTIVE_PROFILE || process.env.HERMES_PROFILE || 'default';
 
 export function thClawsAvailable(): boolean {
   try {
@@ -56,6 +59,19 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalCommandsDir: join(home, '.codex/prompts'),
     useFlatFiles: true,
     detectInstalled: () => existsSync(join(home, '.codex')),
+  },
+  hermes: {
+    name: 'hermes',
+    displayName: 'Hermes Agent',
+    skillsDir: `.hermes/profiles/${hermesProfile}/skills/oracle`,
+    globalSkillsDir: join(
+      hermesHome,
+      'profiles',
+      hermesProfile,
+      'skills',
+      'oracle'
+    ),
+    detectInstalled: () => existsSync(hermesHome),
   },
   cursor: {
     name: 'cursor',
