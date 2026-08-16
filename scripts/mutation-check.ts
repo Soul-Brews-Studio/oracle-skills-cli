@@ -98,17 +98,17 @@ const MUTANTS: Mutant[] = [
 ];
 
 /** Which tests failed. Bun prints only failures, as `(fail) <suite> > <name>`. */
-async function runSuite(): Promise<{ green: boolean; failed: string[] }> {
+async function runSuite(): Promise<{ green: boolean; failed: string[]; total: number }> {
   const proc = Bun.spawn(['bun', 'test', SUITE], { cwd: ROOT, stdout: 'pipe', stderr: 'pipe' });
   const [out, err] = await Promise.all([
     new Response(proc.stdout).text(),
     new Response(proc.stderr).text(),
   ]);
   const code = await proc.exited;
-  const failed = [...`${out}\n${err}`.matchAll(/\(fail\)\s+(.+?)(?:\s+\[|\n|$)/g)].map((m) =>
-    m[1].trim(),
-  );
-  return { green: code === 0, failed };
+  const text = `${out}\n${err}`;
+  const failed = [...text.matchAll(/\(fail\)\s+(.+?)(?:\s+\[|\n|$)/g)].map((m) => m[1].trim());
+  const total = Number(/Ran (\d+) tests?/.exec(text)?.[1] ?? 0);
+  return { green: code === 0, failed, total };
 }
 
 /** Does the mutated file still parse? An unparseable mutant is a broken experiment. */
@@ -126,10 +126,12 @@ const original = readFileSync(TARGET, 'utf8');
 copyFileSync(TARGET, BACKUP);
 
 let killed = 0;
+let baseTotal = 0;
 const problems: string[] = [];
 
 try {
   const base = await runSuite();
+  baseTotal = base.total;
   if (!base.green) {
     console.error('✗ baseline suite is already failing — fix that before mutation testing');
     process.exit(1);
@@ -163,6 +165,19 @@ try {
       console.log(`✗ ${m.id}: SURVIVED — no test catches this`);
       console.log(`   ${m.why}`);
       problems.push(`${m.id} survived`);
+      continue;
+    }
+
+    // A mutant that kills EVERY check discriminates nothing — it is
+    // indistinguishable from a broken experiment, and attribution alone will not
+    // catch it because the declared test is among the casualties. neo named the
+    // tell ("a mutant killed by everything") after it hid a fake kill twice; this
+    // enforces it. Verified with a control that parses cleanly, detects nothing,
+    // and exits 1 from main() — previously scored "✓ killed", exit 0.
+    if (baseTotal > 1 && res.failed.length >= baseTotal) {
+      console.log(`✗ ${m.id}: UNIVERSAL — killed all ${baseTotal} checks; proves nothing`);
+      console.log(`   a mutation that breaks everything discriminates nothing`);
+      problems.push(`${m.id} universal`);
       continue;
     }
 
