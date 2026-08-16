@@ -110,7 +110,7 @@ about                 # version + status
 
 ## Zombie Skills
 
-40 skills excluded from all profiles. Install by name:
+39 skills excluded from all profiles. Install by name:
 
 ```bash
 bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>
@@ -150,7 +150,6 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | `/rrr-lite` | Lite variant killed 2026-05-14. Use /rrr instead. |
 | `/oracle-up` | G-SKLL | Bring up a whole oracle node on a remote host — ... |
 | `/schedule` | Query schedule via Oracle API (Drizzle DB). Use when user... |
-| `/worktree` | Work in an isolated git worktree — safe parallel editing,... |
 | `/standup` | Daily standup check — pending tasks, appointments, recent... |
 | `/xray` | X-ray deep scan — inspect Claude Code auto-memory, instal... |
 | `/feel` | Capture how the system feels — energy, momentum, burnout,... |
