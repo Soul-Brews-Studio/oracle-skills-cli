@@ -40,14 +40,22 @@ function fixture(opts: {
 }
 
 async function run(home: string): Promise<string> {
+  return (await runFull(home)).stdout;
+}
+
+/** Full result — needed to assert the never-block contract (exit 0, clean stderr). */
+async function runFull(home: string): Promise<{ stdout: string; stderr: string; code: number }> {
   const proc = Bun.spawn(['bun', DETECTOR], {
     env: { ...process.env, HOME: home },
     stdout: 'pipe',
     stderr: 'pipe',
   });
-  const out = await new Response(proc.stdout).text();
-  await proc.exited;
-  return out;
+  const [stdout, stderr] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ]);
+  const code = await proc.exited;
+  return { stdout, stderr, code };
 }
 
 afterAll(() => {
@@ -117,10 +125,32 @@ describe('skills-staleness detector', () => {
     expect(out).toContain('45d');
   });
 
-  test('never throws, and stays silent, when no manifest exists', async () => {
+  test('never blocks the caller: no manifest → silent, clean stderr, exit 0', async () => {
+    // Asserting only on stdout made this test non-discriminating: removing the
+    // `existsSync(MANIFEST)` guard just moves the failure into the try/catch, so
+    // stdout stays empty either way and the test could never go red (verified by
+    // mutation — M6 killed nothing). The contract that actually matters is the
+    // never-block one, so assert the whole surface: no stdout, no stderr noise,
+    // exit 0. That catches an unhandled rejection or a crash reaching the caller.
     const home = mkdtempSync(join(tmpdir(), 'arra-staleness-none-'));
     roots.push(home);
     mkdirSync(join(home, '.claude', 'skills'), { recursive: true });
-    expect((await run(home)).trim()).toBe('');
+    const { stdout, stderr, code } = await runFull(home);
+    expect(stdout.trim()).toBe('');
+    expect(stderr).not.toContain('error:');
+    expect(stderr).not.toContain('Unhandled');
+    expect(code).toBe(0);
+  });
+
+  test('never blocks the caller: unreadable manifest → silent, exit 0', async () => {
+    const home = mkdtempSync(join(tmpdir(), 'arra-staleness-bad-'));
+    roots.push(home);
+    const skills = join(home, '.claude', 'skills');
+    mkdirSync(skills, { recursive: true });
+    writeFileSync(join(skills, '.arra-oracle-skills.json'), '{ not json at all');
+    const { stdout, stderr, code } = await runFull(home);
+    expect(stdout.trim()).toBe('');
+    expect(stderr).not.toContain('Unhandled');
+    expect(code).toBe(0);
   });
 });
