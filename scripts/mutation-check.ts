@@ -25,11 +25,24 @@ const TARGET = join(ROOT, 'skills', 'recap', 'skills-staleness.ts');
 const SUITE = join(ROOT, '__tests__', 'skills-staleness.test.ts');
 const BACKUP = `${TARGET}.mutation-backup`;
 
-type Mutant = { id: string; why: string; apply: (s: string) => string };
+/**
+ * `killedBy` names the ONE test that must fail for this mutant. Declaring it is
+ * what makes a kill evidence rather than a coincidence (found by neo, 2026-08-16):
+ *
+ *  - A mutant that merely BREAKS the file fails the whole suite, and a harness
+ *    that only reads the suite exit code scores that as "killed". It detected
+ *    nothing. Verified against this very harness with a syntax-garbage control
+ *    mutant: it reported "✓ killed". So a kill must be ATTRIBUTED, not inferred,
+ *    and an unparseable mutant is BROKEN — an invalid experiment, never a kill.
+ *  - Cross-kills are the tell. If a mutant takes down tests it has no business
+ *    reaching, the suite is coupled and the mapping is not evidence of anything.
+ */
+type Mutant = { id: string; why: string; killedBy: string; apply: (s: string) => string };
 
 const MUTANTS: Mutant[] = [
   {
     id: 'M1-predicate-drops-skillmd',
+    killedBy: 'SKILL.md-less directory',
     why: 'FIX 4 (neo): reconciling against a wider population than the manifest is built from → permanent false positive no reinstall can clear',
     apply: (s) =>
       s.replace(
@@ -39,16 +52,19 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M2-fail-open',
+    killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',
     apply: (s) => s.replace('if (diskReadFailed) {', 'if (false) {'),
   },
   {
     id: 'M3-old-install-never-fires',
+    killedBy: 'older than 30 days',
     why: 'a 30+ day old install must still be surfaced when no newer source is found',
     apply: (s) => s.replace('age !== null && age >= 30', 'false'),
   },
   {
     id: 'M4-reconciliation-always-off',
+    killedBy: 'genuinely unrecorded',
     why: 'the predicate fix must not silence REAL drift along with the false positive',
     apply: (s) =>
       s.replace(
@@ -58,6 +74,7 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M5-never-quiet',
+    killedBy: 'silent on a healthy',
     why: 'a diagnostic that speaks on a healthy shelf gets ignored; silence is the contract',
     apply: (s) =>
       s.replace(
@@ -67,6 +84,7 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M6-never-block-removed',
+    killedBy: 'no manifest',
     why: 'orientation must not break on a diagnostic: no manifest / bad JSON must still exit 0 quietly',
     apply: (s) =>
       s
@@ -79,21 +97,40 @@ const MUTANTS: Mutant[] = [
   },
 ];
 
-async function runSuite(): Promise<boolean> {
+/** Which tests failed. Bun prints only failures, as `(fail) <suite> > <name>`. */
+async function runSuite(): Promise<{ green: boolean; failed: string[] }> {
   const proc = Bun.spawn(['bun', 'test', SUITE], { cwd: ROOT, stdout: 'pipe', stderr: 'pipe' });
-  await new Response(proc.stdout).text();
-  await new Response(proc.stderr).text();
+  const [out, err] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ]);
+  const code = await proc.exited;
+  const failed = [...`${out}\n${err}`.matchAll(/\(fail\)\s+(.+?)(?:\s+\[|\n|$)/g)].map((m) =>
+    m[1].trim(),
+  );
+  return { green: code === 0, failed };
+}
+
+/** Does the mutated file still parse? An unparseable mutant is a broken experiment. */
+async function parses(file: string): Promise<boolean> {
+  const proc = Bun.spawn(['bun', 'build', file, '--target=bun', '--outfile=/dev/null'], {
+    cwd: ROOT,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  });
+  await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text()]);
   return (await proc.exited) === 0;
 }
 
 const original = readFileSync(TARGET, 'utf8');
 copyFileSync(TARGET, BACKUP);
 
-let survived = 0;
-let inert = 0;
+let killed = 0;
+const problems: string[] = [];
 
 try {
-  if (!(await runSuite())) {
+  const base = await runSuite();
+  if (!base.green) {
     console.error('✗ baseline suite is already failing — fix that before mutation testing');
     process.exit(1);
   }
@@ -101,22 +138,51 @@ try {
 
   for (const m of MUTANTS) {
     const mutated = m.apply(original);
+
+    // An un-appliable mutation silently weakens the check while still reporting a pass.
     if (mutated === original) {
-      console.log(`⚠️  ${m.id}: INERT — source no longer matches this mutation, update it`);
-      inert++;
+      console.log(`⚠️  ${m.id}: INERT — source drifted, mutation no longer applies`);
+      problems.push(`${m.id} inert`);
       continue;
     }
+
     writeFileSync(TARGET, mutated);
-    const stillGreen = await runSuite();
+    const ok = await parses(TARGET);
+    const res = ok ? await runSuite() : null;
     writeFileSync(TARGET, original);
 
-    if (stillGreen) {
+    // BROKEN, not killed: the file no longer compiles, so the suite fails for a
+    // reason that has nothing to do with detection.
+    if (!res) {
+      console.log(`⚠️  ${m.id}: BROKEN — mutant does not parse; proves nothing`);
+      problems.push(`${m.id} broken`);
+      continue;
+    }
+
+    if (res.green) {
       console.log(`✗ ${m.id}: SURVIVED — no test catches this`);
       console.log(`   ${m.why}`);
-      survived++;
-    } else {
-      console.log(`✓ ${m.id}: killed`);
+      problems.push(`${m.id} survived`);
+      continue;
     }
+
+    // A kill must be ATTRIBUTED to the declared test, not inferred from red.
+    const hit = res.failed.filter((f) => f.includes(m.killedBy));
+    const strays = res.failed.filter((f) => !f.includes(m.killedBy));
+
+    if (hit.length === 0) {
+      console.log(`✗ ${m.id}: MIS-ATTRIBUTED — suite went red, but not via "${m.killedBy}"`);
+      console.log(`   actually failed: ${res.failed.join(' | ') || '(none parsed)'}`);
+      problems.push(`${m.id} mis-attributed`);
+      continue;
+    }
+
+    console.log(`✓ ${m.id}: killed by "${m.killedBy}"`);
+    if (strays.length) {
+      // Not fatal, but it means the mapping is not clean evidence.
+      console.log(`   ⓘ cross-kill: also failed ${strays.join(' | ')}`);
+    }
+    killed++;
   }
 } finally {
   writeFileSync(TARGET, original);
@@ -126,12 +192,11 @@ try {
 }
 
 console.log(
-  `\n${MUTANTS.length - survived - inert}/${MUTANTS.length} mutants killed` +
-    (survived ? `  ·  ${survived} SURVIVED` : '') +
-    (inert ? `  ·  ${inert} inert` : ''),
+  `\n${killed}/${MUTANTS.length} mutants killed and correctly attributed` +
+    (problems.length ? `  ·  ${problems.length} problem(s): ${problems.join(', ')}` : ''),
 );
 
-if (survived || inert) {
+if (problems.length) {
   console.error('\nA green suite that cannot go red is not a passing suite.');
   process.exit(1);
 }
