@@ -128,12 +128,25 @@ async function main() {
   // Note isDirectory() deliberately does NOT follow symlinks: externally-linked
   // skills (e.g. ego-browser → ~/.local/share/ego) are not shelf-managed and must
   // not count as "unrecorded", or this fires on a healthy install.
+  //
+  // [ADOPTED — fix 3, found by neo] The predicate MUST match the one the installer
+  // uses to build the manifest (src/cli/installer.ts:770-774), which additionally
+  // requires a SKILL.md:
+  //
+  //     .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+  //     .filter((name) => existsSync(join(targetDir, name, 'SKILL.md')))
+  //
+  // Reconciling against a WIDER population than the manifest is built from makes
+  // any SKILL.md-less directory permanently unrecorded: unrecorded > 0 forever,
+  // MANIFEST UNRELIABLE forever, and no reinstall can ever clear it — while the
+  // message tells you to reinstall. A sticky false positive on a healthy shelf is
+  // the fastest way to make people stop reading the tool.
   let onDisk = 0;
   let diskReadFailed = false;
   try {
-    onDisk = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter(
-      (d) => d.isDirectory() && !d.name.startsWith('.'),
-    ).length;
+    onDisk = readdirSync(SKILLS_DIR, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
+      .filter((d) => existsSync(join(SKILLS_DIR, d.name, 'SKILL.md'))).length;
   } catch {
     diskReadFailed = true; // [ADOPTED — fix 2] see below
   }
