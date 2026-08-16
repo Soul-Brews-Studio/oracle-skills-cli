@@ -359,6 +359,15 @@ if [ -d "$TARGET_REPO/.git" ]; then
   grep -qxF '.claude/INCUBATED_BY' "$TARGET_REPO/.git/info/exclude" 2>/dev/null \
     || echo '.claude/INCUBATED_BY' >> "$TARGET_REPO/.git/info/exclude"
   echo "✓ Excluded from git: .claude/INCUBATED_BY (local .git/info/exclude)"
+
+  # If a PRIOR incubation already committed the breadcrumb, exclude alone
+  # won't hide it — git keeps tracking a tracked file. Auto-untrack it
+  # (index-only; the file stays on disk). This makes "must be ignored"
+  # actually hold instead of leaving a manual git-rm note.
+  if git -C "$TARGET_REPO" ls-files --error-unmatch .claude/INCUBATED_BY >/dev/null 2>&1; then
+    git -C "$TARGET_REPO" rm --cached --quiet .claude/INCUBATED_BY
+    echo "✓ Untracked previously-committed .claude/INCUBATED_BY (git rm --cached)"
+  fi
 fi
 ```
 
@@ -368,7 +377,45 @@ The breadcrumb enables:
 - **/recap awareness**: /recap shows a warning when INCUBATED_BY exists (#229)
 
 The breadcrumb is machine-local — it must never appear in the target repo's
-git history. If a repo already committed one: `git rm --cached .claude/INCUBATED_BY` (#447).
+git history (#447). Step 0.5 enforces this in both directions: it adds the
+local exclude for future runs, and auto-untracks the file if a prior
+incubation already committed it (`git rm --cached`, index-only — the
+breadcrumb stays on disk). Nothing manual is left for you to remember.
+
+### Step 0.6: Share the vault — symlink target ψ → parent oracle vault
+
+An incubated repo that writes its own memory (retros, learnings, traces) into a
+standalone `ψ/` strands that brain — the parent oracle never sees it. Point the
+target's `ψ` at the parent vault so incubated work lands in one shared brain.
+
+```bash
+# Only if the parent actually has a vault to share
+if [ -e "$ROOT/ψ" ]; then
+  ln -sfn "$ROOT/ψ" "$TARGET_REPO/ψ"   # -n: don't descend into an existing symlink
+  echo "✓ Vault shared: $TARGET_REPO/ψ → $ROOT/ψ"
+
+  # Keep it OUT of the target's git history via LOCAL exclude (never the
+  # committed .gitignore — target may be public; #447 rule).
+  # GOTCHA (neo, 2026-08-16): a bare symlink `ψ` is NOT matched by `ψ/` — the
+  # trailing slash only matches a directory. Exclude BOTH forms or the symlink
+  # shows up as untracked.
+  if [ -d "$TARGET_REPO/.git" ]; then
+    for pat in 'ψ' 'ψ/'; do
+      grep -qxF "$pat" "$TARGET_REPO/.git/info/exclude" 2>/dev/null \
+        || echo "$pat" >> "$TARGET_REPO/.git/info/exclude"
+    done
+    echo "✓ Excluded from git: ψ and ψ/ (local .git/info/exclude)"
+  fi
+fi
+```
+
+**Consequence — the vault is now GLOBAL, not per-repo.** Once the target's `ψ`
+symlinks into the parent, `incubate/`, `learn/`, and `memory/` are the same
+directory on disk across every repo that shares that vault. `/incubate` or
+`/learn` in one shows up for all of them. If the parent vault itself is a
+symlink into a **private** companion repo (e.g. `neo-oracle/ψ → neo-oracle-vault`),
+that's deliberate: it keeps memory out of open-source-bound repos while still
+sharing one brain. Don't assume an incubated repo's memory is private to it.
 
 ### If just a name (no slash, no URL)
 

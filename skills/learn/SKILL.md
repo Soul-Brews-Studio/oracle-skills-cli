@@ -85,20 +85,91 @@ echo "Learning from: $ROOT"
 
 **IMPORTANT FOR SUBAGENTS:**
 When spawning Haiku agents, you MUST give them TWO literal paths:
-1. **SOURCE_DIR** (where to READ code) - the `origin/` symlink
+1. **SOURCE_DIR** (where to READ code) — the **`readlink`-RESOLVED ghq path**.
+   **Never the `origin/` symlink path.** See ⚠️ below — this is not cosmetic.
 2. **DOCS_DIR** (where to WRITE docs) - the parent directory, NOT inside origin/
 
-⚠️ **THE BUG**: If you only give agents `origin/` path, they cd into it and write there → files end up in WRONG repo!
+⚠️ **BUG 1 (writes)**: If you only give agents `origin/` path, they cd into it and write there → files end up in WRONG repo!
+
+⚠️ **BUG 2 (reads — worse, and silent)**: The `origin/` path is *nested inside
+this oracle repo* (`ROOT/ψ/learn/...`). An agent handed that path reads the
+target as a subdirectory of us and describes it as a variant of our repo. Measured
+on `mattpocock/skills` (2026-08-16): the arm given the nested path produced 3
+contaminated docs / 26 false claims; the arm given the resolved ghq path produced
+**zero**. Same target, same minute, same model. Resolve it:
+
+```bash
+SOURCE_DIR="$(readlink "$ROOT/ψ/learn/$OWNER/$REPO/origin")"   # → ghq path
+```
 
 **FIX**: Always give BOTH paths as LITERAL absolute values (no variables!):
 
 Example: ROOT=/home/user/ghq/.../my-oracle, learning acme-corp/cool-library, TODAY=2026-02-04, TIME=1349:
 ```
-READ from:  .../ψ/learn/acme-corp/cool-library/origin/
+READ from:  /home/user/ghq/github.com/acme-corp/cool-library/     ← resolved, NOT under ψ/
 WRITE to:   .../ψ/learn/acme-corp/cool-library/2026-02-04/1349_[FILENAME].md
 ```
 
 Tell each agent: "Read from [SOURCE_DIR]. Write to [DOCS_DIR]/[TIME]_[FILENAME].md"
+
+### ⚠️ MANDATORY: Isolation preamble (prepend to EVERY agent prompt)
+
+Agents spawned here inherit **this oracle repo's** `CLAUDE.md` as project
+instructions. They will silently describe the *target* repo using *our*
+vocabulary. Measured on `mattpocock/skills` (2026-08-16): 3 of 5 docs
+contaminated, 26 false structural claims — including a doc that wrote
+*"(not in mattpocock/skills; reference from oracle-skills-cli CLAUDE.md)"*
+and then asserted the claim anyway. **Detection is not containment.** The
+agent noticing the mismatch does not stop it shipping.
+
+Prepend this verbatim to every agent prompt:
+
+```
+ISOLATION RULE — read before anything else.
+You are running inside an unrelated repo whose CLAUDE.md is in your context.
+Its conventions describe YOUR HOST, not the target you are analyzing.
+Document ONLY what you can cite from a file under SOURCE_DIR.
+Before writing any structural claim (build tooling, versioning scheme,
+directory layout, curation/lifecycle model, CI gates), verify it with a
+concrete check — `ls`, reading package.json, reading the config file.
+If you cannot cite it, write "not present" — never substitute a mechanism
+you know from elsewhere, and never describe the target as a variant of
+another repo.
+```
+
+**Do not soften this to "be careful."** The failure mode is confident and
+fluent; only a citation requirement catches it.
+
+### ⚠️ Absent-referent rule (the biggest single cause)
+
+A mandated section with no material in the target is what actually produces
+contamination. `TESTING.md` was demanded for a repo with **zero tests**; the
+agent correctly wrote "no test infrastructure" — then filled the rest of the
+page with our CalVer, our `bun run compile`, our "public shelf". The two docs
+whose topics were fully sourced from the target's README came back spotless.
+
+So: **every agent must be told the section may legitimately be empty.**
+
+```
+If the target has little or nothing for your assigned topic, say so plainly
+in one or two lines and STOP. A short accurate doc is correct output. Do NOT
+pad, and do NOT reach for mechanisms from any other repo to fill the page.
+```
+
+### ⚠️ Never let SOURCE_DIR read as "inside us"
+
+`origin` is a symlink living under our own `ψ/`, so the target's absolute
+path is nested in ours. An agent given only that path modeled the target as
+*"this origin version"* — an upstream variant of our repo — and inherited our
+architecture wholesale. **Resolve the symlink and hand agents the real path:**
+
+```bash
+SOURCE_DIR="$(readlink "$ROOT/ψ/learn/$OWNER/$REPO/origin")"   # → the ghq path
+```
+
+State the target's identity explicitly too: *"You are analyzing the
+independent repository `OWNER/REPO`, which has no relationship to the repo
+you are running inside."*
 
 ### If URL (http* or owner/repo format)
 
@@ -123,7 +194,11 @@ ghq get -u "$URL" && \
 ls -la "$ROOT/ψ/learn/$OWNER/$REPO/"
 ```
 
-> **Note**: Grep tool doesn't follow symlinks. Use: `rg -L "pattern" ψ/learn/owner/repo/origin/`
+> **Note**: Grep tool doesn't follow symlinks — which is precisely why agents get the
+> **resolved** `SOURCE_DIR` (`readlink ... /origin`) rather than the symlink path. On the
+> resolved ghq path, plain `rg "pattern" "$SOURCE_DIR"` works and no `-L` is needed.
+> (Historical: an oracle hit this symlink friction, switched to the direct path for
+> unrelated reasons, and accidentally produced the only uncontaminated run — see BUG 2.)
 
 ### Then resolve path:
 ```bash
@@ -149,7 +224,8 @@ TODAY = YYYY-MM-DD (e.g., 2026-02-04)
 TIME = HHMM (e.g., 1349)
 REPO_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/
 DOCS_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/[TODAY]/   ← date folder
-SOURCE_DIR = [ROOT]/ψ/learn/[OWNER]/[REPO]/origin/  ← symlink
+SOURCE_DIR = $(readlink [ROOT]/ψ/learn/[OWNER]/[REPO]/origin)  ← RESOLVED ghq path.
+             Never pass the ψ/-nested symlink path to an agent (see BUG 2 above).
 FILE_PREFIX = [TIME]_                               ← time prefix for files
 
 Example:
@@ -269,6 +345,31 @@ WRITE your output to:   [DOCS_DIR]/[TIME]_[filename].md
 - Plugin/middleware architecture
 
 **Skip to Step 2** after all agents complete.
+
+## Step 1.9: Contamination check (REQUIRED — before the hub file)
+
+Agents that leak are fluent and confident; you cannot spot it by reading. Grep
+for **our** distinctive vocabulary appearing in docs about **their** repo:
+
+```bash
+# Terms distinctive to THIS oracle repo. A hit means the doc is describing us.
+rg -n --stats "src/skills|split-brain|bun run compile|public shelf|CalVer|G-SKLL|zombie|lefthook" \
+   "$DOCS_DIR"/${TIME}_*.md
+```
+
+Any hit → verify that specific claim against the target before trusting the
+doc. Cheap structural checks settle most of them instantly:
+
+```bash
+ls -d "$SOURCE_DIR/src" 2>&1                                  # does the vault exist?
+python3 -c "import json;print(json.load(open('$SOURCE_DIR/package.json')).get('scripts'))"
+```
+
+If a doc is contaminated, **prepend a correction banner naming each false
+claim and its verified reality** — do not silently delete, and do not just
+warn generically. Check **every** doc: a partial pass leaves a poisoned file
+looking clean by omission (this happened — `TESTING.md` was missed on the
+first pass and read as verified for 25 minutes).
 
 ## Step 2: Create/Update Hub File ([REPO].md)
 
