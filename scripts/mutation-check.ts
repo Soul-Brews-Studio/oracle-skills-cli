@@ -52,6 +52,22 @@ const MUTANTS: Mutant[] = [
       ),
   },
   {
+    id: 'M7-prerelease-blind',
+    killedBy: 'PRERELEASE is behind',
+    why: 'FIX 1: prerelease dropped as NaN, so 26.7.27-alpha.947 compared AHEAD of its own release',
+    apply: (s) =>
+      s.replace(
+        'const isBehind = (installed: string, source: string) => compareVersions(installed, source) < 0;',
+        "const isBehind = (i: string, s2: string) => {\n  const n = (v: string) => v.split(/[.\\-+]/).map((p) => Number.parseInt(p, 10)).filter(Number.isFinite);\n  const a = n(i), b = n(s2);\n  for (let k = 0; k < Math.max(a.length, b.length); k++) { const x = a[k] ?? 0, y = b[k] ?? 0; if (x !== y) return x < y; }\n  return false;\n};",
+      ),
+  },
+  {
+    id: 'M8-behind-never-fires',
+    killedBy: 'reports BEHIND',
+    why: 'BEHIND detection is the whole point of the tool; it must fire when source is newer',
+    apply: (s) => s.replace('const behind = srcVersion ? isBehind(m.version, srcVersion) : false;', 'const behind = false;'),
+  },
+  {
     id: 'M2-fail-open',
     killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',

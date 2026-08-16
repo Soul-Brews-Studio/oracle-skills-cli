@@ -8,12 +8,29 @@ const DETECTOR = join(import.meta.dir, '..', 'skills', 'recap', 'skills-stalenes
 const roots: string[] = [];
 
 /** Build a fake $HOME with a .claude/skills shelf and a manifest. */
+/**
+ * Stand up a fake ghq source clone inside the fixture $HOME.
+ *
+ * `ghq root` reads git config, which reads $HOME — so overriding HOME points ghq
+ * at the fixture and the detector compares against this fake clone. No network,
+ * real shelf untouched. Fixture technique from neo (laris-co/neo-oracle).
+ *
+ * Without this, the BEHIND branch is unreachable in tests — which is exactly how
+ * the prerelease comparison shipped with zero coverage (mutation M7 survived).
+ */
+function fakeSourceClone(home: string, version: string) {
+  const dir = join(home, 'ghq', 'github.com', 'Soul-Brews-Studio', 'arra-oracle-skills-cli');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'package.json'), JSON.stringify({ version }));
+}
+
 function fixture(opts: {
   recorded: string[];
   withSkillMd: string[];
   bareDirs?: string[];
   version?: string;
   installedAt?: string;
+  sourceVersion?: string;
 }) {
   const home = mkdtempSync(join(tmpdir(), 'arra-staleness-'));
   roots.push(home);
@@ -36,6 +53,7 @@ function fixture(opts: {
       agent: 'claude-code',
     }),
   );
+  if (opts.sourceVersion) fakeSourceClone(home, opts.sourceVersion);
   return { home, skills };
 }
 
@@ -123,6 +141,56 @@ describe('skills-staleness detector', () => {
     });
     const out = await run(home);
     expect(out).toContain('45d');
+  });
+
+  test('reports BEHIND when the local source clone is newer', async () => {
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.5.16',
+      sourceVersion: '26.7.27',
+    });
+    const { stdout, code } = await runFull(home);
+    expect(stdout).toContain('BEHIND');
+    expect(stdout).toContain('26.7.27');
+    expect(code).toBe(0); // a diagnostic must never block the caller
+  });
+
+  test('a PRERELEASE is behind its own release (the untested branch)', async () => {
+    // The whole point of the prerelease-aware comparison. Parsing that drops the
+    // tag as NaN turns 26.7.27-alpha.947 into [26,7,27,947] and compares it AHEAD
+    // of the release [26,7,27] — so everyone on a prerelease is told they are
+    // current the moment it ships. This shipped with ZERO coverage; mutation M7
+    // survived until this test existed.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.7.27-alpha.947',
+      sourceVersion: '26.7.27',
+    });
+    expect((await run(home))).toContain('BEHIND');
+  });
+
+  test('does NOT report BEHIND when the shelf is current', async () => {
+    // Guards the fix from over-firing: a correct shelf must stay silent.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.7.27',
+      sourceVersion: '26.7.27',
+    });
+    expect((await run(home)).trim()).toBe('');
+  });
+
+  test('does NOT report BEHIND when the shelf is AHEAD of local source', async () => {
+    // A local clone can itself be stale; being ahead of it is not being behind.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.7.27',
+      sourceVersion: '26.5.16',
+    });
+    expect(await run(home)).not.toContain('BEHIND');
   });
 
   test('never blocks the caller: no manifest → silent, clean stderr, exit 0', async () => {
