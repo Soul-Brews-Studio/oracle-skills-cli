@@ -229,6 +229,23 @@ try {
       continue;
     }
 
+    // AMBIGUOUS (neo, #22). INERT asks whether the anchor is PRESENT. It never
+    // asked whether the anchor is UNIQUE. String.replace with a string argument
+    // edits only the FIRST occurrence, so a non-unique anchor silently mutates a
+    // different site than the mutant claims — while every other gate reports
+    // normally. Exit code right, reason wrong; the same shape that faked four
+    // verifications tonight, in a new position.
+    //
+    // Detected without extracting the anchor: if it occurred more than once, a
+    // second application still finds one and changes something else. A unique
+    // anchor is consumed by the first application, so applying twice is a no-op.
+    if (m.apply(mutated) !== mutated) {
+      console.log(`⚠️  ${m.id}: AMBIGUOUS — anchor matches more than once; only the first is edited`);
+      console.log(`   the mutant may be changing a site it does not claim to change`);
+      problems.push(`${m.id} ambiguous`);
+      continue;
+    }
+
     writeFileSync(TARGET, mutated);
     const ok = await parses(TARGET);
     const alive = ok ? await isAlive(TARGET) : false;
