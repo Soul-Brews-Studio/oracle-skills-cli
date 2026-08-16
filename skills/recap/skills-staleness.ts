@@ -154,7 +154,30 @@ async function main() {
   const unrecorded = onDisk - recorded;
   const manifestUntrustworthy = onDisk > 0 && recorded > 0 && unrecorded > 0;
 
-  if (!behind && !oldInstall && !manifestUntrustworthy && !diskReadFailed && !VERBOSE) return;
+  // [neo, #25] Reconciliation ran in ONE DIRECTION ONLY. `unrecorded > 0` sees
+  // disk exceeding the manifest; the opposite drift went entirely unreported,
+  // because the subtraction simply goes negative and the guard is false.
+  //
+  // Measured before fixing: manifest recording 36 skills against a disk holding
+  // 1 printed NOTHING in quiet mode and exit 0, and in --verbose cheerfully said
+  // "36 skills recorded" while 35 were gone. A shelf that had lost 35 of 36
+  // skills read as healthy, from a tool whose entire premise is reconciling two
+  // sources against each other.
+  //
+  // This direction is the more urgent of the two: unrecorded skills are an
+  // inventory gap, missing skills are LOST WORK.
+  const missing = recorded - onDisk;
+  const skillsMissing = recorded > 0 && !diskReadFailed && missing > 0;
+
+  if (
+    !behind &&
+    !oldInstall &&
+    !manifestUntrustworthy &&
+    !skillsMissing &&
+    !diskReadFailed &&
+    !VERBOSE
+  )
+    return;
 
   console.log('\n## 🧩 SKILL SHELF');
   console.log(
@@ -168,6 +191,14 @@ async function main() {
   if (diskReadFailed) {
     console.log(`⚠️  Could not read ${SKILLS_DIR} — manifest could NOT be reconciled against disk.`);
     console.log(`   Treat everything below as UNVERIFIED.`);
+  }
+
+  if (skillsMissing) {
+    console.log(`⚠️  SKILLS MISSING — manifest records ${recorded}, only ${onDisk} on disk.`);
+    console.log(`   ${missing} skill(s) the manifest claims are NOT present. This is lost work,`);
+    console.log(`   not an inventory gap — a shelf can silently lose skills to a failed install,`);
+    console.log(`   an interrupted profile alignment, or manual deletion.`);
+    console.log(`   Recover: reinstall from a current tree, then check the orphan trash dir.`);
   }
 
   if (manifestUntrustworthy) {

@@ -272,6 +272,46 @@ describe('skills-staleness detector', () => {
     expect(out).toContain('2 skill dirs on disk, only 1 recorded');
   });
 
+  test('reports SKILLS MISSING when the manifest claims more than disk holds', async () => {
+    // neo #25: reconciliation ran in ONE direction. `onDisk - recorded > 0` sees
+    // disk exceeding the manifest; the reverse simply went negative and the guard
+    // stayed false. A shelf that had lost 35 of 36 skills printed nothing and
+    // exited 0, while --verbose said "36 skills recorded".
+    //
+    // This is the more urgent direction: unrecorded skills are an inventory gap,
+    // missing skills are lost work.
+    const { home } = fixture({
+      recorded: ['alpha-skill', 'beta-skill', 'gamma-skill', 'delta-skill'],
+      withSkillMd: ['alpha-skill'],
+    });
+    const { stdout, code } = await runFull(home);
+    expect(stdout).toContain('SKILLS MISSING');
+    expect(stdout).toContain('manifest records 4, only 1 on disk');
+    expect(code).toBe(0); // still never blocks the caller
+  });
+
+  test('does NOT report SKILLS MISSING on a healthy shelf', async () => {
+    // Guards the new direction from over-firing, the standard way this repair
+    // breaks: every healthy shelf would otherwise look like data loss.
+    const { home } = fixture({
+      recorded: ['alpha-skill', 'beta-skill'],
+      withSkillMd: ['alpha-skill', 'beta-skill'],
+    });
+    expect(await run(home)).not.toContain('SKILLS MISSING');
+  });
+
+  test('a symlinked skill does not fake a MISSING skill either', async () => {
+    // The symlink exclusion and the new direction interact: a recorded skill that
+    // is present only as a symlink would be counted absent by a naive fix, turning
+    // the externally-linked case into phantom data loss.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      symlinked: ['ego-browser-ish'],
+    });
+    expect((await run(home)).trim()).toBe('');
+  });
+
   test('never blocks the caller: no manifest → silent, clean stderr, exit 0', async () => {
     // Asserting only on stdout made this test non-discriminating: removing the
     // `existsSync(MANIFEST)` guard just moves the failure into the try/catch, so

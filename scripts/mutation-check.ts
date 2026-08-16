@@ -158,6 +158,12 @@ const MUTANTS: Mutant[] = [
     apply: (s) => s.replace("      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))\n      .filter((d) => existsSync(join(SKILLS_DIR, d.name, 'SKILL.md'))).length;", "      .filter((d) => (d.isDirectory() || d.isSymbolicLink()) && !d.name.startsWith('.'))\n      .filter((d) => existsSync(join(SKILLS_DIR, d.name, 'SKILL.md'))).length;"),
   },
   {
+    id: 'M12-missing-direction-blind',
+    killedBy: 'SKILLS MISSING',
+    why: 'neo #25: reconciliation compared in one direction only, so a shelf that LOST skills read as healthy. Silent for hours in a tool whose premise is reconciling two sources.',
+    apply: (s) => s.replace('const skillsMissing = recorded > 0 && !diskReadFailed && missing > 0;', 'const skillsMissing = false;'),
+  },
+  {
     id: 'M2-fail-open',
     killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',
@@ -181,11 +187,12 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M5-never-quiet',
+    sites: 9, // the early-return guard is now a multi-line condition
     killedBy: 'silent on a healthy',
     why: 'a diagnostic that speaks on a healthy shelf gets ignored; silence is the contract',
     apply: (s) =>
       s.replace(
-        'if (!behind && !oldInstall && !manifestUntrustworthy && !diskReadFailed && !VERBOSE) return;',
+        "  if (\n    !behind &&\n    !oldInstall &&\n    !manifestUntrustworthy &&\n    !skillsMissing &&\n    !diskReadFailed &&\n    !VERBOSE\n  )\n    return;",
         '',
       ),
   },
