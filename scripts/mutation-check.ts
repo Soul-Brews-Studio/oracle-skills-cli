@@ -38,11 +38,40 @@ const BACKUP = `${TARGET}.mutation-backup`;
  *  - Cross-kills are the tell. If a mutant takes down tests it has no business
  *    reaching, the suite is coupled and the mapping is not evidence of anything.
  */
-type Mutant = { id: string; why: string; killedBy: string; apply: (s: string) => string };
+type Mutant = {
+  id: string;
+  why: string;
+  killedBy: string;
+  /** How many source lines this mutation is expected to touch. Default 1. */
+  sites?: number;
+  apply: (s: string) => string;
+};
+
+/**
+ * How many lines did the mutation actually change?
+ *
+ * Multiset difference rather than index comparison, so it stays correct when the
+ * mutation removes or adds lines (M5 deletes one; M6 chains three edits) instead
+ * of reporting every subsequent line as changed.
+ */
+function changedLines(before: string, after: string): number {
+  const count = (t: string) => {
+    const m = new Map<string, number>();
+    for (const l of t.split('\n')) m.set(l, (m.get(l) ?? 0) + 1);
+    return m;
+  };
+  const [a, b] = [count(before), count(after)];
+  let removed = 0;
+  let added = 0;
+  for (const [l, n] of a) removed += Math.max(0, n - (b.get(l) ?? 0));
+  for (const [l, n] of b) added += Math.max(0, n - (a.get(l) ?? 0));
+  return Math.max(removed, added);
+}
 
 const MUTANTS: Mutant[] = [
   {
     id: 'M1-predicate-drops-skillmd',
+    sites: 2, // collapses a two-line filter chain into one
     killedBy: 'SKILL.md-less directory',
     why: 'FIX 4 (neo): reconciling against a wider population than the manifest is built from → permanent false positive no reinstall can clear',
     apply: (s) =>
@@ -53,6 +82,7 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M7-prerelease-blind',
+    sites: 6, // replaces a one-line arrow with a 6-line function
     killedBy: 'PRERELEASE is behind',
     why: 'FIX 1: prerelease dropped as NaN, so 26.7.27-alpha.947 compared AHEAD of its own release',
     apply: (s) =>
@@ -113,6 +143,7 @@ const MUTANTS: Mutant[] = [
   },
   {
     id: 'M6-never-block-removed',
+    sites: 8, // three chained edits: catch, guard, try/catch block
     killedBy: 'no manifest',
     why: 'orientation must not break on a diagnostic: no manifest / bad JSON must still exit 0 quietly',
     apply: (s) =>
@@ -240,9 +271,31 @@ try {
     // second application still finds one and changes something else. A unique
     // anchor is consumed by the first application, so applying twice is a no-op.
     if (m.apply(mutated) !== mutated) {
-      console.log(`⚠️  ${m.id}: AMBIGUOUS — anchor matches more than once; only the first is edited`);
-      console.log(`   the mutant may be changing a site it does not claim to change`);
-      problems.push(`${m.id} ambiguous`);
+      // Direction 1: a string anchor matched more than once. String.replace edits
+      // only the first, so the anchor survives and a second apply hits another
+      // site. State ONLY what is true of this direction — neo's #23 was a gate
+      // that returned the right verdict with a false explanation, which sends the
+      // next debugger hunting a problem that is not there.
+      console.log(`⚠️  ${m.id}: AMBIGUOUS (under-applied) — anchor still matches after one apply`);
+      console.log(`   string replace edits only the FIRST occurrence; the mutant may be`);
+      console.log(`   changing a site it does not claim, and leaving the claimed one intact`);
+      problems.push(`${m.id} ambiguous-under`);
+      continue;
+    }
+
+    // Direction 2: OVER-application. A /g regex consumes every match in a single
+    // pass, so the anchor does NOT survive and the idempotence check above stays
+    // silent — my stated hole, which neo confirmed by measurement. Idempotence is
+    // asymmetric; it can only see what is left behind. So also measure the blast
+    // radius directly: how many lines actually changed versus how many this mutant
+    // claims. A mutant that rewrites 20 sites while claiming 1 is not testing what
+    // it says it tests, whichever mechanism produced the spread.
+    const expected = m.sites ?? 1;
+    const actual = changedLines(original, mutated);
+    if (actual !== expected) {
+      console.log(`⚠️  ${m.id}: AMBIGUOUS (blast radius) — changed ${actual} lines, claims ${expected}`);
+      console.log(`   the mutation is not scoped to the site it declares`);
+      problems.push(`${m.id} ambiguous-radius`);
       continue;
     }
 
