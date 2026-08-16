@@ -152,6 +152,12 @@ const MUTANTS: Mutant[] = [
     apply: (s) => s.replace("    console.log(`   update: bunx --bun github:${SOURCE_REPO}#alpha install -g -y --agent claude-code`);", ''),
   },
   {
+    id: 'M11-symlinks-counted',
+    killedBy: 'externally-SYMLINKED',
+    why: 'externally-linked skills (ego-browser -> ~/.local/share/ego) are not shelf-managed; counting them makes a healthy shelf look drifted. Documented as load-bearing and unguarded for hours — no fixture had a symlink.',
+    apply: (s) => s.replace("      .filter((d) => d.isDirectory() && !d.name.startsWith('.'))\n      .filter((d) => existsSync(join(SKILLS_DIR, d.name, 'SKILL.md'))).length;", "      .filter((d) => (d.isDirectory() || d.isSymbolicLink()) && !d.name.startsWith('.'))\n      .filter((d) => existsSync(join(SKILLS_DIR, d.name, 'SKILL.md'))).length;"),
+  },
+  {
     id: 'M2-fail-open',
     killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',

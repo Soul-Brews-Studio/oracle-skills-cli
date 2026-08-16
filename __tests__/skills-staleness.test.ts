@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from 'bun:test';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync, symlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -28,6 +28,8 @@ function fixture(opts: {
   recorded: string[];
   withSkillMd: string[];
   bareDirs?: string[];
+  /** Externally-managed skills linked into the shelf, as ego-browser really is. */
+  symlinked?: string[];
   version?: string;
   installedAt?: string;
   sourceVersion?: string;
@@ -43,6 +45,16 @@ function fixture(opts: {
   }
   // Directories with NO SKILL.md — the installer never records these.
   for (const n of opts.bareDirs ?? []) mkdirSync(join(skills, n), { recursive: true });
+
+  // Externally-managed skills, linked in rather than installed. The real shelf has
+  // one (ego-browser -> ~/.local/share/ego/ego-skills); no fixture had one until
+  // now, which is why the exclusion was documented but never enforced.
+  for (const n of opts.symlinked ?? []) {
+    const real = join(home, 'external', n);
+    mkdirSync(real, { recursive: true });
+    writeFileSync(join(real, 'SKILL.md'), '---\nname: external\n---\n');
+    symlinkSync(real, join(skills, n));
+  }
 
   writeFileSync(
     join(skills, '.arra-oracle-skills.json'),
@@ -225,6 +237,39 @@ describe('skills-staleness detector', () => {
       sourceVersion: '26.5.16',
     });
     expect(await run(home)).not.toContain('BEHIND');
+  });
+
+  test('an externally-SYMLINKED skill does not count as unrecorded', async () => {
+    // The real shelf carries ego-browser as a symlink to ~/.local/share/ego. It is
+    // not shelf-managed, so the installer never records it and the detector must
+    // not count it — isDirectory() on a Dirent deliberately does NOT follow
+    // symlinks. That was documented as load-bearing and never enforced: a mutant
+    // making the predicate count symlinks SURVIVED the whole suite, because no
+    // fixture had ever contained one.
+    //
+    // Found by auditing the fixtures against the real shelf rather than by
+    // attacking the tool — the fixture gap and the coverage gap were again the
+    // same gap.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      symlinked: ['ego-browser-ish'],
+    });
+    expect((await run(home)).trim()).toBe('');
+  });
+
+  test('a symlinked skill is excluded even while REAL drift is reported', async () => {
+    // Guards the fix from over-applying: excluding symlinks must not also swallow
+    // a genuine unrecorded skill sitting beside one. Counts must be right, not
+    // merely quiet — 2 real dirs on disk, 1 recorded, symlink ignored entirely.
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill', 'ghost-skill'],
+      symlinked: ['ego-browser-ish'],
+    });
+    const out = await run(home);
+    expect(out).toContain('MANIFEST UNRELIABLE');
+    expect(out).toContain('2 skill dirs on disk, only 1 recorded');
   });
 
   test('never blocks the caller: no manifest → silent, clean stderr, exit 0', async () => {
