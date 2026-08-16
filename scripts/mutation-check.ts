@@ -17,7 +17,8 @@
  * Usage:  bun scripts/mutation-check.ts        # exits non-zero if any survives
  */
 
-import { readFileSync, writeFileSync, copyFileSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, copyFileSync, unlinkSync, mkdtempSync, mkdirSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 const ROOT = join(import.meta.dir, '..');
@@ -111,6 +112,58 @@ async function runSuite(): Promise<{ green: boolean; failed: string[]; total: nu
   return { green: code === 0, failed, total };
 }
 
+/**
+ * Is the mutant still ALIVE — does it do anything at all?  (neo, #17)
+ *
+ * A mutant that returns immediately parses, runs, exits 0 and emits nothing. It
+ * defeats BROKEN (it parses), UNIVERSAL (it only kills the checks that assert on
+ * PRESENCE), and MIS-ATTRIBUTED (the declared check does fail). It looked like a
+ * clean kill in both our harnesses.
+ *
+ * The root cause is not a threshold: absence assertions ("stays quiet", "no output,
+ * exit 0") are satisfied VACUOUSLY by a corpse. They cannot distinguish
+ * correctly-silent from never-ran. Four of this suite's seven checks are
+ * absence assertions.
+ *
+ * So before any check is trusted, demand a sign of life: on a healthy shelf with
+ * --verbose the tool MUST say something. Every real mutant here does; a do-nothing
+ * mutant cannot.
+ */
+async function isAlive(file: string): Promise<boolean> {
+  const home = mkdtempSync(join(tmpdir(), 'arra-mut-live-'));
+  try {
+    const skills = join(home, '.claude', 'skills');
+    mkdirSync(join(skills, 'probe-skill'), { recursive: true });
+    writeFileSync(join(skills, 'probe-skill', 'SKILL.md'), '---\nname: probe\n---\n');
+    writeFileSync(
+      join(skills, '.arra-oracle-skills.json'),
+      JSON.stringify({
+        version: '0.0.1',
+        installedAt: new Date().toISOString(),
+        skills: ['probe-skill'],
+        agent: 'claude-code',
+      }),
+    );
+    const proc = Bun.spawn(['bun', file, '--verbose'], {
+      env: { ...process.env, HOME: home },
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    const [out] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+    ]);
+    await proc.exited;
+    return out.trim().length > 0;
+  } catch {
+    return false;
+  } finally {
+    try {
+      rmSync(home, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
 /** Does the mutated file still parse? An unparseable mutant is a broken experiment. */
 async function parses(file: string): Promise<boolean> {
   const proc = Bun.spawn(['bun', 'build', file, '--target=bun', '--outfile=/dev/null'], {
@@ -150,14 +203,24 @@ try {
 
     writeFileSync(TARGET, mutated);
     const ok = await parses(TARGET);
-    const res = ok ? await runSuite() : null;
+    const alive = ok ? await isAlive(TARGET) : false;
+    const res = ok && alive ? await runSuite() : null;
     writeFileSync(TARGET, original);
 
     // BROKEN, not killed: the file no longer compiles, so the suite fails for a
     // reason that has nothing to do with detection.
-    if (!res) {
+    if (!ok) {
       console.log(`⚠️  ${m.id}: BROKEN — mutant does not parse; proves nothing`);
       problems.push(`${m.id} broken`);
+      continue;
+    }
+
+    // NUKED: it parses and exits, but does nothing. Absence checks pass vacuously
+    // against a corpse, so any "kill" here is meaningless.
+    if (!res) {
+      console.log(`⚠️  ${m.id}: NUKED — mutant produces no output at all; a corpse`);
+      console.log(`   absence assertions pass vacuously; this proves nothing`);
+      problems.push(`${m.id} nuked`);
       continue;
     }
 
