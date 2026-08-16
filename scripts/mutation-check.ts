@@ -68,6 +68,18 @@ const MUTANTS: Mutant[] = [
     apply: (s) => s.replace('const behind = srcVersion ? isBehind(m.version, srcVersion) : false;', 'const behind = false;'),
   },
   {
+    id: 'M9-wrong-remediation-repo',
+    killedBy: 'remediation it prints',
+    why: 'neo control 1 (protocol round 1): detection stays correct, only the command handed to a human is wrong. Survived all 5 gates in both harnesses — every gate we built guards the REASONING, none guarded the OUTPUT.',
+    apply: (s) => s.replace("update: bunx --bun github:${SOURCE_REPO}#alpha install -g -y --agent claude-code", "update: bunx --bun github:some-other-org/wrong-repo install -g -y --agent claude-code"),
+  },
+  {
+    id: 'M10-remediation-removed',
+    killedBy: 'remediation it prints',
+    why: 'BEHIND with no next step is a dead end — the diagnosis is useless without actionable advice',
+    apply: (s) => s.replace("    console.log(`   update: bunx --bun github:${SOURCE_REPO}#alpha install -g -y --agent claude-code`);", ''),
+  },
+  {
     id: 'M2-fail-open',
     killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',

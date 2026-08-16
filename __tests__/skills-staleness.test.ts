@@ -171,6 +171,40 @@ describe('skills-staleness detector', () => {
     expect((await run(home))).toContain('BEHIND');
   });
 
+  test('the remediation it prints points at the SAME repo detection resolved', async () => {
+    // Every other check in this file interrogates the tool's REASONING — does it
+    // parse, run, discriminate, conclude correctly. None looked at the advice it
+    // hands a human. A tool that detects BEHIND correctly and then prints a
+    // command installing from the wrong repo is strictly worse than silence,
+    // because it is trusted and acted on immediately.
+    //
+    // Verified as a real gap: a mutant corrupting ONLY the remediation string
+    // survived all previous checks and both mutation harnesses.
+    //
+    // This asserts against GROUND TRUTH rather than a literal: whatever repo the
+    // fixture stood the source clone up at — the repo detection actually used —
+    // must be the repo the printed command installs from. Any wrong owner/repo
+    // fails, not just the one control that exposed this.
+    const REPO_SLUG = 'Soul-Brews-Studio/arra-oracle-skills-cli';
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.5.16',
+      sourceVersion: '26.7.27',
+    });
+    const out = await run(home);
+    expect(out).toContain('BEHIND');
+
+    // There must BE actionable advice — a BEHIND with no next step is a dead end.
+    const cmd = out.split('\n').find((l) => l.includes('update:'));
+    expect(cmd).toBeDefined();
+
+    // Every repo reference in the advice must be the one detection resolved.
+    const refs = [...(cmd ?? '').matchAll(/github[:/]([\w.-]+\/[\w.-]+)/g)].map((m) => m[1]);
+    expect(refs.length).toBeGreaterThan(0);
+    for (const ref of refs) expect(ref).toBe(REPO_SLUG);
+  });
+
   test('does NOT report BEHIND when the shelf is current', async () => {
     // Guards the fix from over-firing: a correct shelf must stay silent.
     const { home } = fixture({
