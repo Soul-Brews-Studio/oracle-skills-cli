@@ -54,6 +54,48 @@ type Mutant = {
  * mutation removes or adds lines (M5 deletes one; M6 chains three edits) instead
  * of reporting every subsequent line as changed.
  */
+function lineCounts(t: string): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const l of t.split('\n')) m.set(l, (m.get(l) ?? 0) + 1);
+  return m;
+}
+
+/** Lines present in `b` beyond what `a` has (multiset difference). */
+function surplus(b: string, a: string): Map<string, number> {
+  const [bc, ac] = [lineCounts(b), lineCounts(a)];
+  const out = new Map<string, number>();
+  for (const [l, n] of bc) {
+    const d = n - (ac.get(l) ?? 0);
+    if (d > 0) out.set(l, d);
+  }
+  return out;
+}
+
+/**
+ * Does a second application chew on the FIRST application's own output?
+ *
+ * neo's row 4: a mutant whose replacement re-contains its anchor
+ * (find "x = true;" → "x = true; /* noted *\/") edits exactly the one site it
+ * claims, but leaves the anchor present — so a bare idempotence check fires a
+ * FALSE AMBIGUOUS on a legitimate mutant. A false positive inside a verification
+ * tool is the same class as FIX 4, the sticky warning that half these gates exist
+ * because of.
+ *
+ * The anchor is unavailable here (apply is an opaque closure), so discriminate by
+ * effect instead: if every line the second pass consumes was INTRODUCED by the
+ * first pass, it is re-editing its own output — self-containment, legitimate. If
+ * it consumes a line that survived untouched from the original, it found a second
+ * site the mutant never claimed — genuine ambiguity.
+ */
+function secondPassOnlyEditsOwnOutput(a: string, b: string, c: string): boolean {
+  const introducedByFirst = surplus(b, a);
+  const consumedBySecond = surplus(b, c);
+  for (const [line, n] of consumedBySecond) {
+    if ((introducedByFirst.get(line) ?? 0) < n) return false;
+  }
+  return true;
+}
+
 function changedLines(before: string, after: string): number {
   const count = (t: string) => {
     const m = new Map<string, number>();
@@ -270,12 +312,17 @@ try {
     // Detected without extracting the anchor: if it occurred more than once, a
     // second application still finds one and changes something else. A unique
     // anchor is consumed by the first application, so applying twice is a no-op.
-    if (m.apply(mutated) !== mutated) {
+    const twice = m.apply(mutated);
+    if (twice !== mutated && !secondPassOnlyEditsOwnOutput(original, mutated, twice)) {
       // Direction 1: a string anchor matched more than once. String.replace edits
       // only the first, so the anchor survives and a second apply hits another
       // site. State ONLY what is true of this direction — neo's #23 was a gate
       // that returned the right verdict with a false explanation, which sends the
       // next debugger hunting a problem that is not there.
+      //
+      // The surviving anchor alone is NOT sufficient (neo's row 4): a replacement
+      // that re-contains its anchor also survives, while being perfectly scoped.
+      // Only a second pass that reaches UNTOUCHED original text is ambiguity.
       console.log(`⚠️  ${m.id}: AMBIGUOUS (under-applied) — anchor still matches after one apply`);
       console.log(`   string replace edits only the FIRST occurrence; the mutant may be`);
       console.log(`   changing a site it does not claim, and leaving the claimed one intact`);
