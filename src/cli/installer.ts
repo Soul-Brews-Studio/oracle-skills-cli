@@ -325,6 +325,51 @@ async function isOurSkill(skillPath: string): Promise<boolean> {
   }
 }
 
+/** Version stamped into an installed skill by a previous run, or null. */
+async function installedVersionOf(skillPath: string): Promise<string | null> {
+  try {
+    const content = await Bun.file(join(skillPath, 'SKILL.md')).text();
+    return /^installer:\s*arra-oracle-skills-cli v(\S+)/m.exec(content)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Compare two CalVer-ish versions: 26.7.27-alpha.947 vs 26.7.16.
+ * Returns >0 if a is newer, <0 if older, 0 if equal/incomparable.
+ *
+ * A release is newer than any prerelease of the same numbers (26.7.27 >
+ * 26.7.27-alpha.947), matching semver ordering.
+ */
+export function compareVersions(a: string, b: string): number {
+  const split = (v: string) => {
+    const [core, pre = ''] = v.split('-', 2);
+    return {
+      nums: core.split('.').map((n) => parseInt(n, 10) || 0),
+      pre: pre ? pre.split('.').map((p) => (/^\d+$/.test(p) ? parseInt(p, 10) : p)) : null,
+    };
+  };
+  const [x, y] = [split(a), split(b)];
+  for (let i = 0; i < Math.max(x.nums.length, y.nums.length); i++) {
+    const d = (x.nums[i] ?? 0) - (y.nums[i] ?? 0);
+    if (d !== 0) return d;
+  }
+  // Core equal: no prerelease outranks a prerelease.
+  if (!x.pre && y.pre) return 1;
+  if (x.pre && !y.pre) return -1;
+  if (!x.pre || !y.pre) return 0;
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const [p, q] = [x.pre[i], y.pre[i]];
+    if (p === undefined) return -1;
+    if (q === undefined) return 1;
+    if (p === q) continue;
+    if (typeof p === 'number' && typeof q === 'number') return p - q;
+    return String(p) < String(q) ? -1 : 1;
+  }
+  return 0;
+}
+
 export async function listSkills(): Promise<void> {
   const skills = await discoverSkills();
 
@@ -561,6 +606,20 @@ export async function installSkills(
 
         // Only cleanup if: 1) it's ours, 2) not in source anymore
         if (await isOurSkill(installedPath) && !sourceSkillNames.includes(installed)) {
+          // #500: absence from THIS source tree does not mean the skill is dead —
+          // it may simply be newer than the tree we are installing from. Installing
+          // a `main` checkout (v26.7.16) over a skill stamped v26.7.25-alpha.1900
+          // evicted the newer copy, because the check was name-membership only.
+          // The installer is neither the only writer nor always the latest
+          // authority, so never let an older tree eat newer work.
+          const onDisk = await installedVersionOf(installedPath);
+          if (onDisk && compareVersions(onDisk, pkg.version) > 0) {
+            p.log.warn(
+              `Keeping ${installed}: installed v${onDisk} is newer than this tree (v${pkg.version}). ` +
+                `Not in source here — install from a tree that has it, or remove it explicitly.`,
+            );
+            continue;
+          }
           try {
             if (!movedAny) {
               await mkdirp(trashDir, shellMode);
