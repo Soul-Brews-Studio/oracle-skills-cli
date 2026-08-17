@@ -74,9 +74,12 @@ async function run(home: string): Promise<string> {
 }
 
 /** Full result — needed to assert the never-block contract (exit 0, clean stderr). */
-async function runFull(home: string): Promise<{ stdout: string; stderr: string; code: number }> {
+async function runFull(
+  home: string,
+  envOverride: Record<string, string> = {},
+): Promise<{ stdout: string; stderr: string; code: number }> {
   const proc = Bun.spawn(['bun', DETECTOR], {
-    env: { ...process.env, HOME: home },
+    env: { ...process.env, HOME: home, ...envOverride },
     stdout: 'pipe',
     stderr: 'pipe',
   });
@@ -310,6 +313,35 @@ describe('skills-staleness detector', () => {
       symlinked: ['ego-browser-ish'],
     });
     expect((await run(home)).trim()).toBe('');
+  });
+
+  test('BEHIND still fires on a machine with no ghq binary', async () => {
+    // Source discovery ran `ghq root` and swallowed failure, so no ghq meant no
+    // root, no srcDir, and `behind` permanently false — the entire BEHIND branch
+    // silently unreachable on any machine without ghq, which is most machines
+    // that install a published skill.
+    //
+    // It passed locally for hours because the author's machine has ghq. CI, which
+    // does not, failed three BEHIND tests — the environment difference WAS the
+    // bug, not a CI quirk. Mutation M13 survived until this test existed.
+    //
+    // A shim that exits non-zero reproduces the same code path as an absent
+    // binary (both land in the catch) and is deterministic on any machine.
+    const shimDir = mkdtempSync(join(tmpdir(), 'arra-noghq-'));
+    roots.push(shimDir);
+    const shim = join(shimDir, 'ghq');
+    writeFileSync(shim, '#!/bin/sh\nexit 1\n');
+    chmodSync(shim, 0o755);
+
+    const { home } = fixture({
+      recorded: ['alpha-skill'],
+      withSkillMd: ['alpha-skill'],
+      version: '26.5.16',
+      sourceVersion: '26.7.27',
+    });
+    const { stdout, code } = await runFull(home, { PATH: `${shimDir}:${process.env.PATH}` });
+    expect(stdout).toContain('BEHIND');
+    expect(code).toBe(0);
   });
 
   test('never blocks the caller: no manifest → silent, clean stderr, exit 0', async () => {

@@ -164,6 +164,12 @@ const MUTANTS: Mutant[] = [
     apply: (s) => s.replace('const skillsMissing = recorded > 0 && !diskReadFailed && missing > 0;', 'const skillsMissing = false;'),
   },
   {
+    id: 'M13-ghq-binary-required',
+    killedBy: 'no ghq binary',
+    why: 'source discovery depended on the ghq BINARY; swallowing its absence made the entire BEHIND branch permanently unreachable on any machine without ghq — which is most machines. CI caught it; local runs never could, because the author had ghq.',
+    apply: (s) => s.replace("  if (!ghqRoot) ghqRoot = join(HOME, 'ghq');", ''),
+  },
+  {
     id: 'M2-fail-open',
     killedBy: 'fails CLOSED',
     why: 'FIX 2: an unreadable shelf silently produced a confident all-clear — a fail-open verification gate',

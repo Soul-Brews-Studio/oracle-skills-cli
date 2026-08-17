@@ -94,12 +94,25 @@ async function main() {
   const age = m.installedAt ? daysSince(m.installedAt) : null;
 
   // Find a local source clone WITHOUT a network call.
+  //
+  // `ghq root` is the accurate answer when ghq is installed, but it is a BINARY
+  // DEPENDENCY and swallowing its absence made the whole BEHIND branch silently
+  // unreachable: no ghq → no root → no srcDir → `behind` permanently false. The
+  // tool then reports a healthy shelf forever, on every machine without ghq,
+  // which is most machines that install a published skill. Caught by CI, which
+  // has no ghq — three BEHIND tests failed there while passing locally, because
+  // the fixture and the author's machine both happened to have it.
+  //
+  // So fall back to ghq's own documented default root ($HOME/ghq) when the
+  // binary is missing. A user who keeps clones there still gets detection; one
+  // who does not is no worse off than before.
   let ghqRoot = '';
   try {
     ghqRoot = (await $`ghq root`.quiet().text()).trim();
   } catch {
-    /* ghq absent */
+    /* ghq not installed — fall through to the conventional default */
   }
+  if (!ghqRoot) ghqRoot = join(HOME, 'ghq');
   const srcDir = ghqRoot ? join(ghqRoot, 'github.com', SOURCE_REPO) : '';
   const hasSrc = srcDir && existsSync(join(srcDir, 'package.json'));
 
