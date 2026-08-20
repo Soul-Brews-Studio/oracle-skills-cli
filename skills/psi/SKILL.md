@@ -94,23 +94,30 @@ RULE=$(git -C "$REPO" check-ignore -v ψ 2>/dev/null | awk '{print $1}') || RULE
 CARE=$(sed -n 's/^oracle: *//p' "$REPO/.claude/PSI_CARETAKER" 2>/dev/null)
 [ -n "$CARE" ] || CARE='none recorded'
 
-# ── render: one row per verified fact, + the command that proved it ─────
-row() { printf '| %-13s | %-46s | %-4s | %s\n' "$1" "$2" "$3" "$4"; }
+# ── render: no borders. two-space margin, aligned columns, grouped by blank
+#    lines. identity block first, then the checks, then one FOCUS line.
+#    Each check names the command that proved it — the report is its own audit.
+row()  { printf '  %-14s%-42s%-3s %s\n' "$1" "$2" "$3" "$4"; }
+fact() { printf '  %-14s%s\n' "$1" "$2"; }
 
-printf '| %-13s | %-46s | %-4s | %s\n' check value ok proof
-printf '|%s|%s|%s|%s\n' "$(printf '─%.0s' {1..15})" "$(printf '─%.0s' {1..48})" \
-                        "$(printf '─%.0s' {1..6})" "$(printf '─%.0s' {1..28})"
-row repo   "$(basename "$REPO")"  ''  'git rev-parse --show-toplevel'
-row kind   "$KIND"                ''  'ls-files ψ count'
-row ψ      "$PSI"                 ''  'readlink / find'
-[ -n "$PSI2" ] && row ''  "$PSI2" ''  'readlink -f'
+echo
+fact repo "$(basename "$REPO")"
+fact kind "$KIND"
+fact ψ    "$PSI"
+[ -n "$PSI2" ] && fact '' "$PSI2"
+echo
 row tracked      "$TRACKED entries" "$([ "$TRACKED" -eq 0 ] && echo ✓ || echo ⚠)" 'git ls-files ψ'
-row symlink-blob "$BLOB"            "$([ "$BLOB" = no ] && echo ✓ || echo ⚠)"     'ls-files -s ψ → mode 120000'
+row symlink-blob "$BLOB"            "$([ "$BLOB" = no ] && echo ✓ || echo ⚠)"     'ls-files -s ψ → 120000'
 row bare-ψ       "$BARE"            "$([ "$BARE" = yes ] && echo ✓ || echo ⚠)"    'rg -qx ψ .gitignore'
 row 'ψ/'         "$SLASH"           "$([ "$SLASH" = yes ] && echo ✓ || echo ·)"   'rg -qx ψ/ .gitignore'
 row ignore-rule  "$RULE"            "$(case $RULE in *NOT*) echo ⚠;; *) echo ✓;; esac)" 'git check-ignore -v ψ'
 row caretaker    "$CARE"            "$([ "$CARE" = 'none recorded' ] && echo · || echo ✓)" '.claude/PSI_CARETAKER'
+echo
 ```
+
+Keep the two-space margin and the blank-line grouping — the whitespace is what makes it
+readable without rules. Widen a column only if a value would otherwise wrap; never add
+borders back.
 
 ### Deciding FOCUS
 
