@@ -55,29 +55,69 @@ question, one answer.
 
 ## `check`
 
-Report what you verified, never what you assume. `readlink -f` collapses a multi-hop chain
-to the one path that matters.
+Report what you verified, never what you assume. Every line is the output of a command —
+`readlink -f` for the real target, `ls-files -s` for the mode bits, `check-ignore -v` for
+the rule that actually matched. Close with one **FOCUS** line: the single next action.
 
 ```bash
-REPO=$(git rev-parse --show-toplevel)
+REPO=$(git rev-parse --show-toplevel) || exit 1
+GI="$REPO/.gitignore"
 
-if   [ -L "$REPO/ψ" ]; then
-  echo "ψ:       symlink -> $(readlink "$REPO/ψ")"
-  echo "resolves: $(readlink -f "$REPO/ψ")"
-  echo "alive:   $([ -e "$REPO/ψ/" ] && echo yes || echo 'BROKEN — run /psi heal')"
+# ── ψ: type, size, staleness ─────────────────────────────────────────────
+if [ -L "$REPO/ψ" ]; then
+  TARGET=$(readlink "$REPO/ψ"); REAL=$(readlink -f "$REPO/ψ")
+  [ -e "$REPO/ψ/" ] && ALIVE=alive || ALIVE='DANGLING'
+  case "$TARGET" in /*) ABS=' ⚠️ absolute';; *) ABS='';; esac
+  PSI="symlink → $TARGET$ABS"; PSI2="resolves  $REAL ($ALIVE)"
 elif [ -d "$REPO/ψ" ]; then
-  echo "ψ:       real dir ($(find "$REPO/ψ" -type f | wc -l | tr -d ' ') files) — not linked"
+  N=$(find "$REPO/ψ" -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
+  NEW=$(find "$REPO/ψ" -type f ! -name '.DS_Store' -exec stat -f '%m' {} \; 2>/dev/null | sort -rn | head -1)
+  AGE=$(( ( $(date +%s) - ${NEW:-$(date +%s)} ) / 86400 ))
+  PSI="real dir · $N files · newest $(date -r "${NEW:-0}" +%F 2>/dev/null) (${AGE}d old)"; PSI2=""
 else
-  echo "ψ:       absent"
+  PSI="absent"; PSI2=""
 fi
 
-git -C "$REPO" ls-files -s ψ | rg -q '^120000' && echo "⚠️  the symlink itself is COMMITTED"
-echo "tracked: $(git -C "$REPO" ls-files ψ | wc -l | tr -d ' ') entries"
-echo "ignored: bare-ψ=$(rg -qx 'ψ' "$REPO/.gitignore" 2>/dev/null && echo yes || echo NO)  ψ/=$(rg -qx 'ψ/' "$REPO/.gitignore" 2>/dev/null && echo yes || echo NO)"
-git -C "$REPO" check-ignore -v ψ 2>/dev/null || echo "⚠️  ψ is NOT ignored"
+# ── git: is any of it tracked? is the LINK itself committed? ─────────────
+TRACKED=$(git -C "$REPO" ls-files ψ | wc -l | tr -d ' ')
+git -C "$REPO" ls-files -s ψ | rg -q '^120000' && BLOB='⚠️ SYMLINK COMMITTED' || BLOB=no
+
+# ── ignore: both forms, and the rule git actually matched ───────────────
+rg -qx 'ψ'  "$GI" 2>/dev/null && BARE=yes || BARE='NO ⚠️'
+rg -qx 'ψ/' "$GI" 2>/dev/null && SLASH=yes || SLASH=NO
+RULE=$(git -C "$REPO" check-ignore -v ψ 2>/dev/null | awk '{print $1}') || RULE='NOT IGNORED ⚠️'
+
+# ── kind + caretaker ────────────────────────────────────────────────────
+[ "$TRACKED" -gt 0 ] && KIND='oracle repo (ψ is tracked — it IS the brain)' \
+                     || KIND='code repo (ψ must stay ignored)'
+# NOTE: no \K — this rg build rejects it, and the error would silently read as "none".
+CARE=$(sed -n 's/^oracle: *//p' "$REPO/.claude/PSI_CARETAKER" 2>/dev/null)
+[ -n "$CARE" ] || CARE='none recorded'
+
+printf '%-9s %s\n' repo "$REPO" kind "$KIND" ψ "$PSI"
+[ -n "$PSI2" ] && printf '%-9s %s\n' '' "$PSI2"
+printf '%-9s tracked=%s  symlink-blob=%s\n' git "$TRACKED" "$BLOB"
+printf '%-9s bare-ψ=%s  ψ/=%s  → %s\n' ignore "$BARE" "$SLASH" "$RULE"
+printf '%-9s %s\n' caretaker "$CARE"
 ```
 
-`bare-ψ=NO`, a `120000` entry, or a missing check-ignore line is a finding. Say it plainly.
+### Deciding FOCUS
+
+Emit exactly one, first match wins — most dangerous first:
+
+| Condition | FOCUS |
+|---|---|
+| `symlink-blob` committed | **leaking a machine path in git history** → `/psi heal`, then decide on a history rewrite |
+| symlink `DANGLING` | **brain unreachable** → `/psi heal` |
+| symlink target absolute | **breaks on every other machine** → `/psi heal` (rewrites relative) |
+| code repo & `bare-ψ=NO` | **ψ will leak the moment it is linked** → add the bare rule |
+| code repo & `NOT IGNORED` | **do not commit** → fix `.gitignore` first |
+| code repo, real dir, no caretaker | **orphaned vault — no oracle reads these N files** → `/psi link` |
+| oracle repo, ψ tracked | ✅ correct — the vault belongs here, nothing to do |
+| symlink alive, relative, ignored | ✅ linked and safe |
+
+A stale `newest` date is worth naming even on a ✅ — a vault whose newest file is weeks old
+is why a later `/recap` will hand back a stale handoff as if it were current.
 
 ## `link`
 
