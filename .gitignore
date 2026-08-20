@@ -39,3 +39,4 @@ src/commands/
 var/
 .claude/INCUBATED_BY
 agents/
+.claude/PSI_CARETAKER
