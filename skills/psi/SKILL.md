@@ -85,7 +85,11 @@ git -C "$REPO" ls-files -s ψ | rg -q '^120000' && BLOB='⚠️ SYMLINK COMMITTE
 # ── ignore: both forms, and the rule git actually matched ───────────────
 rg -qx 'ψ'  "$GI" 2>/dev/null && BARE=yes || BARE='NO ⚠️'
 rg -qx 'ψ/' "$GI" 2>/dev/null && SLASH=yes || SLASH=NO
-RULE=$(git -C "$REPO" check-ignore -v ψ 2>/dev/null | awk '{print $1}') || RULE='NOT IGNORED ⚠️'
+# cut -f1, NOT an awk positional field ref — see "Never use positional parameters"
+# below. check-ignore -v separates source from pathname with a TAB, so field 1 is
+# the matching rule.
+RULE=$(git -C "$REPO" check-ignore -v ψ 2>/dev/null | cut -f1)
+[ -n "$RULE" ] || RULE='NOT IGNORED ⚠️'
 
 # ── kind + caretaker ────────────────────────────────────────────────────
 [ "$TRACKED" -gt 0 ] && KIND='oracle repo (ψ is tracked — it IS the brain)' \
@@ -97,27 +101,40 @@ CARE=$(sed -n 's/^oracle: *//p' "$REPO/.claude/PSI_CARETAKER" 2>/dev/null)
 # ── render: no borders. two-space margin, aligned columns, grouped by blank
 #    lines. identity block first, then the checks, then one FOCUS line.
 #    Each check names the command that proved it — the report is its own audit.
-row()  { printf '  %-14s%-42s%-3s %s\n' "$1" "$2" "$3" "$4"; }
-fact() { printf '  %-14s%s\n' "$1" "$2"; }
+#    NOTE: printf inline per row — no row()/fact() helpers, because a helper
+#    would need positional parameters and the host rewrites those. See below.
+F='  %-14s%s\n'          # identity line
+R='  %-14s%-42s%-3s %s\n'  # check line
 
 echo
-fact repo "$(basename "$REPO")"
-fact kind "$KIND"
-fact ψ    "$PSI"
-[ -n "$PSI2" ] && fact '' "$PSI2"
+printf "$F" repo "$(basename "$REPO")"
+printf "$F" kind "$KIND"
+printf "$F" ψ    "$PSI"
+[ -n "$PSI2" ] && printf "$F" '' "$PSI2"
 echo
-row tracked      "$TRACKED entries" "$([ "$TRACKED" -eq 0 ] && echo ✓ || echo ⚠)" 'git ls-files ψ'
-row symlink-blob "$BLOB"            "$([ "$BLOB" = no ] && echo ✓ || echo ⚠)"     'ls-files -s ψ → 120000'
-row bare-ψ       "$BARE"            "$([ "$BARE" = yes ] && echo ✓ || echo ⚠)"    'rg -qx ψ .gitignore'
-row 'ψ/'         "$SLASH"           "$([ "$SLASH" = yes ] && echo ✓ || echo ·)"   'rg -qx ψ/ .gitignore'
-row ignore-rule  "$RULE"            "$(case $RULE in *NOT*) echo ⚠;; *) echo ✓;; esac)" 'git check-ignore -v ψ'
-row caretaker    "$CARE"            "$([ "$CARE" = 'none recorded' ] && echo · || echo ✓)" '.claude/PSI_CARETAKER'
+printf "$R" tracked      "$TRACKED entries" "$([ "$TRACKED" -eq 0 ] && echo ✓ || echo ⚠)" 'git ls-files ψ'
+printf "$R" symlink-blob "$BLOB"            "$([ "$BLOB" = no ] && echo ✓ || echo ⚠)"     'ls-files -s ψ → 120000'
+printf "$R" bare-ψ       "$BARE"            "$([ "$BARE" = yes ] && echo ✓ || echo ⚠)"    'rg -qx ψ .gitignore'
+printf "$R" 'ψ/'         "$SLASH"           "$([ "$SLASH" = yes ] && echo ✓ || echo ·)"   'rg -qx ψ/ .gitignore'
+printf "$R" ignore-rule  "$RULE"            "$(case $RULE in *NOT*) echo ⚠;; *) echo ✓;; esac)" 'git check-ignore -v ψ'
+printf "$R" caretaker    "$CARE"            "$([ "$CARE" = 'none recorded' ] && echo · || echo ✓)" '.claude/PSI_CARETAKER'
 echo
 ```
 
 Keep the two-space margin and the blank-line grouping — the whitespace is what makes it
 readable without rules. Widen a column only if a value would otherwise wrap; never add
 borders back.
+
+### Never use positional parameters (dollar-digit) in this skill's shell
+
+The host substitutes the invocation's positional arguments into the skill body before the
+model ever sees it. Running `/psi link to neo but …` rewrote an `awk` program that
+referenced field one into `awk '{print to}'`, and a four-parameter `printf` helper into
+`printf … "to" "neo" "but" "when"` — silent corruption, no error.
+
+So: no shell functions taking positional parameters, and no dollar-digit inside
+`awk`/`sed` programs. Use `cut -f1`, a named variable, or a printf format string held in
+a variable — all three are immune.
 
 ### Deciding FOCUS
 
@@ -150,9 +167,29 @@ when the caretaker has no ψ, or when ψ already points at that same caretaker (
 Replacing a populated ψ with a symlink orphans everything inside it. Fetch the caretaker
 first so a stale vault is not merged over newer content.
 
+The vault mirrors the origin repo's own `owner/name`, **always lowercased**, so the path
+reads back as the repo it came from:
+
+```text
+neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli/
+                └─ owner ────┘ └─ repo ─────────────┘
+```
+
+Lowercase is not cosmetic: `Soul-Brews-Studio` and `soul-brews-studio` are the same repo,
+but on a case-sensitive volume they become two vaults, and the split is invisible until
+memory goes missing.
+
 ```bash
 git -C "$CARETAKER" fetch --quiet 2>/dev/null
-NS="$CARETAKER/ψ/repos/$OWNER/$NAME"          # each repo gets its own subtree
+
+# owner/name from the origin remote, lowercased — never from the directory name,
+# which may have been renamed locally.
+SLUG=$(git -C "$REPO" remote get-url origin 2>/dev/null \
+       | sed -E 's#(git@|https://)[^:/]+[:/]##; s#\.git$##' \
+       | tr '[:upper:]' '[:lower:]')
+[ -n "$SLUG" ] || { echo "✗ no origin remote — cannot derive the vault path"; exit 1; }
+
+NS="$CARETAKER/ψ/$SLUG"                       # ψ/<owner>/<repo>, nested, lowercase
 rsync -a --dry-run --itemize-changes "$REPO/ψ/" "$NS/"
 ```
 
