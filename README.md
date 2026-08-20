@@ -53,24 +53,24 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 |---|-------|------|-------------|
 | 1 | **about-oracle** | skill + subagent | What is Oracle |
 | 2 | **learn** | skill + subagent | Explore a codebase with parallel Haiku… |
-| 3 | **rrr** | skill + subagent | Create session retrospective with AI diary… |
 | - |  |  |  |
-| 4 | **oracle-family-scan** | skill + code | Oracle Family Registry |
-| 5 | **project** | skill + code | Clone and track external repos |
-| 6 | **recap** | skill + code | Session orientation and awareness |
+| 3 | **oracle-family-scan** | skill + code | Oracle Family Registry |
+| 4 | **project** | skill + code | Clone and track external repos |
+| 5 | **recap** | skill + code | Session orientation and awareness |
 | - |  |  |  |
-| 7 | **awaken** | skill | Guided Oracle birth and awakening ritual |
-| 8 | **bampenpien** | skill | บำเพ็ญเพียร |
-| 9 | **bud** | skill | Create a new oracle via maw bud |
-| 10 | **create-shortcut** | skill | Create local skills as shortcuts |
-| 11 | **dig** | skill | Mine Claude Code sessions |
-| 12 | **forward** | skill | Hand off the current session to the next one |
-| 13 | **go** | skill | Manage Oracle skills |
-| 14 | **incubate** | skill | Clone or create repos for active development |
-| 15 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
-| 16 | **oracle-prism** | skill | Multi-perspective analysis |
-| 17 | **philosophy** | skill | Display Oracle philosophy |
-| 18 | **resonance** | skill | Capture a resonance moment |
+| 6 | **awaken** | skill | Guided Oracle birth and awakening ritual |
+| 7 | **bampenpien** | skill | บำเพ็ญเพียร |
+| 8 | **bud** | skill | Create a new oracle via maw bud |
+| 9 | **create-shortcut** | skill | Create local skills as shortcuts |
+| 10 | **dig** | skill | Mine Claude Code sessions |
+| 11 | **forward** | skill | Hand off the current session to the next one |
+| 12 | **go** | skill | Manage Oracle skills |
+| 13 | **incubate** | skill | Clone or create repos for active development |
+| 14 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
+| 15 | **oracle-prism** | skill | Multi-perspective analysis |
+| 16 | **philosophy** | skill | Display Oracle philosophy |
+| 17 | **resonance** | skill | Capture a resonance moment |
+| 18 | **rrr** | skill | [standard] v26.8.17-alpha.1127 G-SKLL |… |
 | 19 | **trace** | skill | Find projects, code, and knowledge across… |
 | 20 | **where-we-are** | skill | Session awareness |
 | 21 | **who-are-you** | skill | Know ourselves |

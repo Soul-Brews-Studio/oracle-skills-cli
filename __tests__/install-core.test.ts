@@ -609,13 +609,12 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     });
   });
 
-  describe("fix #275 — sibling non-script files (DEEP.md etc.) are also copied", () => {
+  describe("fix #275 — sibling non-script files are also copied", () => {
     beforeEach(cleanup);
 
-    it("rrr skill DEEP.md is installed alongside SKILL.md", async () => {
-      // rrr has DEEP.md and TEAMMATE.md
-      const deepMdSrc = join(process.cwd(), "skills/rrr/DEEP.md");
-      if (!existsSync(deepMdSrc)) return; // Skip if DEEP.md not present in source
+    it("rrr skill HOSTS.md is installed alongside SKILL.md", async () => {
+      const hostsMdSrc = join(process.cwd(), "skills/rrr/HOSTS.md");
+      if (!existsSync(hostsMdSrc)) return
 
       await installSkills([TEST_AGENT_GLOBAL], {
         global: true,
@@ -623,8 +622,8 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
         yes: true,
       });
 
-      const deepMdDest = join(SKILLS_DIR, "rrr", "DEEP.md");
-      expect(existsSync(deepMdDest)).toBe(true);
+      const hostsMdDest = join(SKILLS_DIR, "rrr", "HOSTS.md");
+      expect(existsSync(hostsMdDest)).toBe(true);
     });
   });
 }
