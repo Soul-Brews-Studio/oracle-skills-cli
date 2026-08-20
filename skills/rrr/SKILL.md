@@ -1,8 +1,6 @@
 ---
-installer: arra-oracle-skills-cli v26.8.17-alpha.1127
-origin: Nat Weerawan's brain, digitized — how one human works with AI, captured as code — Soul Brews Studio
 name: rrr
-description: '[standard] v26.8.17-alpha.1127 G-SKLL | Create a session retrospective with an AI diary and reusable lessons. Supports foreground, background, and combined execution across compatible agent hosts.'
+description: Create a session retrospective with an AI diary and reusable lessons. Supports foreground, background, and combined execution across compatible agent hosts.
 argument-hint: "[--fg | --bg | --combo]"
 ---
 

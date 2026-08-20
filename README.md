@@ -70,7 +70,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | 15 | **oracle-prism** | skill | Multi-perspective analysis |
 | 16 | **philosophy** | skill | Display Oracle philosophy |
 | 17 | **resonance** | skill | Capture a resonance moment |
-| 18 | **rrr** | skill | [standard] v26.8.17-alpha.1127 G-SKLL |… |
+| 18 | **rrr** | skill | Create a session retrospective with an AI… |
 | 19 | **trace** | skill | Find projects, code, and knowledge across… |
 | 20 | **where-we-are** | skill | Session awareness |
 | 21 | **who-are-you** | skill | Know ourselves |
