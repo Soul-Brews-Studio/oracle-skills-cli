@@ -194,21 +194,61 @@ rsync -a --dry-run --itemize-changes "$REPO/ψ/" "$NS/"
 ```
 
 Print the itemized list and the file count, then **wait for approval**. Only then re-run
-without `--dry-run`. Never `--delete`. Copy, verify the counts match, and *then* remove the
-source — never in one command.
+without `--dry-run`. Never `--delete`.
 
-### 3. Link with a relative target
+The absorb and the removal are never the same command, and never the same step. Step 3
+sequences them: **copy → count both sides → park the original → link → verify through the
+link**, with an automatic rollback if the last check fails.
+
+### 3. Link — copy, verify, park, link, verify again
+
+**Order is the safety.** The source is never removed; it is *parked* outside the repo and
+only after the copy has been counted. If the link fails to resolve, roll back automatically.
+Never `rm -rf` the vault — see "nothing deleted".
 
 ```bash
 mkdir -p "$NS"
+
+# 3a. copy for real (same command as the dry run, minus --dry-run)
+rsync -a --exclude '.DS_Store' "$REPO/ψ/" "$NS/"
+
+# 3b. VERIFY before anything moves. Counts must match exactly, or stop —
+#     the source is still untouched at this point, so aborting costs nothing.
+SRC_N=$(find "$REPO/ψ" -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
+DST_N=$(find "$NS"     -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
+if [ "$SRC_N" -ne "$DST_N" ]; then
+  echo "✗ ABORT — copied $DST_N of $SRC_N files. Source untouched; nothing removed."
+  exit 1
+fi
+echo "✓ verified $DST_N/$SRC_N files copied"
+
+# 3c. PARK the original outside the repo (never delete, never leave it in git's way)
+PARK="${TMPDIR:-/tmp}/psi-replaced-$(echo "$SLUG" | tr / -)-$(date +%Y%m%d-%H%M%S)"
+mv "$REPO/ψ" "$PARK"
+
+# 3d. link, relative
 REL=$(python3 -c 'import os,sys;print(os.path.relpath(sys.argv[1],sys.argv[2]))' "$NS" "$REPO")
-rm -rf "$REPO/ψ"              # only after the absorb was verified
 ln -sfn "$REL" "$REPO/ψ"      # -n: do not descend into an existing symlink
-readlink -f "$REPO/ψ"         # prove it resolves
+
+# 3e. verify the link RESOLVES and the content is reachable THROUGH it.
+#     Any failure restores the parked original and exits.
+restore() { rm -f "$REPO/ψ"; mv "$PARK" "$REPO/ψ"; echo "↩ restored original ψ"; }
+[ -e "$REPO/ψ/" ] || { echo "✗ link does not resolve"; restore; exit 1; }
+THRU=$(find "$REPO/ψ/" -type f ! -name '.DS_Store' | wc -l | tr -d ' ')
+[ "$THRU" -ge "$SRC_N" ] || { echo "✗ only $THRU/$SRC_N reachable through the link"; restore; exit 1; }
+
+readlink -f "$REPO/ψ"
+echo "✓ $THRU files reachable through the link"
+echo "  original parked: $PARK   (delete it yourself once satisfied)"
 ```
 
 `ln -sfn`, never `ln -sf` — with a pre-existing symlinked directory `-f` alone creates the
 link *inside* the target instead of replacing it.
+
+**Why park instead of delete:** at 3c the content exists in two places and has been counted
+in both, so parking looks redundant — until 3d writes a link that silently resolves
+somewhere unexpected. Parking makes 3e's rollback possible. Announce the park path; let the
+human delete it. Nothing deleted.
 
 ### 4. Ignore it, and prove it
 
@@ -263,7 +303,9 @@ caretaker's copy alone — never delete the vault side. Keep the ignore lines un
 
 - Show `maw ls` and let the human name the caretaker. Never guess, never scan for one.
 - Ask before the first destructive step; dry-run output is not consent.
-- Copy, verify, then delete — never in one command.
+- **Nothing deleted.** Never `rm -rf` a vault. Copy → count both sides → park the original
+  outside the repo → link → verify through the link, rolling back on any failure. The human
+  deletes the parked copy, not the skill.
 - Both `ψ` and `ψ/` in `.gitignore`, every time — a trailing slash matches directories
   only, so a `ψ/`-only rule stops matching the moment ψ becomes a symlink.
 - Relative symlink targets only — machines disagree on the ghq root.
