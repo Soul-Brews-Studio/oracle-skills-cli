@@ -137,19 +137,13 @@ source and completion status, and preserve user edits made after the initial wri
 
 ### 4. Retrospective content
 
-The standard artifact includes:
+Use [TEMPLATE.md](TEMPLATE.md) for every mode. It preserves the detailed retrospective
+shape: session metadata, summary, timeline, technical details, key changes, architecture
+decisions, AI Diary, wins, improvements, blockers, Honest Feedback, lessons, next steps,
+related resources, validation checklist, and Self-Audit.
 
-- Session Summary
-- Timeline
-- Files Modified
-- AI Diary (150+ words, first person)
-- Honest Feedback (100+ words, exactly 3 session-specific friction points)
-- Lessons Learned (generalizable rules only)
-- Next Steps
-- Self-Audit
-
-The AI Diary must contain one line labeled `[→ AGENT DECISION]` naming a decision the
-agent made wrong. Tool and environment failures belong under friction, not that label.
+Small sessions may have short sections or an evidence-backed `none`; they must not drop
+required reflection and validation sections.
 
 ### 5. Timeline rules
 
@@ -189,24 +183,8 @@ Review the last seven metrics rows. If a theme appears at least three times in e
 `friction` or `error`, surface a recurring-pattern section in the retrospective. Do not
 open an issue automatically.
 
-### 7. Self-audit
 
-Append this filled block as the final section:
-
-```markdown
-## 🔍 Self-Audit
-- shipped: <N items — list commit hash or file path for each, or "none shipped">
-- blocked: <N items — list the specific reason for each, or "none blocked">
-- uncomfortable truth: [→ AGENT DECISION] <one decision the agent made wrong>
-- friction: <N points> (operational: <list> | strategic: <list>)
-- next steps: <N — each actionable without a follow-up question>
-- rationalizations caught: <N — name them, or "none">
-```
-
-Reject vague success claims, blame shifting, inflated metrics, unsupported assertions,
-and “mostly done” without a concrete remainder.
-
-### 8. Save and announce
+### 7. Save and announce
 
 Do not `git add ψ/`; it may resolve to a shared vault.
 

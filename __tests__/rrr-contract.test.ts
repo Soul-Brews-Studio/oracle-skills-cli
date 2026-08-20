@@ -5,6 +5,7 @@ import { join } from "path";
 const skillDir = join(process.cwd(), "skills", "rrr");
 const skill = readFileSync(join(skillDir, "SKILL.md"), "utf8");
 const hosts = readFileSync(join(skillDir, "HOSTS.md"), "utf8");
+const template = readFileSync(join(skillDir, "TEMPLATE.md"), "utf8");
 
 describe("rrr execution contract", () => {
   it("exposes only three mutually-exclusive modes and defaults to foreground", () => {
@@ -34,6 +35,24 @@ describe("rrr execution contract", () => {
     expect(skill).toContain("write a complete, useful context-based retrospective synchronously");
     expect(skill).toContain("Then launch one background miner/writer");
     expect(skill).toContain("Session enrichment: pending");
+  });
+
+  it("uses the complete gist-inspired retrospective structure", () => {
+    expect(skill).toContain("[TEMPLATE.md](TEMPLATE.md)");
+    for (const heading of [
+      "## Technical Details",
+      "### Architecture Decisions",
+      "## 📝 AI Diary",
+      "## What Went Well",
+      "## What Could Improve",
+      "## Blockers & Resolutions",
+      "## 💭 Honest Feedback",
+      "## Lessons Learned",
+      "## Next Steps",
+      "## Related Resources",
+      "## ✅ Retrospective Validation Checklist",
+      "## 🔍 Self-Audit",
+    ]) expect(template).toContain(heading);
   });
 
   it("keeps host-specific session sources behind adapters", () => {
