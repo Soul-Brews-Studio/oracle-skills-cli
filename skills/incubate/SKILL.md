@@ -278,16 +278,21 @@ if gh repo view "$SLUG" --json name &>/dev/null; then
   ghq get -u "https://github.com/$SLUG"
 else
   echo "Repo not found — creating private repo..."
+  NEW_REPO_CREATED=1   # our own fresh repo — commit-ignore the breadcrumb (Step 0.5)
   gh repo create "$SLUG" --private --clone=false
   ghq get "https://github.com/$SLUG"
   GHQ_ROOT=$(ghq root)
   LOCAL="$GHQ_ROOT/github.com/$SLUG"
-  if [ ! -f "$LOCAL/README.md" ]; then
-    echo "# $REPO" > "$LOCAL/README.md"
-    git -C "$LOCAL" add README.md
-    git -C "$LOCAL" commit -m "Initial commit"
-    git -C "$LOCAL" push origin main 2>/dev/null || git -C "$LOCAL" push origin master
-  fi
+  # Seed a .gitignore that ignores the incubation breadcrumb from the very first
+  # commit, so the rule travels with every clone (a local .git/info/exclude does
+  # not). Safe here — WE just created this private repo; the #447 "don't edit a
+  # foreign repo's committed .gitignore" rule applies only to CLONES.
+  grep -qxF '.claude/INCUBATED_BY' "$LOCAL/.gitignore" 2>/dev/null \
+    || echo '.claude/INCUBATED_BY' >> "$LOCAL/.gitignore"
+  [ -f "$LOCAL/README.md" ] || echo "# $REPO" > "$LOCAL/README.md"
+  git -C "$LOCAL" add README.md .gitignore
+  git -C "$LOCAL" diff --cached --quiet || git -C "$LOCAL" commit -m "Initial commit"
+  git -C "$LOCAL" push origin main 2>/dev/null || git -C "$LOCAL" push origin master
 fi
 
 GHQ_ROOT=$(ghq root)
@@ -352,18 +357,26 @@ BREADCRUMB
 
 echo "✓ Breadcrumb dropped: $TARGET_REPO/.claude/INCUBATED_BY"
 
-# Keep the breadcrumb OUT of the target repo's git history (#447).
-# .git/info/exclude is local-only (never committed) — right home for
-# machine-local metadata. Do NOT touch the target's .gitignore.
+# Keep the breadcrumb OUT of the target repo's tracked history. Pick the mechanism
+# by ownership:
+# - NEW repo we just created ($NEW_REPO_CREATED): commit-ignore it in .gitignore so
+#   the rule travels with clones. The initial commit above already staged it.
+# - CLONE we don't own (may be public/foreign): use .git/info/exclude — local-only,
+#   never committed, so we never edit someone else's committed .gitignore (#447).
 if [ -d "$TARGET_REPO/.git" ]; then
-  grep -qxF '.claude/INCUBATED_BY' "$TARGET_REPO/.git/info/exclude" 2>/dev/null \
-    || echo '.claude/INCUBATED_BY' >> "$TARGET_REPO/.git/info/exclude"
-  echo "✓ Excluded from git: .claude/INCUBATED_BY (local .git/info/exclude)"
+  if [ "${NEW_REPO_CREATED:-0}" = "1" ]; then
+    grep -qxF '.claude/INCUBATED_BY' "$TARGET_REPO/.gitignore" 2>/dev/null \
+      || echo '.claude/INCUBATED_BY' >> "$TARGET_REPO/.gitignore"
+    echo "✓ Ignored in git: .claude/INCUBATED_BY (committed .gitignore — new repo)"
+  else
+    grep -qxF '.claude/INCUBATED_BY' "$TARGET_REPO/.git/info/exclude" 2>/dev/null \
+      || echo '.claude/INCUBATED_BY' >> "$TARGET_REPO/.git/info/exclude"
+    echo "✓ Excluded from git: .claude/INCUBATED_BY (local .git/info/exclude)"
+  fi
 
-  # If a PRIOR incubation already committed the breadcrumb, exclude alone
-  # won't hide it — git keeps tracking a tracked file. Auto-untrack it
-  # (index-only; the file stays on disk). This makes "must be ignored"
-  # actually hold instead of leaving a manual git-rm note.
+  # Either way: if a PRIOR incubation already committed the breadcrumb, an
+  # exclude/ignore rule won't hide an already-tracked file. Auto-untrack it
+  # (index-only; the file stays on disk) so "must be ignored" actually holds.
   if git -C "$TARGET_REPO" ls-files --error-unmatch .claude/INCUBATED_BY >/dev/null 2>&1; then
     git -C "$TARGET_REPO" rm --cached --quiet .claude/INCUBATED_BY
     echo "✓ Untracked previously-committed .claude/INCUBATED_BY (git rm --cached)"
@@ -376,11 +389,13 @@ The breadcrumb enables:
 - **Provenance chain**: `learned-from` links /learn → /incubate (#232)
 - **/recap awareness**: /recap shows a warning when INCUBATED_BY exists (#229)
 
-The breadcrumb is machine-local — it must never appear in the target repo's
-git history (#447). Step 0.5 enforces this in both directions: it adds the
-local exclude for future runs, and auto-untracks the file if a prior
-incubation already committed it (`git rm --cached`, index-only — the
-breadcrumb stays on disk). Nothing manual is left for you to remember.
+The breadcrumb stays out of the target repo's tracked history. Step 0.5 picks the
+mechanism by ownership: a **committed `.gitignore` rule** for a repo we just created
+(so the rule travels with every clone), or a machine-local **`.git/info/exclude`** for
+a clone we don't own (#447 — never edit a foreign/public repo's committed .gitignore).
+Either way it auto-untracks the file if a prior incubation already committed it
+(`git rm --cached`, index-only — the breadcrumb stays on disk). Nothing manual is
+left for you to remember.
 
 ### Step 0.6: Share the vault — symlink target ψ → parent oracle vault
 
