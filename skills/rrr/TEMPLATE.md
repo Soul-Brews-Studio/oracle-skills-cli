@@ -15,7 +15,7 @@ sessions, but do not omit required reflection or verification sections.
 **Current Issue**: #N or none
 **Current PR**: #N or none
 **Session**: <host session ID or unknown>
-**Evidence Source**: live-session | Claude adapter | Codex adapter | unknown
+**Evidence Source**: live-session | Claude adapter | Codex adapter | git-commit-times | unknown
 
 ## Session Summary
 
@@ -23,8 +23,11 @@ sessions, but do not omit required reflection or verification sections.
 
 ## Timeline
 
-<Verified timestamp table when session mining is enabled and succeeds. For `--fg`, use
-ordered untimed bullets. Never estimate times.>
+<Real `HH:MM` (GMT+7) rows. Times come from session mining (`--bg`/`--combo`) or, in
+any mode including `--fg`, from verified git commit timestamps. Only fall back to ordered
+untimed bullets when no timestamped evidence exists at all. Never estimate times.>
+
+- HH:MM — <event> (`<commit>`)
 
 ## Technical Details
 

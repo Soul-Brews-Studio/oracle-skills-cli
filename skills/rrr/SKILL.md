@@ -79,6 +79,14 @@ PSI_RESOLVED=$(readlink -f "$PSI" 2>/dev/null || printf '%s' "$PSI")
 
 ### 1. Gather repository evidence
 
+All retro times and date-stamped paths use **GMT+7 (Asia/Bangkok)**. Pin it once so
+every `date` call and git timestamp below renders in GMT+7 regardless of the host's
+local zone:
+
+```bash
+export TZ='Asia/Bangkok'   # GMT+7 — retro timeline, header, and path stamps
+```
+
 Use the smallest commands that accurately describe this session:
 
 ```bash
@@ -86,14 +94,21 @@ date "+%H:%M %Z (%A %d %B %Y)"
 git -C "$ORACLE_ROOT" status --short
 git -C "$ORACLE_ROOT" log --oneline -10
 git -C "$ORACLE_ROOT" diff --stat HEAD~5 2>/dev/null || true
+
+# Verified commit timestamps in GMT+7 — the timeline's real-time source (works in --fg,
+# no session mining needed). --date=format-local honors the TZ exported above.
+git -C "$ORACLE_ROOT" log --since='18 hours ago' \
+  --date=format-local:'%H:%M' --format='%ad — %s (%h)' --reverse
 ```
 
 Repository evidence is allowed in every mode. Persisted **agent-session** evidence is
-for `--bg` and `--combo` only.
+for `--bg` and `--combo` only. Commit timestamps are repository evidence, not session
+mining — a `--fg` retro may and should use them to build a real timeline.
 
 ### 2. Resolve artifact paths
 
 ```bash
+# TZ='Asia/Bangkok' (GMT+7) was exported in step 1, so these stamps are Bangkok-local.
 DATE_PATH=$(date +%Y-%m/%d)
 TODAY=$(date +%Y-%m-%d)
 HHMM=$(date +%H.%M)
@@ -122,8 +137,12 @@ task remains active.
 #### Foreground (`--fg`)
 
 Write the artifact synchronously using current conversation context and repository
-evidence only. Timeline entries without verified times must be ordered but untimed.
-State `Persisted session mining: disabled by --fg` in the evidence note.
+evidence only. Build the Timeline from the **verified GMT+7 commit timestamps** gathered
+in step 1 — real `HH:MM` rows, not `unknown`. Set the header `Start / End` to the first
+and last commit time (or the current clock when there are no commits this session), and
+`Duration` to their span. Only events with no timestamped evidence at all fall back to
+ordered untimed bullets. State `Persisted session mining: disabled by --fg` in the
+evidence note.
 
 #### Combined (`--combo`)
 
@@ -146,11 +165,18 @@ required reflection and validation sections.
 ### 5. Timeline rules
 
 1. Never invent timestamps.
-2. Use normalized session evidence when available.
-3. Same-day sessions show the date once and `HH:MM` in rows.
-4. Multi-day sessions group rows under `### YYYY-MM-DD`.
-5. With context-only evidence, use ordered untimed bullets rather than estimated times.
-6. Record the evidence source: Claude adapter, Codex adapter, context-only, or unknown.
+2. All times render in **GMT+7 (Asia/Bangkok)** — the `TZ` exported in step 1 covers
+   `date` and `git --date=format-local` alike. Label rows plainly as `HH:MM` (GMT+7).
+3. Prefer verified times from these sources, in order: normalized session evidence
+   (`--bg`/`--combo`) → **git commit timestamps** (all modes, including `--fg`) → the
+   current clock for the closing entry.
+4. Same-day sessions show the date once and `HH:MM` in rows.
+5. Multi-day sessions group rows under `### YYYY-MM-DD`.
+6. Only fall back to ordered untimed bullets when NO timestamped evidence exists at all —
+   not merely because session mining is off. If any commit landed this session, the
+   timeline has real times.
+7. Record the evidence source: Claude adapter, Codex adapter, git-commit-times,
+   context-only, or unknown.
 
 ### 6. Lesson and metrics
 
