@@ -157,10 +157,14 @@ source and completion status, and preserve user edits made after the initial wri
 Use [TEMPLATE.md](TEMPLATE.md) for every mode. It preserves the detailed retrospective
 shape: session metadata, summary, timeline, technical details, key changes, architecture
 decisions, AI Diary, wins, improvements, blockers, Honest Feedback, lessons, next steps,
-related resources, validation checklist, and Self-Audit.
+related resources, and Self-Audit — the written retro ends at Self-Audit.
+
+Before saving, silently verify the retro against TEMPLATE.md's **validation gate**. It is
+an internal quality check — run it, fix what fails, and **never write the checklist into
+the retrospective file**.
 
 Small sessions may have short sections or an evidence-backed `none`; they must not drop
-required reflection and validation sections.
+required reflection sections, and must still pass the silent validation gate.
 
 ### 5. Timeline rules
 

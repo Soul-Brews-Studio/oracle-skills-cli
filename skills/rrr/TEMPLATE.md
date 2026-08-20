@@ -88,7 +88,22 @@ tools, communication, or scope. Keep generalizable rules for Lessons Learned.>
 - Retrospective: <absolute path>
 - Lesson: <absolute path or none>
 
-## ✅ Retrospective Validation Checklist
+## 🔍 Self-Audit
+
+- shipped: <N items — commit hash or file path for each, or "none shipped">
+- blocked: <N items — specific reason for each, or "none blocked">
+- uncomfortable truth: [→ AGENT DECISION] <one decision the agent made wrong>
+- friction: <N points> (operational: <list> | strategic: <list>)
+- next steps: <N — each actionable without a follow-up question>
+- rationalizations caught: <N — name them, or "none">
+```
+
+## Validation gate — verify silently, never write it into the retro
+
+Before saving, confirm every item below holds. This is an **internal quality gate**:
+check it in your reasoning, fix whatever fails, then write the file. **Do NOT copy this
+checklist into the retrospective** — the saved retro ends at Self-Audit and contains no
+checklist section.
 
 - [ ] Metadata reflects the actual session and repository.
 - [ ] Summary distinguishes shipped, unfinished, and blocked work.
@@ -100,15 +115,7 @@ tools, communication, or scope. Keep generalizable rules for Lessons Learned.>
 - [ ] Next steps are concrete and executable.
 - [ ] Links and paths resolve, or are explicitly marked unavailable.
 
-## 🔍 Self-Audit
-
-- shipped: <N items — commit hash or file path for each, or "none shipped">
-- blocked: <N items — specific reason for each, or "none blocked">
-- uncomfortable truth: [→ AGENT DECISION] <one decision the agent made wrong>
-- friction: <N points> (operational: <list> | strategic: <list>)
-- next steps: <N — each actionable without a follow-up question>
-- rationalizations caught: <N — name them, or "none">
-```
+If an item fails, revise the retro before writing — do not record the failure in the file.
 
 ## Repository integration boundaries
 

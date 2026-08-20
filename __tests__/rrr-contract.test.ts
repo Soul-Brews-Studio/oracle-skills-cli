@@ -50,9 +50,23 @@ describe("rrr execution contract", () => {
       "## Lessons Learned",
       "## Next Steps",
       "## Related Resources",
-      "## ✅ Retrospective Validation Checklist",
       "## 🔍 Self-Audit",
     ]) expect(template).toContain(heading);
+  });
+
+  it("keeps the validation checklist as a silent gate, not a written report section", () => {
+    // The written-report fence ends at Self-Audit and carries no checklist.
+    const fence = template.split("```markdown")[1]?.split("```")[0] ?? "";
+    expect(fence).toContain("## 🔍 Self-Audit");
+    expect(fence).not.toContain("Validation Checklist");
+    expect(fence).not.toContain("Metadata reflects the actual session");
+    // The checklist lives OUTSIDE the fence as a gate with a do-not-write rule.
+    expect(template).toContain("## Validation gate");
+    expect(template).toContain("Metadata reflects the actual session");
+    expect(template).toMatch(/do not (copy|write)/i);
+    // SKILL.md instructs a silent verification, never a written checklist.
+    expect(skill).toContain("validation gate");
+    expect(skill).toContain("never write the checklist");
   });
 
   it("keeps host-specific session sources behind adapters", () => {
