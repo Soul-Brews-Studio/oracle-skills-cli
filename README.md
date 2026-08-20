@@ -1,6 +1,6 @@
 # arra-oracle-skills-cli
 
-21 skills for AI coding agents — persistent memory, session awareness, and collaborative tools.
+22 skills for AI coding agents — persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
@@ -47,7 +47,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 <!-- skills:start -->
 
 <details>
-<summary>📚 <strong>21 skills installed</strong> — click to expand</summary>
+<summary>📚 <strong>22 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -69,11 +69,12 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | 14 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
 | 15 | **oracle-prism** | skill | Multi-perspective analysis |
 | 16 | **philosophy** | skill | Display Oracle philosophy |
-| 17 | **resonance** | skill | Capture a resonance moment |
-| 18 | **rrr** | skill | Create a session retrospective with an AI… |
-| 19 | **trace** | skill | Find projects, code, and knowledge across… |
-| 20 | **where-we-are** | skill | Session awareness |
-| 21 | **who-are-you** | skill | Know ourselves |
+| 17 | **psi** | skill | Attach a code repo's ψ vault to a caretaker… |
+| 18 | **resonance** | skill | Capture a resonance moment |
+| 19 | **rrr** | skill | Create a session retrospective with an AI… |
+| 20 | **trace** | skill | Find projects, code, and knowledge across… |
+| 21 | **where-we-are** | skill | Session awareness |
+| 22 | **who-are-you** | skill | Know ourselves |
 
 </details>
 
@@ -87,8 +88,8 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
 | **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
-| **full** | 21 | all |
-| **lab** | 21 | all |
+| **full** | 22 | all |
+| **lab** | 22 | all |
 
 Switch anytime: `/go standard`, `/go full`, `/go lab`
 
