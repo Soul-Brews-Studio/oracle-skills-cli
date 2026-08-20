@@ -1,511 +1,231 @@
 ---
+installer: arra-oracle-skills-cli v26.8.17-alpha.1127
+origin: Nat Weerawan's brain, digitized — how one human works with AI, captured as code — Soul Brews Studio
 name: rrr
-description: Create session retrospective with AI diary and lessons learned. Use when user says "rrr", "retrospective", "wrap up session", "session summary", or at end of work session.
-argument-hint: "[--bg | --quick | --detail | --deep]"
+description: '[standard] v26.8.17-alpha.1127 G-SKLL | Create a session retrospective with an AI diary and reusable lessons. Supports foreground, background, and combined execution across compatible agent hosts.'
+argument-hint: "[--fg | --bg | --combo]"
 ---
 
 # /rrr
 
 > "Reflect to grow, document to remember."
 
+Create a truthful session retrospective, record reusable learning, and append the
+session-metrics row. Never invent timestamps or claim evidence that the active host
+cannot provide.
+
+## Mode router
+
+Choose one execution mode:
+
+```text
+/rrr                              # same as --fg
+/rrr --bg                         # full retrospective in the background
+/rrr --fg                         # foreground, current-context only; never mines persisted sessions
+/rrr --combo                      # foreground draft, then background evidence enrichment
 ```
-/rrr                      # Retro + 1 background dig subagent (parallel, fast)
-/rrr --bg                 # Hand the WHOLE retro to a background Sonnet — returns instantly
-/rrr --quick              # No dig, no subagent — memory only (fastest)
-/rrr --detail             # Full template + background dig
-/rrr --deep               # 5 parallel subagents
-/rrr --deep --teammate    # 3 coordinated team agents (requires AGENT_TEAMS)
-```
 
-**Default mode**: main agent starts writing the retro immediately from conversation memory.
-One background subagent runs dig + .jsonl timestamp extraction in parallel.
-When the subagent returns, main agent merges real timestamps into the Timeline section.
-**No speed penalty** — dig runs while you write.
+`--fg`, `--bg`, and `--combo` are mutually exclusive. If more than one is supplied,
+stop and report the valid syntax. When none is supplied, use `--fg`.
 
-`--quick` skips dig entirely — memory only, zero subagents.
+| Mode | Required behavior |
+|---|---|
+| `--bg` | Mine the persisted host session and write the retrospective asynchronously. Announce the destination and return without waiting. |
+| `--fg` | Write synchronously from current conversation context and repository evidence. Do not inspect persisted session transcripts, JSONL, rollout files, or session databases. Do not launch a hidden mining agent. |
+| `--combo` | Write a useful foreground artifact immediately, then launch background session mining that enriches the same artifact with verified timestamps and evidence. Clearly mark enrichment pending until it completes. |
 
-**Subagent rules**: default /rrr spawns exactly 1 background Agent (dig miner). `--deep` spawns 5. `--quick` spawns 0.
-**NEVER use the Task tool.** Only `--deep` and `--deep --teammate` use TeamCreate.
+Plain `/rrr` is the safe, lean foreground path. Persisted session mining happens only in
+`--bg` and `--combo`.
 
----
 
-## Oracle Root Detection (REQUIRED — run before any ψ/ write)
+## Host capability contract
 
-**Every skill that writes to ψ/ MUST detect the oracle root first.** Do not assume `pwd` is the oracle repo.
+Before mining or delegation, read [HOSTS.md](HOSTS.md). Detect capabilities rather
+than assuming Claude Code paths, Claude JSONL, a particular agent API, or a model name.
+
+Public output should say **session mining**, not **JSONL mining**. A host adapter may
+internally read JSONL, rollout files, or another supported source, but it must normalize
+the result and preserve source attribution.
+
+If background execution is unavailable:
+
+- `--fg` is unaffected.
+- `--bg` falls back to `--fg` and clearly reports that persisted mining was unavailable.
+- `--combo` keeps the foreground artifact, marks session enrichment unavailable, and
+  does not fabricate a completion notification.
+
+## Oracle root detection
+
+Run this before every `ψ/` write. Do not assume the current directory is the Oracle repo.
 
 ```bash
-# Step 1: Find git root
 ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 
-# Step 2: Cross-check — oracle repo has CLAUDE.md + ψ/
-if [ -n "$ORACLE_ROOT" ] && [ -f "$ORACLE_ROOT/CLAUDE.md" ] && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
+if [ -n "$ORACLE_ROOT" ] && { [ -f "$ORACLE_ROOT/CLAUDE.md" ] || [ -f "$ORACLE_ROOT/AGENTS.md" ]; } \
+   && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
   PSI="$ORACLE_ROOT/ψ"
-elif [ -f "$(pwd)/CLAUDE.md" ] && { [ -d "$(pwd)/ψ" ] || [ -L "$(pwd)/ψ" ]; }; then
-  # Fallback: pwd has oracle markers
+elif { [ -f "$(pwd)/CLAUDE.md" ] || [ -f "$(pwd)/AGENTS.md" ]; } \
+   && { [ -d "$(pwd)/ψ" ] || [ -L "$(pwd)/ψ" ]; }; then
   ORACLE_ROOT="$(pwd)"
   PSI="$ORACLE_ROOT/ψ"
 else
-  # Last resort: warn and use pwd
-  echo "⚠️ Not in oracle repo (no CLAUDE.md + ψ/ at git root). Writing to pwd."
-  ORACLE_ROOT="$(pwd)"
+  echo "⚠️ Not in an Oracle repo. Writing under the current repository."
+  ORACLE_ROOT="${ORACLE_ROOT:-$(pwd)}"
   PSI="$ORACLE_ROOT/ψ"
 fi
+
+PSI_RESOLVED=$(readlink -f "$PSI" 2>/dev/null || printf '%s' "$PSI")
 ```
 
-**Why**: prevents retros writing to `~/ψ/` (home) or incubated repo's `ψ/` instead of the oracle's own vault.
+## Shared workflow
 
-All paths below use `$PSI/` instead of bare `ψ/`.
+### 1. Gather repository evidence
 
----
-
-## /rrr (Default — background dig + parallel write)
-
-### 1. Gather git context (main agent)
+Use the smallest commands that accurately describe this session:
 
 ```bash
 date "+%H:%M %Z (%A %d %B %Y)"
-git log --oneline -10 && git diff --stat HEAD~5
+git -C "$ORACLE_ROOT" status --short
+git -C "$ORACLE_ROOT" log --oneline -10
+git -C "$ORACLE_ROOT" diff --stat HEAD~5 2>/dev/null || true
 ```
 
-Detect session ID:
+Repository evidence is allowed in every mode. Persisted **agent-session** evidence is
+for `--bg` and `--combo` only.
+
+### 2. Resolve artifact paths
 
 ```bash
-ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_BASE=$(ls -d "$HOME/.claude/projects/${ENCODED_PWD}" 2>/dev/null | head -1)
-LATEST_JSONL=$(ls -t "$PROJECT_BASE"/*.jsonl 2>/dev/null | head -1)
-[ -n "$LATEST_JSONL" ] && SESSION_ID=$(basename "$LATEST_JSONL" .jsonl) && echo "SESSION: ${SESSION_ID:0:8}"
+DATE_PATH=$(date +%Y-%m/%d)
+TODAY=$(date +%Y-%m-%d)
+HHMM=$(date +%H.%M)
+mkdir -p "$PSI/memory/retrospectives/$DATE_PATH" "$PSI/memory/learnings"
 ```
 
-### 1.5. Spawn timestamp miner (background subagent)
+Write:
 
-Spawn ONE background Agent to extract real timestamps from the session .jsonl:
+- retrospective: `$PSI/memory/retrospectives/$DATE_PATH/${HHMM}_${SLUG}.md`
+- lesson: `$PSI/memory/learnings/${TODAY}_${SLUG}.md`
+- metrics: `$PSI/memory/learnings/session-metrics.md`
 
-```
-Agent({
-  name: "timestamp-miner",
-  description: "Extract session timestamps for /rrr",
-  run_in_background: true,
-  prompt: `Extract real user message timestamps from a Claude Code session file.
-Read-only — do NOT write files.
+### 3. Execute the selected mode
 
-Run this single command:
+#### Background (`--bg`, default)
 
-ENCODED_PWD=$(echo "[ORACLE_ROOT]" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_BASE=$(ls -d "$HOME/.claude/projects/${ENCODED_PWD}" 2>/dev/null | head -1)
-LATEST_JSONL=$(ls -t "$PROJECT_BASE"/*.jsonl 2>/dev/null | head -1)
-echo "SESSION_FILE: $LATEST_JSONL"
-python3 -c "
-import json, os, sys
-sys.stdout.reconfigure(encoding='utf-8')  # Windows Thai locale: stdout defaults to cp874 -> Thai snippets mojibake; force UTF-8 output
-from datetime import datetime, timezone, timedelta
-tz = timezone(timedelta(hours=7))
-jsonl = '$LATEST_JSONL'
-if not jsonl or not os.path.exists(jsonl): exit(0)
-with open(jsonl, encoding='utf-8') as f:
-    for line in f:
-        try:
-            m = json.loads(line)
-            if m.get('type') != 'user' or 'message' not in m: continue
-            content = m['message'].get('content', '')
-            if isinstance(content, list):
-                for c in content:
-                    if isinstance(c, dict) and c.get('type') == 'text':
-                        content = c.get('text', ''); break
-            if not isinstance(content, str): continue
-            ts = m.get('timestamp', '')
-            if not ts or '<command-name>' in content[:200]: continue
-            dt = datetime.fromisoformat(ts.replace('Z', '+00:00')).astimezone(tz)
-            snippet = content[:80].replace(chr(10), ' ')
-            print(f'{dt.strftime(\"%Y-%m-%d %H:%M\")} | {snippet}')
-        except: pass
-"
+Resolve every path and capability before delegation. Give one background writer the
+current context summary, repository evidence, normalized session evidence when
+available, destination paths, template requirements, and the anti-rationalization
+rules. Use the active host's model routing; never require a named vendor model.
 
-Return ALL output lines. The main agent will use them for the Timeline.`
-})
-```
+Return immediately with the resolved absolute destination. If the host cannot keep work
+alive after returning, use the documented foreground fallback instead of pretending the
+task remains active.
 
-**Why only .jsonl, not dig.py**: the subagent has no conversation context — it can't interpret dig session summaries. The .jsonl timestamps are objective data (real ISO timestamps from every user message). That's all we need for the Timeline.
+#### Foreground (`--fg`)
 
-### 2. Write Retrospective (main agent — start immediately, don't wait for dig)
+Write the artifact synchronously using current conversation context and repository
+evidence only. Timeline entries without verified times must be ordered but untimed.
+State `Persisted session mining: disabled by --fg` in the evidence note.
 
-**Path**: `$PSI/memory/retrospectives/YYYY-MM/DD/HH.MM_slug.md`
+#### Combined (`--combo`)
 
-```bash
-mkdir -p "$PSI/memory/retrospectives/$(date +%Y-%m/%d)"
-```
+First write a complete, useful context-based retrospective synchronously. Its Timeline
+may contain ordered untimed entries and must include `Session enrichment: pending`.
+Then launch one background miner/writer using the host adapter. It updates the same file
+atomically: merge verified timestamps/evidence, replace the pending marker with the
+source and completion status, and preserve user edits made after the initial write.
 
-**Start writing NOW from conversation memory.** Draft all sections. When the dig-miner subagent returns (background notification), merge its timestamp data into the Timeline section.
+### 4. Retrospective content
 
-### Timeline format rules
+The standard artifact includes:
 
-1. **Use dig-miner timestamps when available** — real `HH:MM` from .jsonl extraction. If dig-miner hasn't returned yet or failed, write `[timestamps pending from dig-miner]` and fill in when it returns.
-
-2. **Date once in header, time-only in rows** — same-day sessions:
-
-   ```markdown
-   ## Timeline
-
-   **Date**: 2026-05-14 (GMT+7)
-
-   | Time | What |
-   |---|---|
-   | 20:14 | User: "..." |
-   | 20:21 | PR #379 merged |
-   ```
-
-3. **Multi-day session** — group by `### YYYY-MM-DD` subheader, `HH:MM` rows under each.
-
-4. **Never invent timestamps.** If dig-miner fails, say "timestamps unavailable" — don't guess.
-
-Include in retrospective header:
-```
-📡 Session: 74c32f34 | repo-name | Xh XXm
-```
-
-**Write immediately, no prompts.** Include:
 - Session Summary
-- Timeline (real timestamps from .jsonl mining — `YYYY-MM-DD HH:MM | what`)
+- Timeline
 - Files Modified
-- AI Diary (150+ words, first-person; must contain one line labeled `[→ AGENT DECISION]` naming a choice YOU made wrong — overconfidence, repeated wrong proposal, misread requirement; tool failures and env issues belong in friction, not here)
-- Honest Feedback (100+ words, 3 friction points; **session-specific only** — what dragged in THIS session; if something generalizes beyond this session, it belongs in Lessons, not here)
-- Lessons Learned (**generalizable only** — state each as a rule you'd tell another Oracle on a different project; if it only applies to this session's specific context, it's friction, not a lesson)
+- AI Diary (150+ words, first person)
+- Honest Feedback (100+ words, exactly 3 session-specific friction points)
+- Lessons Learned (generalizable rules only)
 - Next Steps
+- Self-Audit
 
-### 3. Write Lesson Learned
+The AI Diary must contain one line labeled `[→ AGENT DECISION]` naming a decision the
+agent made wrong. Tool and environment failures belong under friction, not that label.
 
-**Path**: `$PSI/memory/learnings/YYYY-MM-DD_slug.md`
+### 5. Timeline rules
 
-### 3.5. Append Session-Metrics Row (REQUIRED)
+1. Never invent timestamps.
+2. Use normalized session evidence when available.
+3. Same-day sessions show the date once and `HH:MM` in rows.
+4. Multi-day sessions group rows under `### YYYY-MM-DD`.
+5. With context-only evidence, use ordered untimed bullets rather than estimated times.
+6. Record the evidence source: Claude adapter, Codex adapter, context-only, or unknown.
 
-**Path**: `$PSI/memory/learnings/session-metrics.md`
+### 6. Lesson and metrics
 
-If the file doesn't exist, create with this header:
+Write a lesson only when it transfers to another project:
+
+```yaml
+---
+pattern: <generalizable lesson in one line>
+date: <today>
+source: rrr: <repo>
+concepts: [<tags>]
+---
+```
+
+Create the metrics file when absent:
 
 ```markdown
 # Oracle Session Metrics
-
-Rule (parent CLAUDE.md §"Self-Evaluation Loop"): same friction 3 sessions → fix root cause, not another workaround.
 
 | when | session | done | stuck | win | friction | error |
 |---|---|---|---|---|---|---|
 ```
 
-Then append ONE row:
+Append exactly one row for every run. Use `unknown` when the host cannot provide a
+session ID. Never skip a trivial session; record `trivial` where appropriate.
 
-| Column | Content |
-|---|---|
-| `when` | `YYYY-MM-DD HH:MM` in GMT+7 |
-| `session` | first 8 chars of `SESSION_ID` (from Step 1.5). If detection failed, write `unknown` |
-| `done` | tasks/items completed this session (comma-separated, terse) |
-| `stuck` | items blocked, deferred, or dropped — or `n/a` |
-| `win` | biggest unlock or ship this session (one line) |
-| `friction` | operational drag: env issue, tool failure, process slowdown — session-specific (one line, or `n/a`) |
-| `error` | agent decision error: wrong call YOU made — overconfidence, premature action, misread scope (one line, or `n/a`) |
+Review the last seven metrics rows. If a theme appears at least three times in either
+`friction` or `error`, surface a recurring-pattern section in the retrospective. Do not
+open an issue automatically.
 
-**Rule**: never skip. Trivial session? Still append with `trivial` in win/friction. Gaps break the pattern-detection value of the file.
+### 7. Self-audit
 
-### 4. Oracle Sync (two-layer pattern)
-
-1. Write to `$PSI/memory/learnings/YYYY-MM-DD_<slug>.md` with frontmatter:
-   ```yaml
-   ---
-   pattern: <lesson learned in one line>
-   date: <today>
-   source: rrr: REPO
-   concepts: [<tags>]
-   ---
-
-   # <lesson title>
-   <body>
-   ```
-
-2. The Oracle's auto-memory layer picks up new files in `$PSI/memory/learnings/` automatically — no separate API call needed.
-
-### 4.5. Pattern Check (last 7 rows)
-
-Read the last 7 rows (or all rows if fewer) of `$PSI/memory/learnings/session-metrics.md`.
-
-Count keyword themes in the `friction` column (operational — escalation: file issue) and the `error` column (decision — escalation: raise in standup) independently. If any theme reaches **≥3 times** in either column, append the recurring-pattern section, naming which column triggered and the appropriate escalation.
-
-```markdown
-## 🔁 Recurring Pattern Detected
-
-"<theme>" appeared in <N> of last 7 sessions (<session IDs>). Per parent CLAUDE.md §"Self-Evaluation Loop" — consider root-cause fix instead of another workaround.
-
-Suggested: open issue `root-cause: <theme>` or raise with Boss during next standup.
-```
-
-If no theme reaches ≥3 → skip this section silently.
-
-**Rule**: surface only. Do NOT auto-open issues or take action beyond flagging. Principle 3 (External Brain, Not Command) — Boss decides.
-
-### 5. Save
-
-Retro files are written to vault (wherever `ψ` symlink resolves).
-
-**Do NOT `git add ψ/`** — it may be a symlink to the vault. Vault files are shared state, not committed to repos.
-
-### 6. Confirm (announce-mode — absolute paths required)
-
-# announce-mode → absolute path (no ψ/, no ~/, no $VAR, no ...).
-# Use:  echo "marker: $RESOLVED_PATH"  — bash substitutes. See CONVENTIONS.md.
-
-```bash
-RETRO_FILE="$PSI/memory/retrospectives/$(date +%Y-%m/%d)/$(date +%H.%M)_${SLUG}.md"
-LESSON_FILE="$PSI/memory/learnings/$(date +%Y-%m-%d)_${SLUG}.md"
-METRICS_FILE="$PSI/memory/learnings/session-metrics.md"
-echo "📝 Retrospective:  $RETRO_FILE"
-echo "💡 Lesson learned: $LESSON_FILE"
-echo "📊 Metrics row:    $METRICS_FILE"
-```
-
----
-
-## /rrr --detail
-
-Same flow as default but use full template:
-
-```markdown
-# Session Retrospective
-
-**Session Date**: YYYY-MM-DD
-**Start/End**: HH:MM - HH:MM GMT+7
-**Duration**: ~X min
-**Focus**: [description]
-**Type**: [Feature | Bug Fix | Research | Refactoring]
-
-## Session Summary
-## Timeline
-## Files Modified
-## Key Code Changes
-## Architecture Decisions
-## AI Diary (150+ words, vulnerable, first-person)
-## What Went Well
-## What Could Improve
-## Blockers & Resolutions
-## Honest Feedback (100+ words, 3 friction points)
-## Lessons Learned
-## Next Steps
-## Metrics (commits, files, lines)
-```
-
-Then steps 3-5 same as default.
-
----
-
-## /rrr --bg
-
-**Fire-and-forget.** Hands the entire retrospective to a background Sonnet subagent and
-returns immediately — the session keeps moving while the retro gets written.
-
-Use it mid-session to snapshot progress without stopping, or at the end when you'd rather
-start the next thing than wait. For the full interactive retro, use plain `/rrr`.
-
-> **Why Sonnet, not Haiku:** the Timeline mining is mechanical (the subagent runs
-> `dig-session.py`), but the AI Diary + Lessons are *writing*. Fleet tier: Haiku gathers,
-> Sonnet drafts, Opus synthesizes. Sonnet is where a retro earns its keep.
-
-### Resolve first, then spawn
-
-```bash
-ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
-LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
-SESSION_ID=$(basename "$LATEST_JSONL" .jsonl | cut -c1-8)
-PSI=$(readlink -f "$ORACLE_ROOT/ψ" 2>/dev/null || echo "$ORACLE_ROOT/ψ")
-REPO_NAME=$(basename "$ORACLE_ROOT")
-YM=$(date +%Y-%m); DD=$(date +%d); HHMM=$(date +%H.%M)
-```
-
-Substitute every `<PLACEHOLDER>` with the real value before spawning — the subagent
-cannot see your shell.
-
-### Spawn ONE background Agent (`model: "sonnet"`, `run_in_background: true`)
-
-```
-You are a session retrospective writer. Write a retrospective for the current session.
-
-JSONL: <LATEST_JSONL>
-Vault (PSI): <PSI>
-Session: <SESSION_ID> | <REPO_NAME> | Date: <YYYY-MM-DD HH:MM>
-
-Steps:
-1. Run: python3 "$(ls ~/.claude/skills/forward/scripts/dig-session.py \
-             ~/.claude/plugins/marketplaces/*/skills/forward/scripts/dig-session.py \
-             ~/.claude/plugins/cache/*/*/*/skills/forward/scripts/dig-session.py \
-             ~/.claude/skills/forward/dig-session.py 2>/dev/null | head -1)" "<LATEST_JSONL>"
-   (real timestamps for the Timeline — never guess or approximate times)
-2. mkdir -p "<PSI>/memory/retrospectives/<YYYY-MM>/<DD>"
-3. git -C <ORACLE_ROOT> status --short   (for an "Uncommitted" note)
-4. Write the retrospective to:
-   <PSI>/memory/retrospectives/<YYYY-MM>/<DD>/<HH.MM>_<slug>.md
-
-Format:
-
-# Retrospective: <session focus>
-
-**Date**: <YYYY-MM-DD HH:MM> · **Session**: <SESSION_ID> | <REPO_NAME>
-**Source**: /rrr --bg (JSONL-mined, Sonnet)
-
-## Timeline
-<real `YYYY-MM-DD HH:MM | what` rows from the mining. Same-day → date once in the
-header, HH:MM in rows. Multi-day → group under ### YYYY-MM-DD subheaders.>
-
-## AI Diary
-<150+ words, FIRST-PERSON. Honest reflection. MUST contain one line labeled
-`[→ AGENT DECISION]` naming a choice YOU (the AI) made WRONG — overconfidence, a
-repeated wrong proposal, a misread requirement. Tool failures and env issues are
-friction, not this.>
-
-## Honest Feedback
-<100+ words, exactly 3 friction points — SESSION-SPECIFIC only. Anything that
-generalizes belongs in Lessons instead.>
-
-## Lessons Learned
-<GENERALIZABLE only — state each as a rule you would tell another Oracle on a
-DIFFERENT project. If it only applies here, it is friction, not a lesson.>
-
-## Uncommitted Files
-<from git status --short, or "none">
-
-5. Append one line to <PSI>/memory/learnings/session-metrics.md if it exists
-   (date | session | one-line outcome). If a lesson is clearly generalizable, also
-   write <PSI>/memory/learnings/<YYYY-MM-DD>_<slug>.md with frontmatter
-   (pattern, date, source, concepts).
-
-After writing, print: "📓 Retro written: <absolute_path>".
-Do NOT enter plan mode. Do NOT commit.
-```
-
-### After spawning
-
-Tell the user where it will land, then **keep working — don't wait**:
-
-```
-📓 /rrr --bg launched — retrospective writing in background (Sonnet).
-   Session: <SESSION_ID>
-   Will write to: <PSI>/memory/retrospectives/<YYYY-MM>/<DD>/<HH.MM>_<slug>.md
-```
-
-Sibling: `/forward --bg` (handoff for the next session). Running both at session end
-gives you the pair — `/rrr --bg` looks back, `/forward --bg` looks forward.
-
----
-
-## /rrr --quick
-
-**Fast retro without dig — uses conversation memory only.** Use when you want speed over timeline accuracy, or when dig.py is unavailable.
-
-### 1. Gather
-
-```bash
-date "+%H:%M %Z (%A %d %B %Y)"
-git log --oneline -10 && git diff --stat HEAD~5
-```
-
-### 1.5. Detect Session
-
-```bash
-ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
-LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
-if [ -n "$LATEST_JSONL" ]; then
-  SESSION_ID=$(basename "$LATEST_JSONL" .jsonl)
-  echo "SESSION: ${SESSION_ID:0:8}"
-fi
-```
-
-### 2. Write Retrospective
-
-Same template as default but timeline is reconstructed from conversation memory (may be incomplete after compaction).
-
-### 3-5. Same as default steps 3-5
-
-Write lesson learned, oracle sync.
-
-**Do NOT `git add ψ/`** — vault files are shared state, not committed to repos.
-
----
-
-## /rrr --deep
-
-Read `DEEP.md` in this skill directory. Only mode that uses subagents (5 parallel agents).
-
----
-
-## /rrr --deep --teammate
-
-Read `TEAMMATE.md` in this skill directory. Coordinated team retro (3 agents + lead). Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
-
----
-
-## Wizard v2 Context
-
-If the Oracle was born via `/awaken` wizard v2, CLAUDE.md may contain:
-- **Memory consent**: If `auto`, `/rrr` runs are expected and welcomed. If `manual`, only run when explicitly asked.
-- **Experience level**: Adjust diary depth (beginner = simpler language, senior = technical depth)
-- **Team context**: If multi-Oracle team, note cross-Oracle learnings and handoff relevance
-
-Check CLAUDE.md for these fields. If not present, use defaults (auto memory, standard depth).
-
----
-
-## Anti-Rationalization Guard
-
-> "You didn't come here to make the choice. You've already made it. You're here to try to understand why."
-
-Before writing the final retrospective, scan your own draft for these **excuse patterns**:
-
-### Common Rationalizations
-
-| Excuse | Reality |
-|--------|---------|
-| "This was too complex to finish" | Was it complex, or did you skip the hard part? Show the specific blocker. |
-| "I ran out of context" | Context is a resource. Did you spend it well, or spiral on side quests? |
-| "The API/tool didn't work" | Show the error. Show what you tried. "Didn't work" is not a diagnosis. |
-| "I already tested it manually" | Manual testing doesn't persist. Where's the proof? |
-| "I'll fix it next session" | Is there a concrete plan, or is this a polite way to abandon it? |
-| "It's mostly done" | Define "mostly." What percentage? What's left? Be specific. |
-| "The user changed direction" | Did they change, or did you misunderstand? Check the original request. |
-| "This is a known issue" | Known by whom? Is there an issue filed? A workaround documented? |
-
-### Red Flags in Your Own Retro
-
-Stop and re-examine if your retrospective contains:
-
-- **Vague success claims**: "Made good progress" — on what? Show commits or it didn't happen.
-- **Blame-shifting**: "The build was broken" — did you break it? Did you fix it?
-- **Missing friction**: Zero "What Could Improve" items = you're not being honest.
-- **Inflated metrics**: Counting config changes as "features shipped."
-- **Scope creep excuses**: "I also refactored X" — was that in scope? Did you choose it over the actual task?
-- **Missing evidence**: Claims without git hashes, file paths, or concrete output.
-
-### Verification Checklist + Required Audit Block
-
-Before saving, run each check and **append this block verbatim (filled in) as the final section of the retro file**:
+Append this filled block as the final section:
 
 ```markdown
 ## 🔍 Self-Audit
 - shipped: <N items — list commit hash or file path for each, or "none shipped">
-- blocked: <N items — list specific error/reason for each, or "none blocked">
-- uncomfortable truth: [→ AGENT DECISION] <one line — name the choice you made wrong>
+- blocked: <N items — list the specific reason for each, or "none blocked">
+- uncomfortable truth: [→ AGENT DECISION] <one decision the agent made wrong>
 - friction: <N points> (operational: <list> | strategic: <list>)
-- next steps: <N — confirm each is actionable without a follow-up question>
+- next steps: <N — each actionable without a follow-up question>
 - rationalizations caught: <N — name them, or "none">
 ```
 
-Do not fill with "✓" or "done". Write the actual values. The eval scans this block.
+Reject vague success claims, blame shifting, inflated metrics, unsupported assertions,
+and “mostly done” without a concrete remainder.
 
-**If you catch yourself rationalizing: name it.** Write "I noticed I was rationalizing about X because Y" in the AI Diary. Catching the pattern is more valuable than hiding it.
+### 8. Save and announce
 
----
+Do not `git add ψ/`; it may resolve to a shared vault.
+
+Announce absolute paths only:
+
+```text
+📝 Retrospective:  <absolute path>
+💡 Lesson learned: <absolute path, or "not created — no generalizable lesson">
+📊 Metrics row:    <absolute path>
+```
 
 ## Rules
 
-- **NO SUBAGENTS**: Never use Task tool or spawn subagents (only `--deep` may)
-- AI Diary: 150+ words, vulnerability, first-person
-- Honest Feedback: 100+ words, 3 friction points
-- Oracle Sync: REQUIRED after every lesson learned
-- Time Zone: GMT+7 (Bangkok)
-- **Anti-rationalization**: Scan draft against excuse table before saving
+- Default execution mode is `--fg`.
+- `--fg` never mines persisted session data and never launches a hidden miner.
+- `--bg` and `--combo` are the only modes allowed to mine persisted session data.
+- `--combo` is the only foreground-plus-background-enrichment mode.
+- Never hard-code Claude storage, JSONL schema, agent APIs, team APIs, or model names in
+  the shared flow; isolate host details in [HOSTS.md](HOSTS.md).
+- Never invent timestamps, session IDs, commits, files, or completed background work.
+- Do not create coordinated teams or multi-agent analysis trees for `/rrr`.
+- Keep vault writes outside git staging.
