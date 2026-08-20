@@ -197,31 +197,57 @@ consent. If the human says nothing, nothing happens.
 Replacing a populated ψ with a symlink orphans everything inside it. Fetch the caretaker
 first so a stale vault is not merged over newer content.
 
-The vault mirrors the origin repo's own `owner/name`, **always lowercased**, so the path
-reads back as the repo it came from:
+Every linked repo lives under **`ψ/family/<host>/<owner>/<repo>`**, always lowercased.
+Below `family/` the path is the ghq tree exactly, so it reads the same in both places:
 
 ```text
-neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli/
-                └─ owner ────┘ └─ repo ─────────────┘
+/opt/Code/github.com/soul-brews-studio/arra-oracle-skills-cli             ← the code (ghq)
+neo-oracle/ψ/family/github.com/soul-brews-studio/arra-oracle-skills-cli   ← its memory
+             └ family ┘└─ host ──┘└─ owner ───────┘└─ repo ────────────┘
 ```
 
-Lowercase is not cosmetic: `Soul-Brews-Studio` and `soul-brews-studio` are the same repo,
-but on a case-sensitive volume they become two vaults, and the split is invisible until
-memory goes missing.
+**`family/` keeps the oracle's kin clear of its own organs.** Without it an owner directory
+lands beside `memory/`, `inbox/`, `teams/` — and an org literally named `teams` collides
+with the oracle's own. One directory to list to see everything an oracle tends.
+
+**The host is derived, never assumed.** `gitlab.com`, `codeberg.org`, or a self-hosted
+`git.example.com` each get their own subtree, so two repos sharing an `owner/name` on
+different hosts never collide.
+
+Lowercase is not cosmetic either: `Soul-Brews-Studio` and `soul-brews-studio` are the same
+repo, but on a case-sensitive volume they become two vaults, and the split is invisible
+until memory goes missing.
 
 ```bash
 git -C "$CARETAKER" fetch --quiet 2>/dev/null
 
-# owner/name from the origin remote, lowercased — never from the directory name,
-# which may have been renamed locally.
-SLUG=$(git -C "$REPO" remote get-url origin 2>/dev/null \
-       | sed -E 's#(git@|https://)[^:/]+[:/]##; s#\.git$##' \
+# host/owner/repo from the origin remote, lowercased — never from the directory
+# name, which may have been renamed locally. Handles https, ssh, scp-style,
+# git://, an embedded user, a custom port, and gitlab subgroups.
+URL=$(git -C "$REPO" remote get-url origin 2>/dev/null)
+[ -n "$URL" ] || { echo "✗ no origin remote — cannot derive the vault path"; exit 1; }
+SLUG=$(printf '%s' "$URL" | sed -E \
+        -e 's#^(ssh|git\+ssh|https?|git)://##' \
+        -e 's#^[^@/]+@##'      \
+        -e 's#:[0-9]+/#/#'     \
+        -e 's#:#/#'            \
+        -e 's#\.git$##'        \
+        -e 's#/+$##'           \
        | tr '[:upper:]' '[:lower:]')
-[ -n "$SLUG" ] || { echo "✗ no origin remote — cannot derive the vault path"; exit 1; }
 
-NS="$CARETAKER/ψ/$SLUG"                       # ψ/<owner>/<repo>, nested, lowercase
+NS="$CARETAKER/ψ/family/$SLUG"   # ψ/family/<host>/<owner>/<repo>, lowercase
 rsync -a --dry-run --itemize-changes "$REPO/ψ/" "$NS/"
 ```
+
+Verified against every remote shape:
+
+| remote | slug |
+|---|---|
+| `https://github.com/Soul-Brews-Studio/arra-oracle-skills-cli` | `github.com/soul-brews-studio/arra-oracle-skills-cli` |
+| `git@github.com:laris-co/Neo-Oracle.git` | `github.com/laris-co/neo-oracle` |
+| `git@gitlab.com:MyGroup/sub/proj.git` | `gitlab.com/mygroup/sub/proj` |
+| `ssh://git@git.example.com:2222/team/thing.git` | `git.example.com/team/thing` |
+| `git://codeberg.org/Owner/Proj.git` | `codeberg.org/owner/proj` |
 
 Print the itemized list and the file count, then **wait for approval**. Only then re-run
 without `--dry-run`. Never `--delete`.
@@ -352,8 +378,8 @@ it went, and what the human still owns.
 ```text
   ψ linked · arra-oracle-skills-cli → neo
 
-  moved         17 files → neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli
-  symlink       ../../laris-co/neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli
+  moved         17 files → neo-oracle/ψ/family/github.com/soul-brews-studio/arra-oracle-skills-cli
+  symlink       ../../laris-co/neo-oracle/ψ/family/github.com/soul-brews-studio/arra-oracle-skills-cli
   ignored       .gitignore:9:ψ  (bare rule — ψ/ no longer matches a symlink)
   caretaker     neo
   parked        /var/.../psi-replaced-…-20260820-181051
