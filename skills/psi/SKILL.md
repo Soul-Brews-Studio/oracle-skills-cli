@@ -154,15 +154,45 @@ Emit exactly one, first match wins — most dangerous first:
 A stale `newest` date is worth naming even on a ✅ — a vault whose newest file is weeks old
 is why a later `/recap` will hand back a stale handoff as if it were current.
 
-## `link`
+## `link` — a six-phase ritual
 
-### 1. Refuse bad ground
+Run it **step by step**, not as one script. Announce each phase as you enter it, do that
+phase's work, show the result, then continue. Two phases are hard **gates**: stop and wait
+for a human answer. After the phases, run the checklist, then print the report.
 
-Stop, with the reason, when the repo is itself an oracle (ψ tracked with real content),
-when the caretaker has no ψ, or when ψ already points at that same caretaker (say
-`already linked`, exit).
+```text
+  Phase 1/6 · Survey            what ψ is now
+  Phase 2/6 · Caretaker         ← GATE: the human names the oracle
+  Phase 3/6 · Preview           ← GATE: the human approves the dry run
+  Phase 4/6 · Absorb            copy + count both sides
+  Phase 5/6 · Link              park → symlink → verify through it
+  Phase 6/6 · Seal              ignore rules + caretaker record
+```
 
-### 2. Absorb — dry run first, always
+Never run a later phase's commands while announcing an earlier one. A gate that is
+"announced and then passed in the same breath" is not a gate.
+
+### Phase 1/6 · Survey — refuse bad ground
+
+Run `check` first and show it. Then stop, with the reason, when:
+
+- the repo is itself an oracle (ψ tracked with real content),
+- ψ already points at that same caretaker → say `already linked`, exit 0,
+- there is no origin remote (the vault path cannot be derived).
+
+### Phase 2/6 · Caretaker — GATE
+
+Show `maw ls`, then **ask which oracle should take care of this repo's memory and wait for
+the answer.** Resolve it with `maw locate`, and confirm the caretaker's `ψ/: present` plus
+that it is not behind its remote. Never pick a name yourself, never carry one over from a
+previous run.
+
+### Phase 3/6 · Preview — GATE
+
+Show the itemized dry run and the counts, then **wait for approval.** Dry-run output is not
+consent. If the human says nothing, nothing happens.
+
+### Phase 4/6 · Absorb — dry run first, always
 
 Replacing a populated ψ with a symlink orphans everything inside it. Fetch the caretaker
 first so a stale vault is not merged over newer content.
@@ -200,7 +230,7 @@ The absorb and the removal are never the same command, and never the same step. 
 sequences them: **copy → count both sides → park the original → link → verify through the
 link**, with an automatic rollback if the last check fails.
 
-### 3. Link — copy, verify, park, link, verify again
+### Phase 5/6 · Link — copy, verify, park, link, verify again
 
 **Order is the safety.** The source is never removed; it is *parked* outside the repo and
 only after the copy has been counted. If the link fails to resolve, roll back automatically.
@@ -250,7 +280,7 @@ in both, so parking looks redundant — until 3d writes a link that silently res
 somewhere unexpected. Parking makes 3e's rollback possible. Announce the park path; let the
 human delete it. Nothing deleted.
 
-### 4. Ignore it, and prove it
+### Phase 6/6 · Seal — ignore it, prove it, record the caretaker
 
 ```bash
 for pat in 'ψ' 'ψ/'; do
@@ -268,7 +298,7 @@ git -C "$REPO" check-ignore -v ψ || echo "⚠️  ψ is NOT ignored — do not 
 Verification is part of the step. If `check-ignore` prints nothing, the link is not safe —
 report that instead of declaring success.
 
-### 5. Record the caretaker
+#### Record the caretaker
 
 ```bash
 mkdir -p "$REPO/.claude"
@@ -280,6 +310,60 @@ rg -qx '.claude/PSI_CARETAKER' "$REPO/.gitignore" 2>/dev/null \
 
 Machine-local, ignored like the link. `check` reads it to name the caretaker without asking
 again.
+
+### Checklist — run it, show it, and let it fail loudly
+
+After phase 6, verify the outcome. Every line re-runs a real command; nothing is asserted
+from memory of what the phases *intended* to do. Print it. Unlike the retro checklist in
+`/rrr`, this one is **shown** — it is the evidence that a data move succeeded.
+
+```bash
+C='  %-2s %-34s%s\n'   # format in a variable — no helper, no positional params
+
+# 1 counts match on both sides
+SRC_OK=$([ "${SRC_N:-0}" -eq "$DST_N" ] && echo ✓ || echo ✗)
+printf "$C" "$SRC_OK" "files copied"        "$DST_N/$SRC_N"
+# 2 reachable THROUGH the link, not just present in the vault
+printf "$C" "$([ "${THRU:-0}" -ge "${SRC_N:-0}" ] && echo ✓ || echo ✗)" "reachable through ψ" "$THRU"
+# 3 the link resolves
+printf "$C" "$([ -e "$REPO/ψ/" ] && echo ✓ || echo ✗)" "link resolves"     "$(readlink -f "$REPO/ψ")"
+# 4 relative, not absolute
+case "$(readlink "$REPO/ψ")" in /*) A=✗;; *) A=✓;; esac
+printf "$C" "$A" "relative target"          "$(readlink "$REPO/ψ")"
+# 5 lowercase, nested owner/repo
+printf "$C" "$([ "$SLUG" = "$(echo "$SLUG" | tr '[:upper:]' '[:lower:]')" ] && echo ✓ || echo ✗)" "vault path lowercase" "ψ/$SLUG"
+# 6 git cannot see it
+printf "$C" "$(git -C "$REPO" check-ignore -q ψ && echo ✓ || echo ✗)" "ignored by git" "$(git -C "$REPO" check-ignore -v ψ | cut -f1)"
+# 7 the link itself is not committed
+printf "$C" "$(git -C "$REPO" ls-files -s ψ | rg -q '^120000' && echo ✗ || echo ✓)" "symlink not committed" "$(git -C "$REPO" ls-files ψ | wc -l | tr -d ' ') tracked"
+# 8 the original still exists somewhere
+printf "$C" "$([ -d "$PARK" ] && echo ✓ || echo ✗)" "original parked"      "$PARK"
+```
+
+Any `✗` means **stop and say so** — do not print a success report over a failed checklist.
+Items 2 and 8 are the ones that matter most: 2 proves the brain is actually reachable, 8
+proves nothing was destroyed.
+
+### Report
+
+Close with a short report in the same borderless style as `check`. State what moved, where
+it went, and what the human still owns.
+
+```text
+  ψ linked · arra-oracle-skills-cli → neo
+
+  moved         17 files → neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli
+  symlink       ../../laris-co/neo-oracle/ψ/soul-brews-studio/arra-oracle-skills-cli
+  ignored       .gitignore:9:ψ  (bare rule — ψ/ no longer matches a symlink)
+  caretaker     neo
+  parked        /var/.../psi-replaced-…-20260820-181051
+
+  yours to do   delete the parked copy once satisfied
+                commit the .gitignore change
+```
+
+Report only what the checklist verified. If an item failed, the report says what failed and
+what state the repo is in — never a clean summary over a broken outcome.
 
 ## `heal`
 
