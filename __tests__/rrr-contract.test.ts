@@ -16,7 +16,7 @@ describe("rrr execution contract", () => {
     expect(hint).not.toContain("--detail");
     expect(hint).not.toContain("--teammate");
     expect(skill).toContain("`--fg`, `--bg`, and `--combo` are mutually exclusive");
-    expect(skill).toContain("When none is supplied, use `--fg`");
+    expect(skill).toContain("When none is supplied, use the default foreground");
   });
 
   it("makes foreground current-session-only without persisted mining or hidden agents", () => {
@@ -27,8 +27,7 @@ describe("rrr execution contract", () => {
 
   it("defines background as asynchronous persisted-session mining", () => {
     expect(skill).toContain("Mine the persisted host session");
-    expect(skill).toContain("write the retrospective asynchronously");
-    expect(skill).toContain("Persisted session mining happens only in");
+    expect(skill).toContain("write asynchronously");
   });
 
   it("defines combo as live-session output followed by persisted enrichment", () => {
@@ -86,5 +85,23 @@ describe("rrr execution contract", () => {
     expect(skill).toContain("If background execution is unavailable");
     expect(skill).toContain("`--bg` falls back to `--fg`");
     expect(hosts).toContain("All fallbacks are explicit");
+  });
+
+  it("defaults to a cheap session clock rather than a background agent", () => {
+    expect(skill).toContain("scripts/session-clock.py");
+    expect(skill).toContain("message bodies are never parsed");
+    // combo must NOT be the default
+    expect(skill).not.toContain("`--combo`, default");
+    expect(skill).toContain("no background agent");
+  });
+
+  it("bans estimated timestamps, tilde or not", () => {
+    expect(skill).toContain("A tilde does not license a guess");
+    expect(skill).toContain("Never interpolate a row time between two beats");
+  });
+
+  it("offers a light mode that drops reflection but keeps the timeline", () => {
+    expect(skill).toContain("#### Light (`--light`)");
+    expect(skill).toContain("mode: light");
   });
 });
