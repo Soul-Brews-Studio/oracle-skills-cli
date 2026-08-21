@@ -31,7 +31,7 @@ clock. `--light` composes with the foreground path.
 
 | Mode | Required behavior |
 |---|---|
-| *(none)* | **Default.** Synchronous. Real times from `scripts/session-clock.py` plus git commit times. No background agent, no transcript bodies read. |
+| *(none)* | **Default.** Synchronous. Real times from the host's session clock (see [HOSTS.md](HOSTS.md)) plus git commit times. No background agent; timestamps only, never conversation content. |
 | `--light` | The default path with only Timeline, Summary, Lesson, and Metrics. For quick checkpoints; skips Diary, Feedback, Blockers, Self-Audit. |
 | `--combo` | Foreground artifact now, then background mining that enriches the same file with fuller evidence. Mark enrichment pending until it completes. |
 | `--bg` | Mine the persisted host session and write asynchronously. Announce the destination and return without waiting. |
@@ -47,10 +47,14 @@ marked `~`, back-filled from the known end time. They are recognisable by their 
 regularity — `~04:11 ~04:12 ~04:13 …`, or neat five-minute steps — because real session
 timestamps cluster unevenly (four events inside one minute, then nothing for twenty).
 
-`scripts/session-clock.py` closes the gap without either cost. It substring-scans the
-transcript for `timestamp` fields **only** — message bodies are never parsed, so a 3MB
-transcript costs a few hundred bytes of context and about 40ms. That is why this is the
-default rather than `--combo`: no background agent, no token burn, real times.
+A **session clock** closes the gap without either cost. The contract asks only for
+observed times — read timestamps, not content — so it stays cheap on any host. Claude
+Code's reference implementation scans a 16MB transcript in ~50ms for a few hundred bytes of
+context. That is why this is the default rather than `--combo`: no background agent, no
+token burn, real times.
+
+Each harness resolves the contract its own way. The skill states what it needs; it does not
+dictate a mechanism that only one host could satisfy.
 
 The ban stands: never emit an estimated timestamp, with or without a tilde. If the clock
 reports `evidence: none` and no commits exist, say `unknown` — do not decorate the gap.
@@ -119,21 +123,27 @@ git -C "$ORACLE_ROOT" log --since='18 hours ago' \
   --date=format-local:'%H:%M' --format='%ad — %s (%h)' --reverse
 ```
 
-**Session clock — the default path's primary time source.** Timestamps only; message
-bodies are never read, so this is cheap enough to run every time (~40ms on a 3MB
-transcript):
+**Session clock — the default path's primary time source.** Ask the host for observed
+times. *How* is the adapter's business; **what** is fixed by the SessionClock contract in
+[HOSTS.md](HOSTS.md):
 
-```bash
-python3 "$(dirname "$0")/scripts/session-clock.py"        # current segment
-python3 "$(dirname "$0")/scripts/session-clock.py" --all  # every segment today
-```
+- [ ] times **observed**, never estimated or interpolated
+- [ ] attributable to this session and repository, or `evidence: none`
+- [ ] gap-aware, so an idle overnight is not counted as session time
+- [ ] **beats** — the minutes that actually had activity — not a start/end span
+- [ ] cheap: read timestamps, not content; if it would load the conversation into
+      context, return `none` instead
+- [ ] degrades honestly: no source → `evidence: none`, and that is a correct answer
 
-It splits on idle gaps, so an overnight pause is not reported as a 19-hour session, and
-prints activity **beats** — the minutes that actually had events. Beats are real evidence:
-use them for row times, never interpolate between them. On `evidence: none` there is no
-clock for this host — fall back to commit times, then to untimed bullets.
+Resolve it the way your harness allows — Claude Code has a reference implementation
+(`scripts/session-clock.py`, ~50ms on a 16MB transcript); Codex should use its own rollout
+or session metadata; an unknown host returns `none`. Do not run one host's implementation
+against another host's layout on the assumption that it matches.
 
-Skip this command entirely under `--fg`.
+Place rows on beats. Never interpolate a time between two beats. On `evidence: none`, fall
+back to commit times, then to untimed ordered bullets.
+
+Skip the session clock entirely under `--fg`.
 
 Repository evidence is allowed in every mode. Persisted **agent-session** evidence is
 for `--bg` and `--combo` only. Commit timestamps are repository evidence, not session
@@ -229,7 +239,7 @@ required reflection sections, and must still pass the silent validation gate.
 2. All times render in **GMT+7 (Asia/Bangkok)** — the `TZ` exported in step 1 covers
    `date` and `git --date=format-local` alike. Label rows plainly as `HH:MM` (GMT+7).
 3. Prefer verified times from these sources, in order: **session clock beats**
-   (`scripts/session-clock.py`, default path) → normalized session evidence
+   (host adapter, default path) → normalized session evidence
    (`--bg`/`--combo`) → git commit timestamps (any mode) → the current clock for the
    closing entry. Never interpolate a row time between two beats.
 4. Same-day sessions show the date once and `HH:MM` in rows.

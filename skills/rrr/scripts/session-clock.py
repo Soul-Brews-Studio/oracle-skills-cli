@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Real session timestamps, cheaply — for /rrr timelines.
+"""Session clock — the Claude Code adapter. One implementation, not the mechanism.
+
+Satisfies the SessionClock contract in ../HOSTS.md for hosts that store
+newline-delimited transcripts with ISO `"timestamp":"..."` fields. Codex and other
+harnesses should resolve the same contract from whatever they actually expose
+(rollout metadata, a session API) rather than running this against a layout it was
+not written for. `evidence: none` is always a valid answer.
 
 Reads ONLY the `timestamp` field out of the host's session transcript. Message
 bodies are never parsed or returned, so a 3MB transcript costs a few hundred

@@ -88,8 +88,8 @@ describe("rrr execution contract", () => {
   });
 
   it("defaults to a cheap session clock rather than a background agent", () => {
-    expect(skill).toContain("scripts/session-clock.py");
-    expect(skill).toContain("message bodies are never parsed");
+    expect(skill).toContain("session clock");
+    expect(skill).toContain("timestamps only, never conversation content");
     // combo must NOT be the default
     expect(skill).not.toContain("`--combo`, default");
     expect(skill).toContain("no background agent");
@@ -103,5 +103,16 @@ describe("rrr execution contract", () => {
   it("offers a light mode that drops reflection but keeps the timeline", () => {
     expect(skill).toContain("#### Light (`--light`)");
     expect(skill).toContain("mode: light");
+  });
+
+  it("states the session clock as a contract, leaving the mechanism to each host", () => {
+    // the shared flow must not carry one host's paths or schema
+    expect(skill).not.toContain(".claude/projects");
+    expect(skill).not.toContain(".jsonl");
+    expect(skill).toContain("Resolve it the way your harness allows");
+    // the contract + per-host how-to live in HOSTS.md
+    expect(hosts).toContain("SessionClock");
+    expect(hosts).toContain("Session clock reference implementation");
+    expect(hosts).toContain("evidence: none");
   });
 });
