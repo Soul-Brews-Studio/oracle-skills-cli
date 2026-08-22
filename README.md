@@ -52,24 +52,22 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
 | 1 | **about-oracle** | skill + subagent | What is Oracle |
-| 2 | **learn** | skill + subagent | Explore a codebase with parallel Haiku… |
-| - |  |  |  |
-| 3 | **oracle-family-scan** | skill + code | Oracle Family Registry |
-| 4 | **project** | skill + code | Clone and track external repos |
-| 5 | **recap** | skill + code | Session orientation and awareness |
-| - |  |  |  |
-| 6 | **awaken** | skill | Guided Oracle birth and awakening ritual |
-| 7 | **bampenpien** | skill | บำเพ็ญเพียร |
-| 8 | **bud** | skill | Create a new oracle via maw bud |
-| 9 | **create-shortcut** | skill | Create local skills as shortcuts |
-| 10 | **dig** | skill | Mine Claude Code sessions |
-| 11 | **forward** | skill | Hand off the current session to the next one |
-| 12 | **go** | skill | Manage Oracle skills |
-| 13 | **incubate** | skill | Clone or create repos for active development |
-| 14 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
-| 15 | **oracle-prism** | skill | Multi-perspective analysis |
-| 16 | **philosophy** | skill | Display Oracle philosophy |
-| 17 | **psi** | skill | Attach a code repo's ψ vault to a caretaker… |
+| 2 | **awaken** | skill | Guided Oracle birth and awakening ritual |
+| 3 | **bampenpien** | skill | บำเพ็ญเพียร |
+| 4 | **bud** | skill | Create a new oracle via maw bud |
+| 5 | **create-shortcut** | skill | Create local skills as shortcuts |
+| 6 | **dig** | skill | Mine Claude Code sessions |
+| 7 | **forward** | skill | Hand off the current session to the next one |
+| 8 | **go** | skill | Manage Oracle skills |
+| 9 | **incubate** | skill | Clone or create repos for active development |
+| 10 | **learn** | skill + subagent | Explore a codebase with parallel Haiku… |
+| 11 | **oracle-cheatsheet** | skill | Generate a copy-paste cheat sheet from the… |
+| 12 | **oracle-family-scan** | skill + code | Oracle Family Registry |
+| 13 | **oracle-prism** | skill | Multi-perspective analysis |
+| 14 | **philosophy** | skill | Display Oracle philosophy |
+| 15 | **project** | skill + code | Clone and track external repos |
+| 16 | **psi** | skill | Attach a code repo's ψ vault to a caretaker… |
+| 17 | **recap** | skill + code | Session orientation and awareness |
 | 18 | **resonance** | skill | Capture a resonance moment |
 | 19 | **rrr** | skill | Create a session retrospective with an AI… |
 | 20 | **trace** | skill | Find projects, code, and knowledge across… |

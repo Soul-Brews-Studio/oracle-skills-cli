@@ -133,36 +133,23 @@ async function generateTable() {
     if (skill) skills.push(skill);
   }
   
-  // Group by type priority: skill + subagent > skill + code > skill
-  const subagent = skills.filter(s => s.type === 'skill + subagent').sort((a, b) => a.name.localeCompare(b.name));
-  const withCode = skills.filter(s => s.type === 'skill + code').sort((a, b) => a.name.localeCompare(b.name));
-  const skill = skills.filter(s => s.type === 'skill').sort((a, b) => a.name.localeCompare(b.name));
-  
-  // Generate table
+  // One flat A→Z list. This used to be three type buckets (subagent / code /
+  // plain) separated by blank `| - |` spacer rows, which meant you could not
+  // find a skill by name without knowing its type first — and the spacers broke
+  // the row numbering into meaningless runs. Type is still a column, so nothing
+  // is lost; it is just no longer the primary axis.
+  skills.sort((a, b) => a.name.localeCompare(b.name));
+
   const lines: string[] = [
     '| # | Skill | Type | Description |',
     '|---|-------|------|-------------|',
   ];
-  
+
   let num = 1;
-  
-  // Subagent group
-  for (const s of subagent) {
+  for (const s of skills) {
     lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
   }
 
-  // Skill + code group
-  lines.push('| - |  |  |  |');
-  for (const s of withCode) {
-    lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
-  }
-
-  // Skill group
-  lines.push('| - |  |  |  |');
-  for (const s of skill) {
-    lines.push(`| ${num++} | **${s.name}** | ${s.type} | ${s.description} |`);
-  }
-  
   console.log(lines.join('\n'));
 }
 
