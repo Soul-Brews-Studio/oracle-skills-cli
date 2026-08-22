@@ -125,11 +125,16 @@ async function updateReadmeTable() {
     const zombieTable = await generateZombieTable();
     const zombieCount = zombieTable.split('\n').filter(l => l.startsWith('|')).length;
 
+    // Collapse the graveyard, not the shelf. This table is the longest in the
+    // README and the least useful to a newcomer — the inverse of the skills
+    // table above, which renders open. A blank line after <summary> is required
+    // for GitHub to render the table inside the collapsed block.
     const secretSection = [
       '',
       `## Zombie Skills`,
       '',
-      `${zombieCount} skills excluded from all profiles. Install by name:`,
+      '<details>',
+      `<summary>🧟 <strong>${zombieCount} zombie skills</strong> — excluded from all profiles, installable by name</summary>`,
       '',
       '```bash',
       'bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>',
@@ -138,6 +143,8 @@ async function updateReadmeTable() {
       '| Skill | What |',
       '|-------|------|',
       zombieTable,
+      '',
+      '</details>',
       '',
     ].join('\n');
 

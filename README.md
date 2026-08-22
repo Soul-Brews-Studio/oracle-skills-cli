@@ -109,7 +109,8 @@ about                 # version + status
 
 ## Zombie Skills
 
-39 skills excluded from all profiles. Install by name:
+<details>
+<summary>🧟 <strong>39 zombie skills</strong> — excluded from all profiles, installable by name</summary>
 
 ```bash
 bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>
@@ -156,6 +157,8 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | `/contacts` | Manage Oracle contacts — add, list, remove agents with th... |
 | `/mailbox` | Persistent agent mailbox — store findings, standing order... |
 | `/inbox` | Read and write to Oracle inbox — notes, tasks, messages, ... |
+
+</details>
 <!-- secret-skills:end -->
 
 ## Origin
