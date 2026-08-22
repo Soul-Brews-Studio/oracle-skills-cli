@@ -77,19 +77,17 @@ async function updateReadmeTable() {
   // --- Count total skills (used in both summary + profile table) ---
   const skillCount = (table.match(/^\| \d+/gm) || []).length;
 
-  // Wrap the long skills table in <details> so it collapses by default.
-  // GitHub Markdown requires a blank line between <summary> and the table
-  // for the table to render correctly inside the collapsed block.
-  const collapsibleTable = [
-    '<details>',
-    `<summary>📚 <strong>${skillCount} skills installed</strong> — click to expand</summary>`,
+  // Render the skills table open. It was collapsed back when the shelf carried 32
+  // skills; the 2026-07-25 curation cut it to ~22, and the graveyard table further
+  // down (39 rows) sits expanded — so collapsing the shorter, more useful one hid
+  // the thing the README exists to advertise.
+  const skillsSection = [
+    `📚 **${skillCount} skills**`,
     '',
     table,
-    '',
-    '</details>',
   ].join('\n');
 
-  readme = `${before}\n\n${collapsibleTable}\n\n${after}`;
+  readme = `${before}\n\n${skillsSection}\n\n${after}`;
 
   // --- Update profiles section ---
   const profileStart = readme.indexOf('<!-- profiles:start -->');

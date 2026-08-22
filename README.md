@@ -17,14 +17,15 @@
 bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full
 ```
 
-`-p full` gives you all 32 stable skills. Everything else is a flag on that same command.
+`-p full` gives you every stable skill — see the Profiles table below for the current count. Everything else is a flag on that same command.
 
 <details>
 <summary>Flags, other agents, updating</summary>
 
 | want | add |
 |---|---|
-| a smaller set | `-p standard` (20) · `-p minimal` (7) · `-p lab` (+ experimental) |
+| a smaller set | `-p standard` (20) · `-p minimal` (7) |
+| experimental too | `-p lab` — same as `full` whenever nothing is currently flagged experimental |
 | a few extra skills | `-s recap rrr trace` — added **on top of** the profile |
 | a specific agent | `--agent codex` · `cursor` · `opencode` · `gemini-cli` · `claude-code` |
 | several at once | `--agent claude-code codex opencode` |
@@ -46,8 +47,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 
 <!-- skills:start -->
 
-<details>
-<summary>📚 <strong>22 skills installed</strong> — click to expand</summary>
+📚 **22 skills**
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -75,8 +75,6 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | 20 | **trace** | skill | Find projects, code, and knowledge across… |
 | 21 | **where-we-are** | skill | Session awareness |
 | 22 | **who-are-you** | skill | Know ourselves |
-
-</details>
 
 <!-- skills:end -->
 
