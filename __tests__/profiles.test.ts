@@ -64,8 +64,10 @@ describe("profiles", () => {
     expect(LAB_SKILLS).toHaveLength(3);
   });
 
-  it("ZOMBIE_SKILLS has 39 archived candidates (40 minus worktree — Claude Code has native worktrees)", () => {
-    expect(ZOMBIE_SKILLS).toHaveLength(39);
+  it("ZOMBIE_SKILLS is empty — the 39 moved to arra-oracle-skills-archive 2026-08-22", () => {
+    // Kept as a constant (not deleted) so the tier stays expressible if a skill
+    // is retired in place again. src/skills/.archive/MOVED.md is the breadcrumb.
+    expect(ZOMBIE_SKILLS).toHaveLength(0);
   });
 
   it("labOnly matches LAB_SKILLS", () => {
@@ -143,12 +145,19 @@ describe("resolveProfile", () => {
     }
   });
 
-  it("lab returns all minus zombies", () => {
-    const result = resolveProfile("lab", ALL_SKILLS, [], ZOMBIE_LIST)!;
+  it("lab excludes whatever zombie list it is given", () => {
+    // Uses a SYNTHETIC zombie list, not ZOMBIE_SKILLS. Since the archive moved out
+    // (2026-08-22) the real constant is empty, and passing it here made this test
+    // vacuous — resolveProfile returned null (no exclusions) and the loop body
+    // never ran. Testing the resolver instead of the current inventory keeps the
+    // exclusion logic covered no matter how many zombies exist today.
+    const synthetic = [ALL_SKILLS[0], ALL_SKILLS[1]];
+    const result = resolveProfile("lab", ALL_SKILLS, [], synthetic)!;
     expect(result).not.toBeNull();
-    for (const name of ZOMBIE_LIST) {
+    for (const name of synthetic) {
       expect(result).not.toContain(name);
     }
+    expect(result.length).toBe(ALL_SKILLS.length - synthetic.length);
   });
 
   it("lab returns null (all skills) when no secrets/zombies — lites killed, no exclusions", () => {

@@ -49,19 +49,27 @@ function activeSkillNames(): string[] {
 }
 
 describe("archive integrity (real discoverSkills)", () => {
-  it("every skill under .archive/ is flagged zombie by discoverSkills", async () => {
-    const archived = archivedSkillNames();
-    expect(archived.length).toBeGreaterThan(0); // sanity: archive isn't empty
+  // The archive emptied on 2026-08-22 — all 39 zombies moved to
+  // Soul-Brews-Studio/arra-oracle-skills-archive. The old test asserted that every
+  // archived skill carried the zombie flag; with an empty archive it passed while
+  // proving nothing (`expect([]).toEqual([])`). Replaced with a guard on the thing
+  // that now matters: the breadcrumb, and the invariant that nothing crept back.
+  it("the archive holds only the breadcrumb — no skill directories crept back", () => {
+    expect(archivedSkillNames()).toEqual([]);
+    const moved = join(ARCHIVE_DIR, "MOVED.md");
+    expect(existsSync(moved), "src/skills/.archive/MOVED.md must exist").toBe(true);
+  });
 
-    const skills = await discoverSkills();
-    const zombieFlagged = new Set(
-      skills.filter((s) => s.zombie).map((s) => s.name),
-    );
+  it("the breadcrumb names the repo the skills actually moved to", async () => {
+    const body = await Bun.file(join(ARCHIVE_DIR, "MOVED.md")).text();
+    expect(body).toContain("Soul-Brews-Studio/arra-oracle-skills-archive");
+    // A forwarding address that does not say how to follow it is not a forwarding
+    // address — this is the "archive the body, drop the chain" anti-pattern.
+    expect(body).toMatch(/git clone|install/i);
+  });
 
-    const unflagged = archived.filter((name) => !zombieFlagged.has(name));
-    // Any archived skill missing the frontmatter flag would leak into full/lab
-    // install because the compiled VFS carries no .archive/ path signal.
-    expect(unflagged).toEqual([]);
+  it("ZOMBIE_SKILLS is empty now that the tier has no members on disk", () => {
+    expect([...ZOMBIE_SKILLS]).toEqual([]);
   });
 
   it("no archived skill leaks into the full or lab install set", async () => {

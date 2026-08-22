@@ -67,47 +67,21 @@ export const LAB_SKILLS = [
  *  Lites moved to zombie 2026-05-14. See ZOMBIE_SKILLS for forward-lite etc. */
 export const MINIMAL_ONLY_SKILLS = [] as const;
 
-/** Zombie skills — internal development candidates from arra-symbiosis-skills.
- *  Excluded from ALL profiles. Install by name only: `arra install -s workon`
- *  These are dormant — available for development, not for users.
+/** Zombie skills — MOVED OUT 2026-08-22.
  *
- *  Storage: each zombie lives under `src/skills/.archive/<name>/SKILL.md`
- *  (moved out of the active skill listing for cognitive + visual cleanup).
- *  The installer + VFS generator know to also scan `.archive/` so the `-s`
- *  opt-in path keeps working unchanged. Nothing-is-Deleted preserved. */
-export const ZOMBIE_SKILLS = [
-  // Original 13 (from arra-symbiosis-skills)
-  'alpha-feature', 'birth', 'deep-research', 'gemini', 'handover',
-  'list-issues-pr-pulse', 'mine', 'new-issue', 'oracle-manage',
-  'speak', 'what-we-done', 'whats-next', 'workon',
-  // 2026-05-13 cull (#327): 13 zombies based on usage audit (3,685 sessions).
-  // Kept active by explicit user request: bampenpien (standard), feel (lab),
-  // fyi (lab, imported from oracle-proof-of-concept-skills), resonance (implicit-full).
-  'i-believed', 'work-with', 'morpheus',
-  'retrospective', 'skills-list',
-  'fleet', 'machines', 'warp', 'release',
-  'wormhole', 'harden', 'vault',
-  // 2026-05-14 (#333 content correction): original simple /dream body
-  // preserved as zombie after /dream absorbed the evolved morpheus body.
-  'dream-original',
-  // 2026-05-14: replaced by /go update verb — no longer needs its own skill slot.
-  'oracle-soul-sync-update',
-  // 2026-05-14: lites killed — 900 chars savings wasn't worth 4 PRs of bugs.
-  'forward-lite', 'recap-lite', 'rrr-lite',
-  // 2026-07-05: infra-specific (remote oracle-node provisioning) — too narrow
-  // for the general skill set. Proven in the field (arra → natz-ai-01) but
-  // opt-in only: `arra install -s oracle-up`.
-  'oracle-up',
-  // 2026-07-06 zombie round 2 — usage census over 15,895 sessions (Nat approved):
-  // schedule (5 uses, stale), standup (1 use; /recap covers it), xray (0), feel (0),
-  // and the messaging consolidation — hey (9; superseded by `maw hey` CLI),
-  // contacts (19), mailbox (1), inbox (1) all fold into /talk-to (41 uses).
-  'schedule', 'standup', 'xray', 'feel',
-  'hey', 'contacts', 'mailbox', 'inbox',
-  // 2026-07-25: philosophy un-zombied by Nat — the 5 Principles + Rule 6 are
-  // what an Oracle IS, so they belong on the public shelf even at low call
-  // volume. Usage is the wrong metric for a skill people read once and absorb.
-] as const;
+ *  All 39 archived skills now live in their own repository:
+ *      https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive
+ *
+ *  `src/skills/.archive/MOVED.md` is the breadcrumb left behind, and their full
+ *  history remains in this repo's git log. Nothing was deleted.
+ *
+ *  This constant is now EMPTY on purpose. `arra install -s <zombie-name>` no
+ *  longer resolves — those skills are not bundled in the VFS any more. That path
+ *  was removed deliberately; see the breadcrumb for how to install one now.
+ *
+ *  Keep the constant (rather than deleting it) so the zombie tier stays a real
+ *  concept the code can express if a skill is ever retired again. */
+export const ZOMBIE_SKILLS = [] as const;
 
 /** Return the source directory for a skill by name under a given root —
  *  `.archive/<name>` for zombies, plain `<root>/<name>` for everything else.

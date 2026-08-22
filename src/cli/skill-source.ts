@@ -87,7 +87,8 @@ export function getPublicSkillsDir(): string {
   return join(findPackageRoot(), 'skills');
 }
 
-/** Vault: src/skills/ — secrets, .archive zombies, .template. */
+/** Vault: src/skills/ — secrets, .template. (.archive holds only the
+ *  MOVED.md breadcrumb since 2026-08-22; zombies live in their own repo.) */
 function getVaultSkillsDir(): string {
   return join(findPackageRoot(), 'src', 'skills');
 }
@@ -95,8 +96,11 @@ function getVaultSkillsDir(): string {
 /**
  * Resolve a skill name to its on-disk directory.
  * Order: public shelf (`skills/<name>`) → vault (`src/skills/<name>`) →
- * vault archive (`src/skills/.archive/<name>`). The archive fallback keeps
- * zombie skills installable via `-s <name>`.
+ * vault archive (`src/skills/.archive/<name>`).
+ *
+ * The archive fallback is retained but finds nothing: the 39 zombies moved to
+ * Soul-Brews-Studio/arra-oracle-skills-archive on 2026-08-22, leaving only a
+ * MOVED.md breadcrumb. Kept so a future retirement works without re-plumbing.
  */
 function resolveSkillDir(skillName: string): string {
   const shelf = join(getPublicSkillsDir(), skillName);
@@ -139,8 +143,9 @@ export async function discoverSkills(): Promise<Skill[]> {
 
   // Filesystem mode — dual root.
   // Public shelf (skills/): curated skills, every channel serves these.
-  // Vault (src/skills/): secret skills; .archive/ zombies stay discoverable
-  // by name for the `-s` opt-in path but are excluded from listings/profiles.
+  // Vault (src/skills/): secret skills. .archive/ is scanned but empty since
+  // 2026-08-22 — zombies moved to arra-oracle-skills-archive. The scan stays so
+  // a future retirement needs no re-plumbing.
   const listDirs = (root: string) =>
     existsSync(root)
       ? readdirSync(root, { withFileTypes: true })

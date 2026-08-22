@@ -60,7 +60,8 @@ describe('installer', () => {
     const skills = await discoverSkills();
     
     expect(skills.length).toBeGreaterThan(0);
-    expect(skills.some(s => s.name === 'retrospective')).toBe(true);
+    // 'retrospective' was a zombie; it left with the archive 2026-08-22.
+    expect(skills.some(s => s.name === 'rrr')).toBe(true);
     expect(skills.some(s => s.name === 'recap')).toBe(true);
     expect(skills.some(s => s.name === 'trace')).toBe(true);
   });

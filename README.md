@@ -107,56 +107,20 @@ about                 # version + status
 
 ## Zombie Skills
 
-<details>
-<summary>🧟 <strong>39 zombie skills</strong> — excluded from all profiles, installable by name</summary>
+39 archived skills — excluded from every profile — now live in their own repository:
+
+**→ https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive**
+
+They were moved out of this repo on 2026-08-22. Nothing was deleted: their full
+history remains in this git log, and `src/skills/.archive/MOVED.md` is the breadcrumb.
 
 ```bash
-bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>
+git clone https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive
+cp -R arra-oracle-skills-archive/skills/<name> ~/.claude/skills/
 ```
 
-| Skill | What |
-|-------|------|
-| `/alpha-feature` | Full skill development pipeline — create, compile, test, ... |
-| `/birth` | Prepare Oracle birth props for a new repo — Issue #1, MCP... |
-| `/deep-research` | Deep Research via Gemini — opens new tab, selects Deep Re... |
-| `/gemini` | Control Gemini browser tab via MQTT WebSocket — chat, tra... |
-| `/handover` | Transfer work to another Oracle — forward + wake + tell i... |
-| `/list-issues-pr-pulse` | Open issues, PRs, and Pulse board in one view. Use when u... |
-| `/mine` | Extract a specific topic from a single session JSONL file... |
-| `/new-issue` | Quick GitHub issue creation. Use when user says "new issu... |
-| `/oracle-manage` | Skill and profile management — prepare tools, switch prof... |
-| `/speak` | Text-to-speech using edge-tts neural voices with macOS sa... |
-| `/what-we-done` | Facts-only progress report — commits, PRs merged, issues ... |
-| `/whats-next` | Smart action suggestions — scan context, rank priorities,... |
-| `/workon` | Work on a GitHub issue with worktree isolation, or resume... |
-| `/i-believed` | Declare belief — looking back or leaping forward. 'I beli... |
-| `/work-with` | Persistent cross-oracle collaboration with synchronic sco... |
-| `/morpheus` | Speculative dreaming — background thinking, pre-computati... |
-| `/retrospective` | Quick session retrospective — summary, lessons, next step... |
-| `/skills-list` | List all Oracle skills with profile tier, type, and scrip... |
-| `/fleet` | Deep fleet census — discover all oracles across all nodes... |
-| `/machines` | Fleet machines — discover nodes from contacts, ping to pr... |
-| `/warp` | Teleport to a remote oracle node via SSH+tmux. Interactiv... |
-| `/release` | Automated release flow — bump version, changelog, tag, pu... |
-| `/wormhole` | Federated query proxy — ask questions across oracle nodes... |
-| `/harden` | Audit Oracle configuration for safety, governance, and ha... |
-| `/vault` | Connect external knowledge bases (Obsidian, Logseq, markd... |
-| `/dream-original` | Cross-repo pattern discovery with parallel agents. Finds ... |
-| `/oracle-soul-sync-update` | Sync Oracle instruments with the family. Check and update... |
-| `/forward-lite` | Lite variant killed 2026-05-14. Use /forward instead. |
-| `/recap-lite` | Lite variant killed 2026-05-14. Use /recap instead. |
-| `/rrr-lite` | Lite variant killed 2026-05-14. Use /rrr instead. |
-| `/oracle-up` | G-SKLL | Bring up a whole oracle node on a remote host — ... |
-| `/schedule` | Query schedule via Oracle API (Drizzle DB). Use when user... |
-| `/standup` | Daily standup check — pending tasks, appointments, recent... |
-| `/xray` | X-ray deep scan — inspect Claude Code auto-memory, instal... |
-| `/feel` | Capture how the system feels — energy, momentum, burnout,... |
-| `/hey` | Talk to another oracle via maw federation. Uses fleet mac... |
-| `/contacts` | Manage Oracle contacts — add, list, remove agents with th... |
-| `/mailbox` | Persistent agent mailbox — store findings, standing order... |
-| `/inbox` | Read and write to Oracle inbox — notes, tasks, messages, ... |
-
-</details>
+`arra install -s <zombie-name>` no longer resolves — those skills are not bundled
+in the CLI any more. That path was removed deliberately, not by accident.
 <!-- secret-skills:end -->
 
 ## Origin

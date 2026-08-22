@@ -13,7 +13,7 @@ import { readdirSync, existsSync, mkdirSync } from 'fs';
 import { join, relative } from 'path';
 
 // Dual root: public shelf (skills/, post-move) + vault (src/skills/ —
-// secrets, .archive zombies). Shelf is tolerated absent pre-move.
+// secrets; .archive is now just a breadcrumb). Shelf tolerated absent pre-move.
 const SHELF_DIR = join(import.meta.dir, '..', 'skills');
 const VAULT_DIR = join(import.meta.dir, '..', 'src', 'skills');
 const OUTPUT_DIR = join(import.meta.dir, '..', 'src', 'cli', 'generated');
@@ -44,8 +44,10 @@ const listDirs = (root: string) =>
 const shelfDirs = listDirs(SHELF_DIR);
 const vaultDirs = listDirs(VAULT_DIR);
 
-// Archived (zombie) skills live in src/skills/.archive/. Include them in the
-// VFS so compiled-binary `install -s <name>` opt-in still works after move.
+// src/skills/.archive/ held zombie skills, bundled so compiled-binary
+// `install -s <name>` worked offline. They moved to
+// Soul-Brews-Studio/arra-oracle-skills-archive on 2026-08-22, so this now
+// resolves to nothing. The scan is kept for a future retirement.
 const archivedDirs = listDirs(join(VAULT_DIR, '.archive'));
 
 const skillDirs = [...shelfDirs, ...vaultDirs, ...archivedDirs].sort((a, b) => a.name.localeCompare(b.name));

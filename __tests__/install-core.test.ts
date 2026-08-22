@@ -29,9 +29,10 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
   const fx = makeInstallFixture("all", { useFlatFiles: true });
   const { skillsDir: SKILLS_DIR, agent: TEST_AGENT } = fx;
 
-  // Lites auto-removed when their full counterpart is also installed (post-install cleanup)
-  // Migration removes deprecated lites (forward-lite, recap-lite, rrr-lite) post-install
-  const DEPRECATED_LITES = new Set(['forward-lite', 'recap-lite', 'rrr-lite']);
+  // Empty since 2026-08-22: the lites moved out with the archive, so nothing is
+  // migrated away post-install any more. Kept as a Set so the filters below still
+  // express the concept if a skill is ever deprecated in place again.
+  const DEPRECATED_LITES = new Set<string>();
 
   beforeAll(() => fx.register());
   afterAll(() => fx.unregister());
@@ -109,7 +110,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
   const fx = makeInstallFixture("specific", { useFlatFiles: true });
   const { skillsDir: SKILLS_DIR, agent: TEST_AGENT } = fx;
 
-  const DEPRECATED_LITES = 3; // forward-lite, recap-lite, rrr-lite migrated away post-install
+  const DEPRECATED_LITES = 0; // lites left the repo 2026-08-22 with the rest of the archive
 
   beforeAll(() => fx.register());
   afterAll(() => fx.unregister());
@@ -264,7 +265,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
   fx.config.skillsDir = "test-skills";
   const { skillsDir: SKILLS_DIR, agent: TEST_AGENT } = fx;
 
-  const DEPRECATED_LITES = 3; // forward-lite, recap-lite, rrr-lite migrated away post-install
+  const DEPRECATED_LITES = 0; // lites left the repo 2026-08-22 with the rest of the archive
 
   beforeAll(() => fx.register());
   afterAll(() => fx.unregister());
@@ -428,10 +429,10 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
 // Tests for fix #275 — installer must copy scripts/ subdirectories and
 // sibling files (DEEP.md, etc.) alongside SKILL.md when installing skills.
 //
-// Root cause: src/skills/skills-list/ had SKILL.md but no scripts/ subdir,
-// so skills-list.py was never installed, leaving the skill broken.
+// Root cause: src/skills/dig/ had SKILL.md but no scripts/ subdir,
+// so dig.py was never installed, leaving the skill broken.
 //
-// Fix: add scripts/skills-list.py to src/skills/skills-list/scripts/ so that
+// Fix: add scripts/dig.py to src/skills/dig/scripts/ so that
 // cpr() (fs mode) and writeSkillToDir() (VFS mode) both pick it up.
 // ═════════════════════════════════════════════════════════════════════════════
 {
@@ -488,55 +489,55 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     if (existsSync(TEST_DIR)) await rm(TEST_DIR, { recursive: true });
   });
 
-  describe("fix #275 — scripts-list skill has scripts/ in source", () => {
-    it("src/skills/skills-list/scripts/skills-list.py exists in source", () => {
+  describe("fix #275 — a skill with scripts/ in source", () => {
+    it("skills/dig/scripts/dig.py exists in source", () => {
       const scriptPath = join(
         process.cwd(),
-        "src/skills/.archive/skills-list/scripts/skills-list.py"
+        "skills/dig/scripts/dig.py"
       );
       expect(existsSync(scriptPath)).toBe(true);
     });
 
-    it("skills-list.py is executable Python script", async () => {
+    it("dig.py is an executable Python script", async () => {
       const scriptPath = join(
         process.cwd(),
-        "src/skills/.archive/skills-list/scripts/skills-list.py"
+        "skills/dig/scripts/dig.py"
       );
       const content = await Bun.file(scriptPath).text();
       expect(content).toContain("#!/usr/bin/env python3");
-      expect(content).toContain("skills");
+      expect(content).toContain("session");
     });
   });
 
   describe("fix #275 — installer copies scripts/ subdirectory (global install)", () => {
     beforeEach(cleanup);
 
-    it("installs scripts/skills-list.py alongside SKILL.md", async () => {
+    it("installs scripts/dig.py alongside SKILL.md", async () => {
       await installSkills([TEST_AGENT_GLOBAL], {
         global: true,
-        skills: ["skills-list"],
+        skills: ["dig"],
         yes: true,
       });
 
-      const skillDir = join(SKILLS_DIR, "skills-list");
+      const skillDir = join(SKILLS_DIR, "dig");
       const skillMd = join(skillDir, "SKILL.md");
-      const scriptFile = join(skillDir, "scripts", "skills-list.py");
+      const scriptFile = join(skillDir, "scripts", "dig.py");
 
       expect(existsSync(skillMd)).toBe(true);
       expect(existsSync(scriptFile)).toBe(true);
     });
 
-    it("installed scripts/skills-list.py has correct content", async () => {
+    it("installed scripts/dig.py has correct content", async () => {
       await installSkills([TEST_AGENT_GLOBAL], {
         global: true,
-        skills: ["skills-list"],
+        skills: ["dig"],
         yes: true,
       });
 
-      const scriptFile = join(SKILLS_DIR, "skills-list", "scripts", "skills-list.py");
+      const scriptFile = join(SKILLS_DIR, "dig", "scripts", "dig.py");
       const content = await Bun.file(scriptFile).text();
       expect(content).toContain("#!/usr/bin/env python3");
-      expect(content).toContain("List all skills");
+      expect(content).toContain("Session goldminer");
     });
 
     it("other skills with scripts/ also get scripts/ installed", async () => {
@@ -571,20 +572,20 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     it("SKILL.md content is modified (version injected) but script files are copied verbatim", async () => {
       await installSkills([TEST_AGENT_GLOBAL], {
         global: true,
-        skills: ["skills-list"],
+        skills: ["dig"],
         yes: true,
       });
 
       // SKILL.md should have the installer marker (modified)
-      const skillMd = await Bun.file(join(SKILLS_DIR, "skills-list", "SKILL.md")).text();
+      const skillMd = await Bun.file(join(SKILLS_DIR, "dig", "SKILL.md")).text();
       expect(skillMd).toContain("installer: arra-oracle-skills-cli");
 
       // Script should be unmodified (verbatim copy)
       const installedScript = await Bun.file(
-        join(SKILLS_DIR, "skills-list", "scripts", "skills-list.py")
+        join(SKILLS_DIR, "dig", "scripts", "dig.py")
       ).text();
       const sourceScript = await Bun.file(
-        join(process.cwd(), "src/skills/.archive/skills-list/scripts/skills-list.py")
+        join(process.cwd(), "skills/dig/scripts/dig.py")
       ).text();
       expect(installedScript).toBe(sourceScript);
     });
@@ -596,15 +597,15 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       await mkdir(LOCAL_RELATIVE_SKILLS, { recursive: true });
     });
 
-    it("installs scripts/skills-list.py on local project install (via globalSkillsDir)", async () => {
+    it("installs scripts/dig.py on local project install (via globalSkillsDir)", async () => {
       // Use global: true with the local agent's globalSkillsDir pointing to our test dir
       await installSkills([TEST_AGENT_LOCAL], {
         global: true,
-        skills: ["skills-list"],
+        skills: ["dig"],
         yes: true,
       });
 
-      const scriptFile = join(LOCAL_RELATIVE_SKILLS, "skills-list", "scripts", "skills-list.py");
+      const scriptFile = join(LOCAL_RELATIVE_SKILLS, "dig", "scripts", "dig.py");
       expect(existsSync(scriptFile)).toBe(true);
     });
   });

@@ -24,10 +24,13 @@ function generateProfileTable(totalSkills: number): string {
   return lines.join('\n');
 }
 
-async function generateZombieTable(): Promise<string> {
+/** Guard, not a renderer. The zombie table left the README on 2026-08-22, but the
+ *  constant↔disk invariant still matters: a ZOMBIE_SKILLS entry with no directory
+ *  means someone retired a skill in place and forgot the files (or vice versa).
+ *  With the archive moved out the constant is empty, so this is a no-op today —
+ *  it exists so the next in-place retirement cannot drift silently. */
+async function assertZombieDirsExist(): Promise<void> {
   const skillsRoot = join(process.cwd(), 'src', 'skills');
-  const rows: string[] = [];
-
   for (const name of ZOMBIE_SKILLS) {
     const dir = skillDirFor(name, skillsRoot);
     const skillFile = join(dir, 'SKILL.md');
@@ -38,21 +41,8 @@ async function generateZombieTable(): Promise<string> {
       throw new Error(`ZOMBIE_SKILLS entry "${name}" has no SKILL.md at ${skillFile} — fix src/profiles.ts or restore the archive dir.`);
     }
 
-    const content = await readFile(skillFile, 'utf-8');
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch) continue;
 
-    const fm = frontmatterMatch[1];
-    const descMatch = fm.match(/^description:\s*['"]?(.*?)['"]?\s*$/m);
-    let desc = descMatch ? descMatch[1] : name;
-    // Strip [core]/[lab] markers and version prefixes from description
-    desc = desc.replace(/^\[.*?\]\s*/g, '').replace(/^v[\d.]+-?\S*\s*\|\s*/, '');
-    if (desc.length > 60) desc = desc.substring(0, 57) + '...';
-
-    rows.push(`| \`/${name}\` | ${desc} |`);
   }
-
-  return rows.join('\n');
 }
 
 async function updateReadmeTable() {
@@ -118,33 +108,35 @@ async function updateReadmeTable() {
   const secretStart = readme.indexOf('<!-- secret-skills:start -->');
   const secretEnd = readme.indexOf('<!-- secret-skills:end -->');
 
+  await assertZombieDirsExist();
+
   if (secretStart !== -1 && secretEnd !== -1) {
     const secretBefore = readme.substring(0, secretStart + '<!-- secret-skills:start -->'.length);
     const secretAfter = readme.substring(secretEnd);
 
-    const zombieTable = await generateZombieTable();
-    const zombieCount = zombieTable.split('\n').filter(l => l.startsWith('|')).length;
-
-    // Collapse the graveyard, not the shelf. This table is the longest in the
-    // README and the least useful to a newcomer — the inverse of the skills
-    // table above, which renders open. A blank line after <summary> is required
-    // for GitHub to render the table inside the collapsed block.
+    // The 39 zombies moved to their own repo on 2026-08-22. This section used to
+    // render them as a 39-row table with an `install -s <name>` command that no
+    // longer resolves. Now it is a forwarding address — the table lives in the
+    // archive repo's own README, where it is generated next to the skills it
+    // describes rather than three files away from them.
     const secretSection = [
       '',
       `## Zombie Skills`,
       '',
-      '<details>',
-      `<summary>🧟 <strong>${zombieCount} zombie skills</strong> — excluded from all profiles, installable by name</summary>`,
+      '39 archived skills — excluded from every profile — now live in their own repository:',
+      '',
+      '**→ https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive**',
+      '',
+      'They were moved out of this repo on 2026-08-22. Nothing was deleted: their full',
+      'history remains in this git log, and `src/skills/.archive/MOVED.md` is the breadcrumb.',
       '',
       '```bash',
-      'bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -s <name>',
+      'git clone https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive',
+      'cp -R arra-oracle-skills-archive/skills/<name> ~/.claude/skills/',
       '```',
       '',
-      '| Skill | What |',
-      '|-------|------|',
-      zombieTable,
-      '',
-      '</details>',
+      '`arra install -s <zombie-name>` no longer resolves — those skills are not bundled',
+      'in the CLI any more. That path was removed deliberately, not by accident.',
       '',
     ].join('\n');
 
