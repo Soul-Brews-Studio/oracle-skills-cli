@@ -287,49 +287,6 @@ echo "📋 Outbox: $OUTBOX_FILE"
 
 ---
 
-## Then: Report to jan (family digest — fleet only, **verify jan exists first**)
-
-If this Oracle is part of the maw family fleet, send a one-shot digest to **jan**, the
-family's central index Oracle — the family rule (Earth, 2026-06-16) is that every house
-reports to jan after /rrr + /forward, so family status is push-collected centrally.
-
-**Precondition — check before you send.** As of 2026-08-23 jan does not resolve on m5-beta:
-`maw locate jan` finds nothing, jan is in no `~/.maw/fleet/*.json`, and `~/Desktop/oracle-jan`
-exists on no account. Two oracles hit this the same day and one wasted a turn on the
-suggested remedy `maw wake jan`, which also fails — there is nothing to wake.
-
-So gate the whole step. A digest sent into a void is worse than none: it reports success
-for a delivery that did not happen.
-
-```bash
-# Skip silently unless BOTH maw and jan actually exist.
-if command -v maw >/dev/null 2>&1 && maw locate jan >/dev/null 2>&1; then
-  maw hey --inbox --from <host>:<house> local:jan "[report:<house>] $(date '+%Y-%m-%d %H:%M')
-did: <1-3 lines from the handoff 'What We Did'>
-decision: <key decision/change, if any>
-lesson: <new lesson crystallized, if any>
-blocker: <🔴 hard / ⚠️ some / — none>
-next: <carried-forward next action from the handoff>"
-else
-  : # no maw, or no jan on this node — skip. Do not invent a fallback path.
-fi
-```
-
-- `--inbox` is REQUIRED when you do send; without it maw only pane-injects into jan's shell
-  and **no inbox file is created**.
-- `<house>` = this Oracle's name (repo dir without the `oracle-` prefix).
-  `<host>` = the maw host on this machine.
-- **If jan does not resolve, say so plainly in your closing report** — "family digest
-  skipped: jan not on this node" — and move on. Never write the digest to a guessed path,
-  and never report the step as done.
-- **Point, don't copy**: the report is a digest — full sources (handoff/retro) stay in the
-  house vault. It does not duplicate the handoff (handoff = for this house's next session;
-  report = for the family's central index).
-- If jan is later created on this node, this step starts working with no edit: the guard
-  passes and the send runs.
-
----
-
 ## Then: MUST Show Plan Approval Box
 
 **CRITICAL — DO NOT SKIP**: The whole point of /forward is the plan approval UI.

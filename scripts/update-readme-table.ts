@@ -123,12 +123,15 @@ async function updateReadmeTable() {
       '',
       `## Zombie Skills`,
       '',
-      '39 archived skills — excluded from every profile — now live in their own repository:',
+      // No count here. It was hardcoded as 39 on 2026-08-22 and was wrong by the 23rd
+      // (44 after a second archiving round) — the exact stale-number trap this repo
+      // keeps re-learning. The archive repo's own README counts itself.
+      'Archived skills — excluded from every profile — live in their own repository:',
       '',
       '**→ https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive**',
       '',
-      'They were moved out of this repo on 2026-08-22. Nothing was deleted: their full',
-      'history remains in this git log, and `src/skills/.archive/MOVED.md` is the breadcrumb.',
+      'Moved out of this repo starting 2026-08-22. Nothing was deleted: their full history',
+      'remains in this git log, and `src/skills/.archive/MOVED.md` is the breadcrumb.',
       '',
       '```bash',
       'git clone https://github.com/Soul-Brews-Studio/arra-oracle-skills-archive',

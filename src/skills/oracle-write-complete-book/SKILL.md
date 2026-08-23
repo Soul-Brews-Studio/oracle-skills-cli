@@ -1,6 +1,6 @@
 ---
 name: oracle-write-complete-book
-description: "Write a complete book from scratch — outline, parallel Sonnet drafting, Thai word break, typst PDF rendering, review, title brainstorm, publish to GitHub. Full pipeline proven on 'The Oracle Pattern' (15 chapters, 200+ pages). TRIGGER when: user says 'เขียนหนังสือ', 'write book', 'complete book', 'เขียนเล่มยาว', or wants a full book with PDF output. DO NOT TRIGGER for: short guides (use /oracle-write-book), cheatsheets (use /oracle-cheatsheet), single docs."
+description: "Write a complete book from scratch — outline, parallel Sonnet drafting, Thai word break, typst PDF rendering, review, title brainstorm, publish to GitHub. Two size targets: standard <=100 pages (8-12 chapters), short <=50-60 pages (5-8 chapters). Pipeline proven on 'The Oracle Pattern'. TRIGGER when: user says 'เขียนหนังสือ', 'write book', 'complete book', 'เขียนเล่มยาว', or wants a full book with PDF output. DO NOT TRIGGER for: short guides (use /oracle-write-book), cheatsheets (use /oracle-cheatsheet), single docs."
 created_at: 2026-06-09T13:40:00+07:00
 hidden: true
 metadata:
@@ -9,11 +9,15 @@ metadata:
 
 # /oracle-write-complete-book — Complete Book Pipeline
 
-> จาก idea สู่หนังสือ 200+ หน้า PDF — proven pipeline จาก "The Oracle Pattern"
+> จาก idea สู่หนังสือ PDF — standard <=100 หน้า, short <=50-60 หน้า
+> proven pipeline จาก "The Oracle Pattern"
 
 ## When to Use
 
-- หนังสือเต็มเล่ม 10-20 บท (200+ หน้า)
+- **standard** — 8-12 บท, **<=100 หน้า** (default)
+- **short** — 5-8 บท, **<=50-60 หน้า** (`--short`)
+
+ถ้าร่างเกิน cap ให้ตัด/รวมบท ไม่ใช่ปล่อยยาว — page cap เป็นข้อจำกัดจริง ไม่ใช่คำแนะนำ
 - ต้องการ PDF สวย (typst + Thai font + code blocks)
 - ต้องการ parallel agents เขียนขนาน
 - ต้องการ Thai word segmentation ที่ถูกต้อง
@@ -70,7 +74,8 @@ author: <oracle-name>
 date: YYYY-MM-DD
 language: Thai (kien-thai 7 frames)
 register: <pick from kien-thai 6 registers>
-target_chapters: 10-20
+target_chapters: 8-12      # standard, <=100 pages
+# target_chapters: 5-8    # --short, <=50-60 pages
 target_words_per_chapter: 3000-4000
 parts: 2-3 (Overview / Technical / Vision)
 ```
@@ -522,6 +527,8 @@ Credits ทุก open source tool + skill + community ที่ใช้:
 ## Proven On
 
 **The Oracle Pattern** — 15 บท, 200+ หน้า, 2.3MB PDF
+(สร้างก่อนตั้ง page cap 2026-08-23 — เก็บไว้เป็นหลักฐานว่า pipeline ทำได้จริง
+ไม่ใช่ target ปัจจุบัน)
 - https://github.com/the-oracle-keeps-the-human-human/the-oracle-pattern
 - Pipeline: MD → PyThaiNLP → pandoc → typst → PDF
 - 15 Sonnet agents draft + 14 Sonnet agents write files + 3 review agents

@@ -541,14 +541,15 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     });
 
     it("other skills with scripts/ also get scripts/ installed", async () => {
-      // team-agents has scripts/ — verify it installs correctly
+      // project/ ships scripts/ — verify a second skill also gets them.
+      // Was team-agents until 2026-08-23, when it moved to the archive repo.
       await installSkills([TEST_AGENT_GLOBAL], {
         global: true,
-        skills: ["team-agents"],
+        skills: ["project"],
         yes: true,
       });
 
-      const skillDir = join(SKILLS_DIR, "team-agents");
+      const skillDir = join(SKILLS_DIR, "project");
       const scriptsDir = join(skillDir, "scripts");
       expect(existsSync(scriptsDir)).toBe(true);
 

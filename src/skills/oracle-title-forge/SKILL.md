@@ -1,6 +1,6 @@
 ---
 name: oracle-title-forge
-description: "Forge a title + subtitle (or reframe) for a book, article, talk, or any technical piece so it has LIFE and honesty — not clinical/dated. The method that produced 'Claude Code Channel ปะทะ Hermes Gateway'. Describe-before-you-name, find the real tension, prism the candidates, calibrate register (eloquent but dev-natural, not poetic), name the real technical axes in the subtitle, refuse a fake winner. Use when: a title feels เชย/dead/generic, when naming a book or post, when reframing a comparison as a genuine contest, or when the user says 'ตั้งชื่อ', 'title', 'reframe', 'ชื่อมันเชย', 'คิดชื่อ'. DO NOT TRIGGER for: writing the body content itself (use kien-thai / the book skills)."
+description: "Forge a title + subtitle (or reframe) for a BOOK, article, talk, or any technical piece, then hand off to a cover so it has LIFE and honesty — not clinical/dated. The method that produced 'Claude Code Channel ปะทะ Hermes Gateway'. Describe-before-you-name, find the real tension, prism the candidates, calibrate register (eloquent but dev-natural, not poetic), name the real technical axes in the subtitle, refuse a fake winner. Use when: a title feels เชย/dead/generic, when naming a book or post, when reframing a comparison as a genuine contest, or when the user says 'ตั้งชื่อ', 'title', 'reframe', 'ชื่อมันเชย', 'คิดชื่อ'. After the title lands, offer the cover step (see 'Then: the cover'). DO NOT TRIGGER for: writing the body content itself (use kien-thai / the book skills), or for designing a cover from scratch when no title work is needed (go straight to /oracle-book-cover)."
 argument-hint: "<what to title — topic, or the current dead title + what the piece is about>"
 hidden: true
 metadata:
@@ -86,3 +86,53 @@ eloquent but dev-natural. Verdict promised = honest (fit, not a fake winner).
 
 Related: [[kien-thai]] (Thai prose engine), [[oracle-prism]] (the lens method), the book skills
 (oracle-write-complete-book / -booklet / -combine-blogs) that consume the forged title.
+
+---
+
+## Book mode
+
+A book title carries more weight than an article's: it is the spine text, the search
+result, and the thing someone repeats to a friend. Two extra constraints on top of the
+7 moves:
+
+- **Spine test** — say it out loud as if recommending it. If it needs a subtitle to make
+  sense spoken, the main title is doing too little.
+- **Shelf test** — write it next to three real books in the same genre. Generic titles
+  vanish; that is the whole signal.
+- Subtitle carries the technical axes (the 7 moves already say this); the **main title
+  carries the tension**. Do not let the subtitle rescue a dead title.
+
+## Then: the cover
+
+**This skill does not draw.** Stated plainly because the alternative is pretending:
+
+| capability | present here |
+|---|---|
+| generative image tool (Imagen / DALL-E / SD) | **no** — no such tool in this session |
+| `codex` CLI | yes — but codex does not generate images either |
+| ImageMagick (`convert` / `magick`) | yes — **composition only**: type on a ground, crops, gradients |
+| typst | yes — vector/typographic covers rendered with the book |
+
+So a cover here is one of two honest things: **found art** (licence-checked) or a
+**typographic composition**. Neither is "the AI drew it", and neither should be described
+that way.
+
+**Hand off to `/oracle-book-cover`** — it already does this properly: finds real art with a
+LICENCE gate, runs a 5-lens prism (Reader / Editor / Artist / Designer / Ads), renders 2-3
+PNG candidates, bakes the winner into the `book.typ` cover block only, and exports social
+crops. Do not rebuild that pipeline here.
+
+```text
+/oracle-title-forge   → title + subtitle
+        ↓
+/oracle-book-cover    → art (licence-checked) or typographic cover → book.typ
+```
+
+If `/oracle-book-cover` is not installed on this machine, say so and stop — do not
+improvise a cover with `convert` and call it a design. A typographic fallback is legitimate
+only when the human asks for it knowing no illustration is involved.
+
+**Delegating to codex**: `/codex:rescue` or the `codex-rescue` agent can take a
+cover-generation *task* (typst layout, ImageMagick composition, asset wrangling). It cannot
+produce an illustration. If someone asks "get codex to draw it", the answer is that no
+agent in this fleet has an image model — the work has to be found art, vector, or type.
