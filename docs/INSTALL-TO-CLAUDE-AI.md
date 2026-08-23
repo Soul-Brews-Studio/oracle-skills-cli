@@ -94,6 +94,70 @@ enforces `name` and `description` on every `SKILL.md` and fails the build withou
 | zip uploads but the skill misbehaves | `SKILL.md` zipped at the archive root | zip the **directory**, not its contents (`zip -r x.zip psi`, not `cd psi && zip -r x.zip .`) |
 | skill not usable right after upload | security scan still running | wait 1–2 minutes |
 | uploading a skill with `scripts/` | web skills do not get your local shell | prefer prose-only skills for web; script-driven ones belong in the CLI |
+| `Zip must contain exactly one top-level folder` | you bundled several skills into one archive | one skill per zip — see [Installing many skills at once](#installing-many-skills-at-once) |
+| `This skill name is already in use` and you can't see a clash | the name is reserved platform-wide (e.g. `learn`) | rename in the zip's frontmatter only, not in this repo |
+| a large batch uploaded only partially | the batch halts at the first collision and drops the rest, naming nothing | submit alphabetically, see where it stopped, re-submit the remainder |
+
+## Installing many skills at once
+
+There is **no bundle format.** A zip containing several skills is rejected outright — the
+validator is explicit:
+
+```
+Zip must contain exactly one top-level folder. Currently there are 3.
+Zip must contain exactly one SKILL.md file. Currently there are 3.
+```
+
+One skill per archive, always. What *does* work is **multi-select**: the file input carries
+`multiple`, so one picker action can take many single-skill zips.
+
+```bash
+# one zip per skill
+cd skills
+for d in */; do n="${d%/}"; zip -qr "/tmp/skills/$n.zip" "$n" -x '*.DS_Store'; done
+```
+
+Then **Add → Upload a skill** and select them all. Result: `Uploaded 10 skills`.
+
+That is the closest thing to a one-click install the web UI offers. 22 skills is one action,
+not 22.
+
+### Trap: a batch stops at the first collision and drops the rest
+
+This one costs real time. Uploading 19 skills produced 8 uploads and this message:
+
+```
+This skill name is already in use. Try a different name.
+```
+
+It does **not** say which name. The batch processes in order, halts at the first conflict,
+and **silently discards everything after it** — 10 skills in that run went nowhere with no
+per-file report.
+
+Mitigation: submit in a known order (alphabetical is easiest). Whatever is present in the
+list afterwards tells you where it stopped; the offender is the next name in your sequence.
+Then re-submit the remainder without it.
+
+### Trap: some names are reserved even though nothing shows them
+
+`learn` fails with `already in use` while appearing **nowhere** in the skills list — not as
+yours, not as Anthropic's. Verified by uploading `learn.zip` on its own. The namespace is
+platform-wide, not per-account, and the UI gives you no way to enumerate what is taken.
+
+Workaround: rename in the zip's `SKILL.md` frontmatter only — `oracle-learn` uploads fine.
+Do **not** rename the skill in this repo; the CLI and plugin channels have no such conflict,
+and renaming there would break `/learn` for every existing install.
+
+### Measured result
+
+Uploading all 22 shelf skills on 2026-08-23:
+
+| | |
+|---|---|
+| uploaded | **21** |
+| blocked | 1 — `learn` (reserved name) |
+| actions taken | 3 picker actions (would have been 1 without the collision) |
+| Anthropic skills already present | 3 — `import-memory`, `morning`, `skill-creator` |
 
 ## Which channel do I want?
 
@@ -106,8 +170,9 @@ not how this repo normally ships.
 | **CLI installer** | `bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full` | 19 agents, local `~/.claude/skills/` |
 | **claude.ai upload** | this document | the web app, one skill at a time |
 
-There is **no bulk upload** — the web UI takes one file per action, so all 22 shelf skills
-means 22 uploads. If you want everything, use the CLI or the plugin.
+Bulk is possible but crude: multi-select uploads many single-skill zips in one action
+(there is no bundle format — see above). For everything at once with no collisions to
+manage, the CLI or the plugin is still the better channel.
 
 ## Verified
 
@@ -117,5 +182,9 @@ means 22 uploads. If you want everything, use the CLI or the plugin.
 | accepted formats | `.zip,.skill,.md` (read off the input's `accept`) ✓ |
 | uploaded `psi.zip` (12K, `psi/SKILL.md`) | "Uploaded psi" ✓ |
 | listed in table | `psi · 8/23/26 · You` ✓ |
+| multi-skill zip (3 skills) | ✗ rejected — `exactly one top-level folder` |
+| multi-select (10 zips, one action) | ✓ `Uploaded 10 skills` |
+| all 22 shelf skills | 21 uploaded, `learn` blocked by a reserved name |
 
-Nothing needed fixing — the repo's skills upload as-is.
+Nothing needed fixing in this repo — the skills upload as-is. The one failure (`learn`) is a
+platform-side name conflict, not a defect here.
