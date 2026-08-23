@@ -51,9 +51,14 @@ export const MINIMAL_SKILLS = [
  *  skills dir, confirm WE wrote it. */
 export const STANDARD_SKILLS = [
   'about-oracle', 'awaken', 'bampenpien', 'bud', 'create-shortcut', 'dig',
+  // 2026-08-23: feel + psi promoted into standard. Both are shelf skills with no
+  // scripts, no fleet requirement and no external toolchain, so they carry their
+  // own weight on a fresh machine — the same day-one test that put feel back on
+  // the shelf. psi has been shelf-resident since 2026-08-20.
+  'feel',
   'forward', 'go', 'incubate', 'learn', 'oracle-cheatsheet',
-  'oracle-family-scan', 'oracle-prism', 'oracle-write-complete-book', 'recap',
-  'resonance', 'rrr', 'trace', 'where-we-are', 'who-are-you',
+  'oracle-family-scan', 'oracle-prism', 'oracle-write-complete-book', 'psi',
+  'recap', 'resonance', 'rrr', 'trace', 'where-we-are', 'who-are-you',
 ] as const;
 
 /** Lab-only skills — experimental, not in standard or full.

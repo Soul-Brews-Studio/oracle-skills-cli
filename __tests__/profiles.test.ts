@@ -26,9 +26,11 @@ describe("profiles", () => {
     expect(MINIMAL_SKILLS).toContain("go");
   });
 
-  it("standard has 20 skills", () => {
-    expect(STANDARD_SKILLS).toHaveLength(20);
-    expect(profiles.standard.include).toHaveLength(20);
+  it("standard has 22 skills", () => {
+    // 20 -> 22 on 2026-08-23: feel + psi promoted. Both are shelf-resident with
+    // no scripts, no fleet requirement and no external toolchain.
+    expect(STANDARD_SKILLS).toHaveLength(22);
+    expect(profiles.standard.include).toHaveLength(22);
   });
 
   // TIER LADDER (Nat, 2026-07-25): upgrading a profile must never REMOVE a
@@ -55,9 +57,12 @@ describe("profiles", () => {
     expect(STANDARD_SKILLS).toContain("dig");
   });
 
-  it("standard does NOT include dream or feel", () => {
+  it("standard excludes lab-only skills but now includes feel and psi", () => {
+    // feel was excluded while it was a zombie; it returned to the shelf on
+    // 2026-08-23 and was promoted the same day. dream stays lab-only.
     expect([...STANDARD_SKILLS]).not.toContain("dream");
-    expect([...STANDARD_SKILLS]).not.toContain("feel");
+    expect([...STANDARD_SKILLS]).toContain("feel");
+    expect([...STANDARD_SKILLS]).toContain("psi");
   });
 
   it("LAB_SKILLS has 3 experimental skills (zombie round 2 archived 8 of 11)", () => {
@@ -125,9 +130,9 @@ describe("resolveProfile", () => {
     expect(result).toHaveLength(7);
   });
 
-  it("standard returns 20 skills", () => {
+  it("standard returns 22 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result).toHaveLength(20);
+    expect(result).toHaveLength(22);
   });
 
   it("full returns all minus lab-only, minimal-only, and zombies", () => {

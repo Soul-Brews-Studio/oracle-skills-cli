@@ -84,7 +84,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 | Profile | Count | Skills |
 |---------|-------|--------|
 | **minimal** | 7 | `about-oracle`, `forward`, `go`, `recap`, `rrr`, `trace`, `who-are-you` |
-| **standard** | 20 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
+| **standard** | 22 | `about-oracle`, `awaken`, `bampenpien`, `bud`, `create-shortcut`, `dig`, `feel`, `forward`, `go`, `incubate`, `learn`, `oracle-cheatsheet`, `oracle-family-scan`, `oracle-prism`, `oracle-write-complete-book`, `psi`, `recap`, `resonance`, `rrr`, `trace`, `where-we-are`, `who-are-you` |
 | **full** | 23 | all |
 | **lab** | 23 | all |
 
