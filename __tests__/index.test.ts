@@ -4,9 +4,9 @@ import { agents, detectInstalledAgents, getAgentNames } from '../src/cli/agents'
 import { discoverSkills } from '../src/cli/installer';
 
 describe('agents', () => {
-  it('should have 20 agents defined', () => {
-    // 18 base targets + grok + thClaws
-    expect(Object.keys(agents).length).toBe(20);
+  it('should have 21 agents defined', () => {
+    // 19 base targets + grok + thClaws
+    expect(Object.keys(agents).length).toBe(21);
   });
 
   it('should return agent names', () => {
@@ -16,6 +16,7 @@ describe('agents', () => {
     expect(names).toContain('cursor');
     expect(names).toContain('thclaws');
     expect(names).toContain('grok');
+    expect(names).toContain('hermes');
   });
 
   it('should detect installed agents', () => {
@@ -51,6 +52,7 @@ describe('CLI', () => {
     const result = await $`bun run src/cli/index.ts agents`.text();
     expect(result).toContain('claude-code');
     expect(result).toContain('opencode');
+    expect(result).toContain('hermes');
     expect(result).toContain('Supported agents');
   });
 });

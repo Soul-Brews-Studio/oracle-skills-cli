@@ -11,7 +11,7 @@
 /plugin install oracle-skills@oracle-skills
 ```
 
-**In a terminal** — for any of the 19 supported agents:
+**In a terminal** — for any of the 20 supported agents:
 
 ```bash
 bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -p full
@@ -39,7 +39,7 @@ bunx --bun github:Soul-Brews-Studio/arra-oracle-skills-cli#alpha install -g -y -
 
 **zsh note:** `-s` needs each name as its own word, and zsh doesn't split `$VARS` — write names literally or use `${=NAMES}`, or you'll silently get only the profile.
 
-**19 agents:** Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
+**20 agents:** Claude Code, Codex, Hermes Agent, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
 
 </details>
 
