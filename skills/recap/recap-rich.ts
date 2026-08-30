@@ -13,17 +13,24 @@ const date = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", y
 const time = now.toTimeString().slice(0, 5);
 const month = now.toISOString().slice(0, 7);
 
-// Session detection
+// Session detection.
+//
+// This used to list ~/.claude/projects/<encoded>/ and take the newest .jsonl.
+// That directory survives whichever engine is driving the oracle now, so a body
+// running on another engine reported a *previous Claude session's* id and
+// elapsed time as its own — a complete-looking line that was simply another
+// session's. session-timeline.py resolves the transcript of the session that is
+// running now, from the live environment, and fails instead of guessing.
 let sessionLine = "";
 try {
-  const encodedPwd = ROOT.replace(/^\//, '-').replace(/[\/.]/g, '-');
-  const projectDir = `${process.env.HOME}/.claude/projects/${encodedPwd}`;
-  if (existsSync(projectDir)) {
-    const jsonls = (await $`ls -t ${projectDir}/*.jsonl 2>/dev/null`.text()).trim().split('\n').filter(Boolean);
-    if (jsonls.length) {
-      const sessionId = jsonls[0].split('/').pop()!.replace('.jsonl', '');
+  const locator = join(import.meta.dir, "session-timeline.py");
+  const located = (await $`python3 ${locator} ${ROOT} --locate-only`.quiet().text()).trim();
+  const info = JSON.parse(located) as { session_id: string; file: string; engine: string };
+  {
+    {
+      const sessionId = info.session_id;
       const shortId = sessionId.slice(0, 8);
-      const firstLine = (await $`head -1 ${jsonls[0]}`.text()).trim();
+      const firstLine = (await $`head -1 ${info.file}`.text()).trim();
       let startStr = "";
       try {
         const ts = JSON.parse(firstLine).timestamp;
@@ -36,10 +43,15 @@ try {
         }
       } catch {}
       const repoName = ROOT.split('/').pop() || '';
-      sessionLine = `${shortId} | ${repoName}${startStr ? ` | ${startStr}` : ''}`;
+      sessionLine = `${shortId} | ${repoName}${startStr ? ` | ${startStr}` : ''} | ${info.engine}`;
     }
   }
-} catch {}
+} catch {
+  // Say that the session is unbound rather than printing nothing: a missing line
+  // reads as "no session", while the failure it now reports is "this engine did
+  // not expose an id I could verify". Everything below is engine-neutral.
+  sessionLine = "(unbound — could not verify the running session; see session-timeline.py)";
+}
 
 console.log("# RECAP (Rich)");
 if (sessionLine) console.log(`📡 Session: ${sessionLine}`);

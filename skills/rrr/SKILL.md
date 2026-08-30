@@ -32,20 +32,31 @@ When the subagent returns, main agent merges real timestamps into the Timeline s
 
 **Every skill that writes to ψ/ MUST detect the oracle root first.** Do not assume `pwd` is the oracle repo.
 
+`SKILL_DIR` below means the directory this SKILL.md was loaded from — the host
+names that path when it activates the skill. Use that literal path; do not guess
+it from `~/.claude`, `~/.codex` or `~/.agents`, because the same skill is
+installed under several roots and they are not always the same file.
+
+```bash
+SKILL_DIR="<directory of the SKILL.md the host just gave you>"
+```
+
 ```bash
 # Step 1: Find git root
 ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 
-# Step 2: Cross-check — oracle repo has CLAUDE.md + ψ/
-if [ -n "$ORACLE_ROOT" ] && [ -f "$ORACLE_ROOT/CLAUDE.md" ] && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
+# Step 2: Cross-check — oracle repo has a constitution file + ψ/
+# CLAUDE.md or AGENTS.md: which one exists depends on the engine, not on whether
+# this is an oracle repo.
+if [ -n "$ORACLE_ROOT" ] && { [ -f "$ORACLE_ROOT/CLAUDE.md" ] || [ -f "$ORACLE_ROOT/AGENTS.md" ]; } && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
   PSI="$ORACLE_ROOT/ψ"
-elif [ -f "$(pwd)/CLAUDE.md" ] && { [ -d "$(pwd)/ψ" ] || [ -L "$(pwd)/ψ" ]; }; then
+elif { [ -f "$(pwd)/CLAUDE.md" ] || [ -f "$(pwd)/AGENTS.md" ]; } && { [ -d "$(pwd)/ψ" ] || [ -L "$(pwd)/ψ" ]; }; then
   # Fallback: pwd has oracle markers
   ORACLE_ROOT="$(pwd)"
   PSI="$ORACLE_ROOT/ψ"
 else
   # Last resort: warn and use pwd
-  echo "⚠️ Not in oracle repo (no CLAUDE.md + ψ/ at git root). Writing to pwd."
+  echo "⚠️ Not in oracle repo (no CLAUDE.md/AGENTS.md + ψ/ at git root). Writing to pwd."
   ORACLE_ROOT="$(pwd)"
   PSI="$ORACLE_ROOT/ψ"
 fi
@@ -69,59 +80,50 @@ git log --oneline -10 && git diff --stat HEAD~5
 Detect session ID:
 
 ```bash
-ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_BASE=$(ls -d "$HOME/.claude/projects/${ENCODED_PWD}" 2>/dev/null | head -1)
-LATEST_JSONL=$(ls -t "$PROJECT_BASE"/*.jsonl 2>/dev/null | head -1)
-[ -n "$LATEST_JSONL" ] && SESSION_ID=$(basename "$LATEST_JSONL" .jsonl) && echo "SESSION: ${SESSION_ID:0:8}"
+# Engine-aware and bound to the session that is running right now.
+# Prints JSON {engine, session_id, file, cwd}; exits 2 if it cannot prove which
+# session this is. Never guesses "the newest transcript" — see the note below.
+python3 "$SKILL_DIR/session-timeline.py" "$ORACLE_ROOT" --locate-only
 ```
 
 ### 1.5. Spawn timestamp miner (background subagent)
 
-Spawn ONE background Agent to extract real timestamps from the session .jsonl:
+Spawn ONE background Agent to extract real timestamps for the running session:
 
 ```
 Agent({
   name: "timestamp-miner",
   description: "Extract session timestamps for /rrr",
   run_in_background: true,
-  prompt: `Extract real user message timestamps from a Claude Code session file.
+  prompt: `Extract real user message timestamps for the CURRENT session.
 Read-only — do NOT write files.
 
 Run this single command:
 
-ENCODED_PWD=$(echo "[ORACLE_ROOT]" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_BASE=$(ls -d "$HOME/.claude/projects/${ENCODED_PWD}" 2>/dev/null | head -1)
-LATEST_JSONL=$(ls -t "$PROJECT_BASE"/*.jsonl 2>/dev/null | head -1)
-echo "SESSION_FILE: $LATEST_JSONL"
-python3 -c "
-import json, os, sys
-sys.stdout.reconfigure(encoding='utf-8')  # Windows Thai locale: stdout defaults to cp874 -> Thai snippets mojibake; force UTF-8 output
-from datetime import datetime, timezone, timedelta
-tz = timezone(timedelta(hours=7))
-jsonl = '$LATEST_JSONL'
-if not jsonl or not os.path.exists(jsonl): exit(0)
-with open(jsonl, encoding='utf-8') as f:
-    for line in f:
-        try:
-            m = json.loads(line)
-            if m.get('type') != 'user' or 'message' not in m: continue
-            content = m['message'].get('content', '')
-            if isinstance(content, list):
-                for c in content:
-                    if isinstance(c, dict) and c.get('type') == 'text':
-                        content = c.get('text', ''); break
-            if not isinstance(content, str): continue
-            ts = m.get('timestamp', '')
-            if not ts or '<command-name>' in content[:200]: continue
-            dt = datetime.fromisoformat(ts.replace('Z', '+00:00')).astimezone(tz)
-            snippet = content[:80].replace(chr(10), ' ')
-            print(f'{dt.strftime(\"%Y-%m-%d %H:%M\")} | {snippet}')
-        except: pass
-"
+python3 "[SKILL_DIR]/session-timeline.py" "[ORACLE_ROOT]"
 
-Return ALL output lines. The main agent will use them for the Timeline.`
+Return ALL stdout lines, and if it exits non-zero return the stderr line too.
+Do not substitute another command, and do not look for a transcript yourself.`
 })
 ```
+
+**The miner refuses rather than guesses.** It selects the transcript of the
+session that is running now, decided from the live environment
+(`CLAUDE_CODE_SESSION_ID`, or `CODEX_SESSION_ID` matched against each rollout's
+`session_meta.payload.id`), and exits non-zero when it cannot prove that match.
+
+That refusal is the point. The previous version resolved
+`~/.claude/projects/<encoded>/` and took the newest `.jsonl`. That directory
+still exists whenever the same oracle was ever driven by Claude Code, so a body
+running on another engine selected a *different engine's previous session*,
+printed plausible rows, and exited 0. The retrospective then carried another
+body's timestamps with nothing to signal it. It also exited 0 with no output
+when the directory was absent, which made "nowhere to look" and "quiet session"
+the same reading. Exit codes are now `2` = cannot prove the session, `3` =
+session located but no user messages.
+
+**If the miner exits non-zero, write "timestamps unavailable" and say why.**
+Never reconstruct times from memory, and never fall back to another transcript.
 
 **Why only .jsonl, not dig.py**: the subagent has no conversation context — it can't interpret dig session summaries. The .jsonl timestamps are objective data (real ISO timestamps from every user message). That's all we need for the Timeline.
 
@@ -306,13 +308,7 @@ git log --oneline -10 && git diff --stat HEAD~5
 ### 1.5. Detect Session
 
 ```bash
-ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
-PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
-LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
-if [ -n "$LATEST_JSONL" ]; then
-  SESSION_ID=$(basename "$LATEST_JSONL" .jsonl)
-  echo "SESSION: ${SESSION_ID:0:8}"
-fi
+python3 "$SKILL_DIR/session-timeline.py" "$ORACLE_ROOT" --locate-only
 ```
 
 ### 2. Write Retrospective
