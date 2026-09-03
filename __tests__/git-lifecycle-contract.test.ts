@@ -7,8 +7,14 @@ const ROOT = join(import.meta.dir, "..");
 const TMP = mkdtempSync(join(tmpdir(), "arra-git-lifecycle-"));
 const TEST_HOME = join(TMP, "home");
 mkdirSync(TEST_HOME, { recursive: true });
+// Git exports repository-local variables (notably GIT_INDEX_FILE) to hooks.
+// Letting a fixture subprocess inherit those variables makes `git -C <fixture>`
+// operate on the caller's index during pre-commit, despite its fixture cwd.
+const CLEAN_PROCESS_ENV = Object.fromEntries(
+  Object.entries(process.env).filter(([key]) => !key.startsWith("GIT_")),
+);
 const GIT_ENV = {
-  ...process.env,
+  ...CLEAN_PROCESS_ENV,
   HOME: TEST_HOME,
   XDG_CONFIG_HOME: join(TEST_HOME, ".config"),
   GIT_CONFIG_GLOBAL: "/dev/null",
