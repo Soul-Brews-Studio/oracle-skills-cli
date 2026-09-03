@@ -154,19 +154,20 @@ async function compile() {
         const isSecret = /secret:\s*(true|yes)/i.test(frontmatter);
         const isHidden = /hidden:\s*(true|yes)/i.test(frontmatter);
         const isZombie = /zombie:\s*(true|yes)/i.test(frontmatter);
-        const isFlagged = isSecret || isHidden || isZombie;
+        const isExplicitOnly = /explicit-only:\s*(true|yes)/i.test(frontmatter);
+        const isFlagged = isSecret || isHidden || isZombie || isExplicitOnly;
 
         if (isShelf) {
           shelfNames.add(skillName);
           if (isFlagged) {
-            errors.push({ skill: skillName, message: 'shelf skill carries a secret/hidden/zombie flag — flagged skills live in the vault (src/skills/), not on the public shelf. git mv it back.' });
+            errors.push({ skill: skillName, message: 'shelf skill carries a secret/hidden/zombie/explicit-only flag — flagged skills live in the vault (src/skills/), not on the public shelf. git mv it back.' });
           } else {
             marketplaceSkills.push({ name: skillName, description: rawDescription });
           }
         } else {
           vaultActiveNames.add(skillName);
           if (shelfExists && !isFlagged) {
-            errors.push({ skill: skillName, message: 'unflagged skill in vault (src/skills/) — public skills live on the shelf. git mv it to skills/ or add a secret/hidden/zombie flag.' });
+            errors.push({ skill: skillName, message: 'unflagged skill in vault (src/skills/) — public skills live on the shelf. git mv it to skills/ or add a secret/hidden/zombie/explicit-only flag.' });
           }
           if (!shelfExists && !isFlagged) {
             marketplaceSkills.push({ name: skillName, description: rawDescription });
@@ -210,7 +211,7 @@ async function compile() {
 
   // ── Archive integrity gate ─────────────────────────────────────────────
   // Every skill parked under src/skills/.archive/ MUST carry a curation flag
-  // (zombie/secret/hidden) in its frontmatter. That flag is the ONLY zombie
+  // (zombie/secret/hidden/explicit-only) in its frontmatter. That flag is the ONLY zombie
   // signal that survives into the compiled binary: the VFS (scripts/generate-vfs.ts)
   // flattens active + archived skills into one name→files map with NO .archive/
   // path info, so discoverSkills() in compiled mode can't tell them apart by
@@ -225,10 +226,10 @@ async function compile() {
       const md = join(archiveDir, dirent.name, 'SKILL.md');
       if (!existsSync(md)) continue;
       const fm = (await readFile(md, 'utf-8')).split(/^---\s*$/m)[1] ?? '';
-      if (!/(zombie|secret|hidden):\s*(true|yes)/i.test(fm)) {
+      if (!/(zombie|secret|hidden|explicit-only):\s*(true|yes)/i.test(fm)) {
         errors.push({
           skill: `.archive/${dirent.name}`,
-          message: 'archived skill lacks a zombie/secret/hidden frontmatter flag — it would leak into full/lab install (the compiled VFS has no .archive/ path signal). Add `zombie: true` to its frontmatter.',
+          message: 'archived skill lacks a zombie/secret/hidden/explicit-only frontmatter flag — it would leak into full/lab install (the compiled VFS has no .archive/ path signal). Add `zombie: true` to its frontmatter.',
         });
       }
       if (!/internal:\s*true/i.test(fm)) {

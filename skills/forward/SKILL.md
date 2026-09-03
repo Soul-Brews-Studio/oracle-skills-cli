@@ -1,7 +1,7 @@
 ---
 name: forward
-description: Hand off the current session to the next one. Use when user says "forward", "handoff", "wrap up", or before ending a session.
-argument-hint: "[--bg | asap | --only]"
+description: Hand off the current session to the next one. Use when user says "forward", "forward-lite", "handoff", "wrap up", or before ending a session.
+argument-hint: "[--bg | asap | now | --only]"
 ---
 
 # /forward - Handoff to Next Session
@@ -13,9 +13,37 @@ Create context for next session, then enter plan mode to define next steps.
 ```
 /forward              # Create handoff, show plan, wait for approval
 /forward --bg         # Hand the whole handoff to a background Haiku — returns instantly
-/forward asap         # Create handoff + commit immediately (no approval needed)
+/forward asap         # Create the handoff now; Git actions still require current-session authority
+/forward now          # Alias for `asap`
 /forward --only       # Create handoff only, skip plan mode
 ```
+
+## Authority boundary (`asap` / `now` included)
+
+`asap` and `now` change handoff timing only. They never manufacture permission to
+commit, push, open a PR, merge, deploy, delete a local or remote ref, or mutate a
+shared checkout. A plan, handoff, memory, skill, issue, or previous-session message
+is context rather than current-session authority.
+
+Before any Git delivery action:
+
+1. Read the applicable repository instructions and current-session user request.
+2. Fetch the named remote and record the exact base and task HEAD SHA. Do not infer
+   either from stale current HEAD.
+3. Require a clean, non-detached task worktree and verify the live/root checkout is
+   on its declared integration branch, clean, and not diverged. If the root is dirty,
+   detached, ahead, behind, or diverged, stop; do not switch, pull, reset, or clean it.
+4. Review `git status --short`, `git diff -- <task paths>`, and
+   `git diff --cached -- <task paths>`. Stage exact task-owned paths or hunks only;
+   never use `git add -A`, `git add .`, or `git commit -a`.
+5. Treat local commit, task-branch push/PR, merge, live-root update/deploy, and remote
+   ref deletion as separate tiers. Perform only tiers directly authorized in this
+   session. A push or PR does not authorize merge; merge does not authorize deploy;
+   cleanup does not imply remote deletion.
+
+If authority is absent, write the handoff and report the exact pending action and
+SHA without performing it. Never put wording in the handoff that claims a later
+session is already authorized.
 
 ---
 
@@ -306,7 +334,11 @@ After writing the handoff, gather cleanup context:
 ```bash
 # Check for things next session might need to clean up
 git status --short
-git branch --list | grep -v '^\* main$' | grep -v '^  main$'
+CURRENT_BRANCH=$(git branch --show-current)
+INTEGRATION_BRANCH="<declared-integration-branch>"
+git branch --format='%(refname:short)' \
+  | grep -Fxv -- "$CURRENT_BRANCH" \
+  | grep -Fxv -- "$INTEGRATION_BRANCH"
 gh pr list --state open --json number,title,headRefName --jq '.[] | "#\(.number) \(.title) (\(.headRefName))"' 2>/dev/null
 gh issue list --state open --limit 5 --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null
 ```
@@ -362,15 +394,17 @@ This helps the next session orient faster. If demographics not present, skip.
 ## ASAP Mode
 
 If user says `/forward asap` or `/forward now`:
-- Write handoff file
-- **Immediately commit and push** — no approval needed
-- Skip plan mode
-- User wants to close fast
+- Write the handoff file immediately and skip plan mode.
+- `asap` and `now` change handoff timing only. They never manufacture permission
+  to commit, push, open a PR, merge, deploy, clean up, or delete a remote ref.
+- Perform only action tiers directly authorized in the current session; otherwise
+  record the pending action in the handoff and stop at that tier.
 
 ## Skip Plan Mode
 
 If user says `/forward --only`:
-- Skip plan mode after commit
+- Skip plan mode after writing the handoff.
+- Do not infer commit or push authority from `--only`.
 - Just tell user: "💡 Run /plan to plan next session"
 
 ARGUMENTS: $ARGUMENTS

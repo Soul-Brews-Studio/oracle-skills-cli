@@ -127,15 +127,21 @@ export const profiles: Record<string, { include?: string[]; exclude?: string[] }
 /**
  * Resolve a profile to a filtered list of skill names.
  * Returns null for profiles that mean "all skills" (lab) — unless secrets/zombies exist.
- * Secret and zombie skills are excluded from ALL profiles; install by name only (-s flag).
+ * Secret, zombie, and explicit-only skills are excluded from ALL profiles;
+ * install them by exact name only (-s flag).
  */
 export function resolveProfile(
   profileName: string,
   allSkillNames: string[],
   secretSkillNames?: string[],
-  zombieSkillNames?: string[]
+  zombieSkillNames?: string[],
+  explicitOnlySkillNames?: string[]
 ): string[] | null {
-  const excluded = new Set([...(secretSkillNames || []), ...(zombieSkillNames || [])]);
+  const excluded = new Set([
+    ...(secretSkillNames || []),
+    ...(zombieSkillNames || []),
+    ...(explicitOnlySkillNames || []),
+  ]);
   const profile = profiles[profileName];
   if (!profile) return null;
 

@@ -319,7 +319,8 @@ async function isOurSkill(skillPath: string): Promise<boolean> {
   if (!existsSync(skillMdPath)) return false;
   try {
     const content = await Bun.file(skillMdPath).text();
-    return content.includes('installer: arra-oracle-skills-cli');
+    const frontmatter = content.split(/^---\s*$/m)[1] ?? '';
+    return /^installer:\s*arra-oracle-skills-cli(?:\s|$)/m.test(frontmatter);
   } catch {
     return false;
   }
@@ -400,15 +401,39 @@ export async function installSkills(
     return;
   }
 
+  const requestedNames = [...new Set(options.skills || [])];
+  const knownNames = new Set(allSkills.map((skill) => skill.name));
+  const explicitOnlySkills = allSkills.filter((skill) => skill.explicitOnly);
+  const explicitOnlyNames = new Set(explicitOnlySkills.map((skill) => skill.name));
+  const unknownNames = requestedNames.filter((name) => !knownNames.has(name));
+  if (unknownNames.length > 0) {
+    throw new Error(
+      `Unknown skill${unknownNames.length === 1 ? '' : 's'}: ${unknownNames.join(', ')}. ` +
+      `Available: ${[...knownNames].sort().join(', ')}`,
+    );
+  }
+
   // Resolve profile → skill list, then apply --skill filter
-  let skillsToInstall = allSkills;
+  // No-profile callers may request all public/profile-eligible skills, but
+  // curation flags still require an exact -s name. The CLI normally supplies
+  // its default profile; this also closes the lower-level/null fallback.
+  let skillsToInstall = allSkills.filter(
+    (skill) => !skill.secret && !skill.zombie && !skill.explicitOnly,
+  );
   let profileSkillNames: string[] | null = null;
 
   if (options.profile) {
     const allNames = allSkills.map((s) => s.name);
     const secretNames = allSkills.filter((s) => s.secret).map((s) => s.name);
     const zombieNames = allSkills.filter((s) => s.zombie).map((s) => s.name);
-    profileSkillNames = resolveProfile(options.profile, allNames, secretNames, zombieNames);
+    const explicitOnlyNames = allSkills.filter((s) => s.explicitOnly).map((s) => s.name);
+    profileSkillNames = resolveProfile(
+      options.profile,
+      allNames,
+      secretNames,
+      zombieNames,
+      explicitOnlyNames,
+    );
 
     if (profileSkillNames) {
       const extras = options.skills || [];
@@ -426,7 +451,7 @@ export async function installSkills(
       const dir = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
       if (existsSync(dir)) {
         for (const d of readdirSync(dir, { withFileTypes: true })) {
-          if (d.isDirectory() && !d.name.startsWith('.')) {
+          if (d.isDirectory() && !d.name.startsWith('.') && !explicitOnlyNames.has(d.name)) {
             alreadyInstalled.add(d.name);
           }
         }
@@ -440,6 +465,49 @@ export async function installSkills(
   if (skillsToInstall.length === 0) {
     p.log.error(`No matching skills found. Available: ${allSkills.map((s) => s.name).join(', ')}`);
     return;
+  }
+
+  // An unmarked same-name copy has unknown provenance. Leaving it in place while
+  // profiles hide the canonical explicit-only source would let a fresh loader
+  // silently keep executing stale instructions. Do not overwrite it implicitly;
+  // an exact -s request is the user's scoped choice to replace that exact name.
+  const explicitlyRequested = new Set(requestedNames);
+  const unmanagedExplicitConflicts: string[] = [];
+  const managedExplicitRefreshes = new Map<string, string[]>();
+  for (const agentName of targetAgents) {
+    const agent = agents[agentName as keyof typeof agents];
+    if (!agent) continue;
+    const skillsDir = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
+    if (!existsSync(skillsDir) || (!options.global && isSelfTarget(skillsDir))) continue;
+    for (const skill of explicitOnlySkills) {
+      if (explicitlyRequested.has(skill.name)) continue;
+      const installedPath = join(skillsDir, skill.name);
+      if (!existsSync(join(installedPath, 'SKILL.md'))) continue;
+      if (!(await isOurSkill(installedPath))) {
+        unmanagedExplicitConflicts.push(`${agentName}:${installedPath}`);
+        continue;
+      }
+      const onDisk = await installedVersionOf(installedPath);
+      if (onDisk && compareVersions(onDisk, pkg.version) >= 0) continue;
+      const planned = managedExplicitRefreshes.get(agentName) || [];
+      planned.push(skill.name);
+      managedExplicitRefreshes.set(agentName, planned);
+    }
+  }
+  if (unmanagedExplicitConflicts.length > 0) {
+    throw new Error(
+      `Unmanaged explicit-only skill conflict; refusing a silent stale-loader win: ` +
+      `${unmanagedExplicitConflicts.join(', ')}. ` +
+      `Preserve or relocate the existing copy, or replace it with an exact -s <name> request.`,
+    );
+  }
+  const managedRefreshCount = [...managedExplicitRefreshes.values()]
+    .reduce((count, names) => count + names.length, 0);
+  if (managedRefreshCount > 0) {
+    p.log.info(
+      `Will refresh ${managedRefreshCount} older managed explicit-only skill ` +
+      `cop${managedRefreshCount === 1 ? 'y' : 'ies'} already visible to loaders.`,
+    );
   }
 
   // #285 Part 2 — Explicit-profile alignment.
@@ -516,7 +584,9 @@ export async function installSkills(
   if (!options.yes) {
     const agentList = targetAgents.map((a) => agents[a as keyof typeof agents]?.displayName || a).join(', ');
     const confirmed = await p.confirm({
-      message: `Install ${skillsToInstall.length} skills to ${agentList}?`,
+      message: `Install ${skillsToInstall.length} selected skills to ${agentList}` +
+        (managedRefreshCount > 0 ? ` and refresh ${managedRefreshCount} existing internal cop${managedRefreshCount === 1 ? 'y' : 'ies'}` : '') +
+        `?`,
     });
 
     if (p.isCancel(confirmed) || !confirmed) {
@@ -529,6 +599,7 @@ export async function installSkills(
   spinner.start('Installing skills');
 
   let agentsInstalled = 0;
+  let skillCopiesInstalled = 0;
   for (const agentName of targetAgents) {
     const agent = agents[agentName as keyof typeof agents];
     if (!agent) {
@@ -538,6 +609,10 @@ export async function installSkills(
 
     const targetDir = options.global ? agent.globalSkillsDir : join(process.cwd(), agent.skillsDir);
     const shellMode: ShellMode = options.shellMode || 'auto';
+    const replacementRecoveryDir = join(
+      tmpdir(),
+      `arra-oracle-skills-replaced-${new Date().toISOString().replace(/[:.]/g, '-')}-${agentName.replace(/[^a-zA-Z0-9_-]/g, '_')}`,
+    );
 
     // Self-target guard: never install INTO the repo's own public shelf.
     if (!options.global && isSelfTarget(targetDir)) {
@@ -558,7 +633,28 @@ export async function installSkills(
     // user's cwd. Claude Code would load the global copy and shadow the
     // user's local override — which is the opposite of what they want.
     // Use --force-global to install anyway.
-    let agentSkillsToInstall = skillsToInstall;
+    let agentSkillsToInstall = [...skillsToInstall];
+
+    // Explicit-only skills never belong to a profile, but an older managed copy
+    // may already be visible to the loader from a previous release. Refresh only
+    // that already-installed, attributable copy; never introduce a new internal
+    // skill through a profile and never downgrade a newer installed version.
+    const selectedForAgent = new Set(agentSkillsToInstall.map((skill) => skill.name));
+    const refreshedExplicitOnly: string[] = [];
+    for (const name of managedExplicitRefreshes.get(agentName) || []) {
+      if (selectedForAgent.has(name)) continue;
+      const skill = explicitOnlySkills.find((candidate) => candidate.name === name);
+      if (!skill) continue;
+      agentSkillsToInstall.push(skill);
+      selectedForAgent.add(skill.name);
+      refreshedExplicitOnly.push(skill.name);
+    }
+    if (refreshedExplicitOnly.length > 0) {
+      p.log.info(
+        `Refreshing managed explicit-only skill(s) already installed: ${refreshedExplicitOnly.join(', ')}`,
+      );
+    }
+    skillCopiesInstalled += agentSkillsToInstall.length;
     const shadowedSkills: string[] = [];
     if (options.global && !options.forceGlobal) {
       const localSkillsDir = join(process.cwd(), agent.skillsDir);
@@ -567,7 +663,7 @@ export async function installSkills(
       // every global install run from the repo root.
       if (existsSync(localSkillsDir) && !isSelfTarget(localSkillsDir)) {
         const filtered: Skill[] = [];
-        for (const skill of skillsToInstall) {
+        for (const skill of agentSkillsToInstall) {
           const localSkillMd = join(localSkillsDir, skill.name, 'SKILL.md');
           if (existsSync(localSkillMd) && !(await isOurSkill(join(localSkillsDir, skill.name)))) {
             shadowedSkills.push(skill.name);
@@ -669,7 +765,17 @@ export async function installSkills(
 
         // Remove existing if present
         if (existsSync(destPath)) {
-          await rmrf(destPath, shellMode);
+          if (
+            skill.explicitOnly &&
+            explicitlyRequested.has(skill.name) &&
+            !(await isOurSkill(destPath))
+          ) {
+            await mkdirp(replacementRecoveryDir, shellMode);
+            await mv(destPath, join(replacementRecoveryDir, skill.name), shellMode);
+            p.log.info(`Preserved replaced ${skill.name}: ${replacementRecoveryDir}`);
+          } else {
+            await rmrf(destPath, shellMode);
+          }
         }
 
         // Copy skill folder (VFS mode writes from memory, fs mode copies from disk)
@@ -691,7 +797,8 @@ export async function installSkills(
             );
             // Prepend version AND scope to description (G=Global, L=Local, SKILL for other agents)
             const scopeChar = scope === 'Global' ? 'G' : 'L';
-            const tierTag = (STANDARD_SKILLS as readonly string[]).includes(skill.name) ? '[standard]'
+            const tierTag = skill.explicitOnly ? '[internal]'
+              : (STANDARD_SKILLS as readonly string[]).includes(skill.name) ? '[standard]'
               : (LAB_SKILLS as readonly string[]).includes(skill.name) ? '[lab]'
               : (MINIMAL_ONLY_SKILLS as readonly string[]).includes(skill.name) ? '[minimal]'
               : (ZOMBIE_SKILLS as readonly string[]).includes(skill.name) ? '[zombie]'
@@ -950,7 +1057,7 @@ Execute the \`${skill.name}\` skill with args: \`$ARGUMENTS\`
 
   spinner.stop(
     agentsInstalled > 0
-      ? `Installed ${skillsToInstall.length} skills to ${agentsInstalled} agent(s)`
+      ? `Installed ${skillCopiesInstalled} skill cop${skillCopiesInstalled === 1 ? 'y' : 'ies'} to ${agentsInstalled} agent(s)`
       : 'Nothing installed (all targets refused or unknown)'
   );
 

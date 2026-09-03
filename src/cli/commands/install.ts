@@ -15,7 +15,8 @@ import type { ShellMode } from '../fs-utils.js';
  *     (the installer is also additive with already-installed skills, but for
  *     preview purposes we show what the user explicitly asked for).
  *   - otherwise  →  profile-resolved set ∪ any `-s` extras.
- * Secrets + zombies are filtered out the same way `resolveProfile` filters them.
+ * Secrets, zombies, and explicit-only skills are filtered out the same way
+ * `resolveProfile` filters them.
  */
 async function computePreviewSkillNames(
   options: { profile?: string; skill?: string[] },
@@ -28,6 +29,7 @@ async function computePreviewSkillNames(
   const allNames = all.map((s) => s.name);
   const secretNames = all.filter((s) => s.secret).map((s) => s.name);
   const zombieNames = all.filter((s) => s.zombie).map((s) => s.name);
+  const explicitOnlyNames = all.filter((s) => s.explicitOnly).map((s) => s.name);
 
   // -s without explicit --profile: additive mode — show the explicit picks.
   if (options.skill && options.skill.length > 0 && !profileExplicit) {
@@ -39,9 +41,10 @@ async function computePreviewSkillNames(
     allNames,
     secretNames,
     zombieNames,
+    explicitOnlyNames,
   );
   const profileSkills = resolved ?? allNames.filter(
-    (s) => !secretNames.includes(s) && !zombieNames.includes(s),
+    (s) => !secretNames.includes(s) && !zombieNames.includes(s) && !explicitOnlyNames.includes(s),
   );
   const extras = options.skill || [];
   return [...new Set([...profileSkills, ...extras])];
