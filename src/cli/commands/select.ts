@@ -3,6 +3,16 @@ import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents } from '../agents.js';
 import { installSkills, discoverSkills } from '../installer.js';
 import type { ShellMode } from '../fs-utils.js';
+import type { Skill } from '../types.js';
+
+export function selectableSkills(skills: Skill[]): Skill[] {
+  return skills.filter((skill) => !skill.secret && !skill.explicitOnly);
+}
+
+export function selectableInitialValues(installed: Iterable<string>, visible: Skill[]): string[] {
+  const visibleNames = new Set(visible.map((skill) => skill.name));
+  return [...installed].filter((name) => visibleNames.has(name));
+}
 
 export function registerSelect(program: Command, version: string) {
   program
@@ -44,7 +54,9 @@ export function registerSelect(program: Command, version: string) {
           }
         }
 
-        const visibleSkills = allSkills.filter((s) => !s.secret);
+        // Internal explicit-name-only skills must not leak through the picker:
+        // selecting one here would bypass the exact `-s <name>` boundary.
+        const visibleSkills = selectableSkills(allSkills);
         const selected = await p.multiselect({
           message: `Select skills to install (${visibleSkills.length} available):`,
           options: visibleSkills
@@ -54,7 +66,7 @@ export function registerSelect(program: Command, version: string) {
               label: s.name,
               hint: s.description.split('.')[0].substring(0, 50),
             })),
-          initialValues: [...installedSet],
+          initialValues: selectableInitialValues(installedSet, visibleSkills),
           required: true,
         });
 

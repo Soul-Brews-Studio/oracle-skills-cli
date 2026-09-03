@@ -139,7 +139,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       });
 
       const installed = await listSkillDirs(SKILLS_DIR);
-      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
+      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie && !s.explicitOnly);
       // On mismatch, name the drift — a bare count diff is undebuggable on CI.
       const fullNames = new Set(fullSkills.map((s) => s.name));
       expect({
@@ -152,7 +152,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     it("every full-profile skill has a directory", async () => {
       const allSkills = await discoverSkills();
       const installed = await listSkillDirs(SKILLS_DIR);
-      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
+      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie && !s.explicitOnly);
 
       for (const skill of fullSkills) {
         expect(installed).toContain(skill.name);
@@ -252,7 +252,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       });
 
       const allSkills = await discoverSkills();
-      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
+      const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie && !s.explicitOnly);
       let skills = await listSkillDirs(SKILLS_DIR);
       // On mismatch, name the drift — a bare count diff is undebuggable on CI.
       const fullNames = new Set(fullSkills.map((s) => s.name));
@@ -287,6 +287,112 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
     });
   });
 }
+
+// Internal lifecycle skills are excluded from profiles but may already exist
+// from an older release. Default installs must not silently leave stale loader
+// bytes, and must not overwrite a same-name copy of unknown provenance.
+describe("explicit-only lifecycle migration", () => {
+  const fx = makeInstallFixture("explicit-only-migration", { withCommands: false });
+
+  beforeAll(() => fx.register());
+  afterAll(() => fx.unregister());
+  beforeEach(() => fx.cleanup());
+
+  it("refreshes an older marked copy without introducing other internal skills", async () => {
+    const staleDir = join(fx.skillsDir, "worktree");
+    await mkdir(staleDir, { recursive: true });
+    await writeFile(
+      join(staleDir, "SKILL.md"),
+      `---\ninstaller: arra-oracle-skills-cli v3.9.0-alpha.3\nname: worktree\ndescription: stale\n---\nBased on current HEAD\n`,
+    );
+
+    await installSkills([fx.agent], { global: true, profile: "minimal", yes: true });
+
+    const refreshed = await readFile(join(staleDir, "SKILL.md"), "utf-8");
+    expect(refreshed).toContain("installer: arra-oracle-skills-cli v");
+    expect(refreshed).toContain("[internal]");
+    expect(refreshed).toContain("Fail-closed invariant");
+    expect(existsSync(join(fx.skillsDir, "workon"))).toBe(false);
+    expect(existsSync(join(fx.skillsDir, "merged"))).toBe(false);
+  });
+
+  it("fails closed and leaves an unmarked same-name copy untouched", async () => {
+    const existingDir = join(fx.skillsDir, "worktree");
+    const existing = `---\nname: worktree\ndescription: user copy\n---\nkeep me\ninstaller: arra-oracle-skills-cli v1.0.0 is prose, not frontmatter\n`;
+    await mkdir(existingDir, { recursive: true });
+    await writeFile(join(existingDir, "SKILL.md"), existing);
+
+    let message = "";
+    try {
+      await installSkills([fx.agent], { global: true, profile: "minimal", yes: true });
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+    expect(message).toContain("Unmanaged explicit-only skill conflict");
+    expect(await readFile(join(existingDir, "SKILL.md"), "utf-8")).toBe(existing);
+    expect((await listSkillDirs(fx.skillsDir))).toEqual(["worktree"]);
+  });
+
+  it("does not downgrade a newer marked copy during an additive exact install", async () => {
+    const newerDir = join(fx.skillsDir, "worktree");
+    const newer = `---\ninstaller: arra-oracle-skills-cli v99.1.1\nname: worktree\ndescription: future copy\n---\nfuture sentinel\n`;
+    await mkdir(newerDir, { recursive: true });
+    await writeFile(join(newerDir, "SKILL.md"), newer);
+
+    await installSkills([fx.agent], { global: true, skills: ["recap"], yes: true });
+
+    expect(await readFile(join(newerDir, "SKILL.md"), "utf-8")).toBe(newer);
+    expect(existsSync(join(fx.skillsDir, "recap", "SKILL.md"))).toBe(true);
+  });
+
+  it("backs up an unmanaged copy when its exact name is explicitly replaced", async () => {
+    const existingDir = join(fx.skillsDir, "worktree");
+    const existing = `---\nname: worktree\ndescription: user copy\n---\nrecoverable sentinel\n`;
+    await mkdir(existingDir, { recursive: true });
+    await writeFile(join(existingDir, "SKILL.md"), existing);
+    const prefix = "arra-oracle-skills-replaced-";
+    const before = new Set((await readdir(tmpdir(), { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith(prefix))
+      .map((entry) => entry.name));
+
+    await installSkills([fx.agent], { global: true, skills: ["worktree"], yes: true });
+
+    const installed = await readFile(join(existingDir, "SKILL.md"), "utf-8");
+    expect(installed).toContain("installer: arra-oracle-skills-cli v");
+    expect(installed).toContain("[internal]");
+    const recovery = (await readdir(tmpdir(), { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith(prefix) && !before.has(entry.name))
+      .map((entry) => join(tmpdir(), entry.name))
+      .find((path) => existsSync(join(path, "worktree", "SKILL.md")));
+    expect(recovery).toBeTruthy();
+    expect(await readFile(join(recovery!, "worktree", "SKILL.md"), "utf-8")).toBe(existing);
+    await rm(recovery!, { recursive: true, force: true });
+  });
+
+  it("ignores a leftover internal directory that has no SKILL.md", async () => {
+    const leftover = join(fx.skillsDir, "merged");
+    await mkdir(leftover, { recursive: true });
+
+    await installSkills([fx.agent], { global: true, profile: "minimal", yes: true });
+
+    expect(existsSync(leftover)).toBe(true);
+    expect(existsSync(join(fx.skillsDir, "recap", "SKILL.md"))).toBe(true);
+  });
+
+  it("removes a marked deprecated alias but preserves an unmarked copy", async () => {
+    const marked = join(fx.skillsDir, "forward-lite");
+    const unmarked = join(fx.skillsDir, "rrr-lite");
+    await mkdir(marked, { recursive: true });
+    await mkdir(unmarked, { recursive: true });
+    await writeFile(join(marked, "SKILL.md"), `---\ninstaller: arra-oracle-skills-cli v2.0.10\nname: forward-lite\ndescription: stale\n---\n`);
+    await writeFile(join(unmarked, "SKILL.md"), `---\nname: rrr-lite\ndescription: user copy\n---\n`);
+
+    await installSkills([fx.agent], { global: true, profile: "minimal", yes: true });
+
+    expect(existsSync(marked)).toBe(false);
+    expect(existsSync(unmarked)).toBe(true);
+  });
+});
 
 // ═════════════════════════════════════════════════════════════════════════════
 // e2e-features.test.ts — per-profile install counts + additive switch
@@ -329,7 +435,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       });
 
       const installed = await listSkillDirs(SKILLS_DIR);
-      const excludedCount = allSkills.filter(s => s.secret || s.zombie).length;
+      const excludedCount = allSkills.filter(s => s.secret || s.zombie || s.explicitOnly).length;
       const labCount = labOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
       const minimalOnlyCount = minimalOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
       const expectedCount = allSkills.length - labCount - minimalOnlyCount - excludedCount;
@@ -355,7 +461,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       });
 
       const installed = await listSkillDirs(SKILLS_DIR);
-      const excludedCount = allSkills.filter(s => s.secret || s.zombie).length;
+      const excludedCount = allSkills.filter(s => s.secret || s.zombie || s.explicitOnly).length;
       const minimalOnlyCount = minimalOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
       expect(installed.length).toBe(allSkills.length - excludedCount - minimalOnlyCount);
       for (const name of minimalOnly) {
@@ -379,7 +485,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
 
       const allSkills = await discoverSkills();
       let installed = await listSkillDirs(SKILLS_DIR);
-      const excludedCount = allSkills.filter(s => s.secret || s.zombie).length;
+      const excludedCount = allSkills.filter(s => s.secret || s.zombie || s.explicitOnly).length;
       const labCount = labOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
       const minimalOnlyCount = minimalOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
       const fullCount = allSkills.length - labCount - minimalOnlyCount - excludedCount;
@@ -658,6 +764,19 @@ describe("#459 — non-interactive install with no detected agents", () => {
     expect(proc.exitCode).toBe(0);
     expect(existsSync(join(home, ".claude/skills/recap"))).toBe(true);
 
+    rmSync(home, { recursive: true, force: true });
+  });
+
+  it("exits non-zero for an unknown exact skill name", () => {
+    const home = mkdtempSync(join(tmpdir(), "arra-unknown-skill-"));
+    const proc = Bun.spawnSync(
+      ["bun", cliPath, "install", "-g", "-s", "no-such-skill", "-y", "-a", "claude-code"],
+      { env: { ...process.env, HOME: home }, stdin: "ignore" },
+    );
+    const out = proc.stdout.toString() + proc.stderr.toString();
+    expect(proc.exitCode).not.toBe(0);
+    expect(out).toContain("Unknown skill: no-such-skill");
+    expect(existsSync(join(home, ".claude/skills/no-such-skill"))).toBe(false);
     rmSync(home, { recursive: true, force: true });
   });
 });

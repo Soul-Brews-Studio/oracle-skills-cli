@@ -116,29 +116,46 @@ function resolveSkillDir(skillName: string): string {
 
 // ── Unified API ────────────────────────────────────────────
 
+function frontmatterOf(content: string): string {
+  return content.split(/^---\s*$/m)[1] ?? '';
+}
+
+/**
+ * Parse skills from the exact in-memory representation used by native builds.
+ * Exported so tests can execute the compiled/VFS discovery path without writing
+ * a generated module into the source checkout.
+ */
+export function discoverSkillsFromVFS(
+  vfs: Map<string, Map<string, string>>,
+  skillNames: string[],
+): Skill[] {
+  const skills: Skill[] = [];
+  for (const name of skillNames) {
+    const skillMd = vfs.get(name)?.get('SKILL.md');
+    if (!skillMd) continue;
+    const frontmatter = frontmatterOf(skillMd);
+    const hiddenMatch = frontmatter.match(/hidden:\s*(true|yes)/i);
+    const secretMatch = frontmatter.match(/secret:\s*(true|yes)/i);
+    const zombieMatch = frontmatter.match(/zombie:\s*(true|yes)/i);
+    const explicitOnlyMatch = frontmatter.match(/explicit-only:\s*(true|yes)/i);
+    skills.push({
+      name,
+      description: extractDescription(frontmatter),
+      path: `vfs://${name}`,
+      ...(hiddenMatch ? { hidden: true } : {}),
+      ...(secretMatch ? { secret: true } : {}),
+      ...(zombieMatch ? { zombie: true } : {}),
+      ...(explicitOnlyMatch ? { explicitOnly: true } : {}),
+    });
+  }
+  return skills;
+}
+
 /** Discover all available skills */
 export async function discoverSkills(): Promise<Skill[]> {
   if (isCompiled()) {
     const { vfs, skillNames } = await getVFS();
-    const skills: Skill[] = [];
-    for (const name of skillNames) {
-      const files = vfs.get(name);
-      const skillMd = files?.get('SKILL.md');
-      if (skillMd) {
-        const hiddenMatch = skillMd.match(/hidden:\s*(true|yes)/i);
-        const secretMatch = skillMd.match(/secret:\s*(true|yes)/i);
-        const zombieMatch = skillMd.match(/zombie:\s*(true|yes)/i);
-        skills.push({
-          name,
-          description: extractDescription(skillMd),
-          path: `vfs://${name}`, // Virtual path marker
-          ...(hiddenMatch ? { hidden: true } : {}),
-          ...(secretMatch ? { secret: true } : {}),
-          ...(zombieMatch ? { zombie: true } : {}),
-        });
-      }
-    }
-    return skills;
+    return discoverSkillsFromVFS(vfs, skillNames);
   }
 
   // Filesystem mode — dual root.
@@ -178,9 +195,11 @@ export async function discoverSkills(): Promise<Skill[]> {
     const skillMdPath = join(dir, 'SKILL.md');
     if (existsSync(skillMdPath)) {
       const content = await Bun.file(skillMdPath).text();
-      const hiddenMatch = content.match(/hidden:\s*(true|yes)/i);
-      const secretMatch = content.match(/secret:\s*(true|yes)/i);
-      const zombieMatch = content.match(/zombie:\s*(true|yes)/i);
+      const frontmatter = frontmatterOf(content);
+      const hiddenMatch = frontmatter.match(/hidden:\s*(true|yes)/i);
+      const secretMatch = frontmatter.match(/secret:\s*(true|yes)/i);
+      const zombieMatch = frontmatter.match(/zombie:\s*(true|yes)/i);
+      const explicitOnlyMatch = frontmatter.match(/explicit-only:\s*(true|yes)/i);
       skills.push({
         name,
         description: extractDescription(content),
@@ -188,6 +207,7 @@ export async function discoverSkills(): Promise<Skill[]> {
         ...(hiddenMatch ? { hidden: true } : {}),
         ...(secretMatch ? { secret: true } : {}),
         ...(zombieMatch ? { zombie: true } : {}),
+        ...(explicitOnlyMatch ? { explicitOnly: true } : {}),
       });
     }
   }
@@ -271,4 +291,3 @@ export async function skillHasHooks(skillName: string): Promise<boolean> {
   }
   return existsSync(join(resolveSkillDir(skillName), 'hooks', 'hooks.json'));
 }
-

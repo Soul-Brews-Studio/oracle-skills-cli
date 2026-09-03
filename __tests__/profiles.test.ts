@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { profiles, labOnly, minimalOnly, MINIMAL_SKILLS, STANDARD_SKILLS, LAB_SKILLS, MINIMAL_ONLY_SKILLS, ZOMBIE_SKILLS, resolveProfile } from "../src/profiles";
+import { selectableInitialValues, selectableSkills } from "../src/cli/commands/select";
 
 // Simulated full skill list — must include all standard + lab + zombie + minimal-only + other discovered skills
 const ALL_SKILLS = [
@@ -171,6 +172,15 @@ describe("resolveProfile", () => {
     expect(result).toBeNull();
   });
 
+  it("excludes explicit-only skills from every profile while preserving exact-name install", () => {
+    const explicitOnly = ["workon", "worktree", "merged"];
+    const names = [...ALL_SKILLS, ...explicitOnly];
+    for (const profile of ["minimal", "standard", "full", "lab"]) {
+      const result = resolveProfile(profile, names, [], [], explicitOnly) ?? names;
+      for (const skill of explicitOnly) expect(result).not.toContain(skill);
+    }
+  });
+
   it("unknown profile returns null", () => {
     const result = resolveProfile("nonexistent", ALL_SKILLS);
     expect(result).toBeNull();
@@ -217,5 +227,31 @@ describe("resolveProfile", () => {
     expect(result).toContain("forward");
     expect(result).toContain("recap");
     expect(result).toContain("rrr");
+  });
+});
+
+describe("interactive selector curation", () => {
+  it("excludes secret and explicit-only skills but not ordinary hidden skills", () => {
+    const skills = [
+      { name: "public", description: "public", path: "/public" },
+      { name: "hidden-profile-skill", description: "hidden", path: "/hidden", hidden: true },
+      { name: "internal", description: "internal", path: "/internal", explicitOnly: true },
+      { name: "secret", description: "secret", path: "/secret", secret: true },
+    ];
+    expect(selectableSkills(skills).map((skill) => skill.name)).toEqual([
+      "public",
+      "hidden-profile-skill",
+    ]);
+  });
+
+  it("pre-ticks only names that are actually visible options", () => {
+    const visible = selectableSkills([
+      { name: "public", description: "public", path: "/public" },
+      { name: "worktree", description: "internal", path: "/worktree", explicitOnly: true },
+    ]);
+    expect(selectableInitialValues(
+      new Set(["public", "worktree", "third-party-not-an-option"]),
+      visible,
+    )).toEqual(["public"]);
   });
 });

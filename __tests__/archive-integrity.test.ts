@@ -1,13 +1,17 @@
 import { describe, it, expect } from "bun:test";
-import { readdirSync, existsSync } from "fs";
+import { readdirSync, existsSync, mkdtempSync, rmSync } from "fs";
+import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
+import { tmpdir } from "os";
 import { discoverSkills } from "../src/cli/installer";
+import { discoverSkillsFromVFS } from "../src/cli/skill-source";
 import {
   resolveProfile,
   ZOMBIE_SKILLS,
   LAB_SKILLS,
   STANDARD_SKILLS,
   MINIMAL_SKILLS,
+  profiles,
 } from "../src/profiles";
 
 // Integration guard for the 2026-07 zombie-leak regression.
@@ -78,15 +82,107 @@ describe("archive integrity (real discoverSkills)", () => {
     const allNames = skills.map((s) => s.name);
     const secretNames = skills.filter((s) => s.secret).map((s) => s.name);
     const zombieNames = skills.filter((s) => s.zombie).map((s) => s.name);
+    const explicitOnlyNames = skills.filter((s) => s.explicitOnly).map((s) => s.name);
 
     for (const profile of ["full", "lab"]) {
       const resolved =
-        resolveProfile(profile, allNames, secretNames, zombieNames) ??
+        resolveProfile(profile, allNames, secretNames, zombieNames, explicitOnlyNames) ??
         allNames.filter(
-          (s) => !secretNames.includes(s) && !zombieNames.includes(s),
+          (s) => !secretNames.includes(s) && !zombieNames.includes(s) && !explicitOnlyNames.includes(s),
         );
       const leaked = resolved.filter((name) => archived.has(name));
       expect({ profile, leaked }).toEqual({ profile, leaked: [] });
+    }
+  });
+
+  it("internal lifecycle skills are explicit-only and absent from every profile", async () => {
+    const names = ["workon", "worktree", "merged"];
+    const skills = await discoverSkills();
+    const byName = new Map(skills.map((skill) => [skill.name, skill]));
+    for (const name of names) {
+      expect(byName.get(name)?.hidden, `${name} must stay out of command stubs`).toBe(true);
+      expect(byName.get(name)?.explicitOnly, `${name} must require -s ${name}`).toBe(true);
+    }
+
+    const allNames = skills.map((skill) => skill.name);
+    const secretNames = skills.filter((skill) => skill.secret).map((skill) => skill.name);
+    const zombieNames = skills.filter((skill) => skill.zombie).map((skill) => skill.name);
+    const explicitOnlyNames = skills.filter((skill) => skill.explicitOnly).map((skill) => skill.name);
+    for (const profile of Object.keys(profiles)) {
+      const resolved = resolveProfile(profile, allNames, secretNames, zombieNames, explicitOnlyNames) ?? [];
+      for (const name of names) expect(resolved).not.toContain(name);
+    }
+  });
+
+  it("compiled VFS parsing preserves explicit-only profile exclusion", () => {
+    const withFlag = `---\nname: internal-test\ndescription: internal fixture\nhidden: true\nexplicit-only: true\n---\nbody\n`;
+    const withoutFlag = withFlag.replace("explicit-only: true\n", "");
+    const parse = (content: string) => discoverSkillsFromVFS(
+      new Map([["internal-test", new Map([["SKILL.md", content]])]]),
+      ["internal-test"],
+    );
+
+    const flagged = parse(withFlag);
+    expect(flagged[0]).toMatchObject({
+      name: "internal-test",
+      path: "vfs://internal-test",
+      hidden: true,
+      explicitOnly: true,
+    });
+    const excluded = resolveProfile("full", ["internal-test"], [], [], ["internal-test"]);
+    expect(excluded).toEqual([]);
+
+    // Negative control: stripping the VFS frontmatter flag makes the same name
+    // profile-eligible, so this test fails if native parsing drops the signal.
+    const unflagged = parse(withoutFlag);
+    expect(unflagged[0].explicitOnly).toBeUndefined();
+    expect(resolveProfile("full", ["internal-test"], [], [], [])).toEqual(["internal-test"]);
+  });
+
+  it("compiled define executes isCompiled and the generated VFS import", async () => {
+    const root = mkdtempSync(join(tmpdir(), "arra-vfs-wiring-"));
+    try {
+      await mkdir(join(root, "src", "generated"), { recursive: true });
+      await writeFile(
+        join(root, "src", "skill-source.ts"),
+        await Bun.file(join(process.cwd(), "src", "cli", "skill-source.ts")).text(),
+      );
+      await writeFile(
+        join(root, "src", "types.ts"),
+        await Bun.file(join(process.cwd(), "src", "cli", "types.ts")).text(),
+      );
+      await writeFile(
+        join(root, "src", "generated", "skills-vfs.ts"),
+        `export const SKILLS_VFS = new Map([["wired", new Map([["SKILL.md", ` +
+          JSON.stringify(`---\nname: wired\ndescription: wired fixture\nexplicit-only: true\n---\nbody\n`) +
+          `]])]]);\nexport const SKILL_NAMES = ["wired"];\n`,
+      );
+      const runner = join(root, "runner.ts");
+      await writeFile(
+        runner,
+        `import { discoverSkills, isCompiled } from "./src/skill-source.ts";\n` +
+          `console.log(JSON.stringify({ compiled: isCompiled(), skills: await discoverSkills() }));\n`,
+      );
+      const build = await Bun.build({
+        entrypoints: [runner],
+        outdir: join(root, "dist"),
+        target: "bun",
+        define: { IS_COMPILED: "true" },
+      });
+      expect(build.success, build.logs.join("\n")).toBe(true);
+      const run = Bun.spawnSync(["bun", join(root, "dist", "runner.js")]);
+      expect(run.exitCode, run.stderr.toString()).toBe(0);
+      expect(JSON.parse(run.stdout.toString().trim())).toEqual({
+        compiled: true,
+        skills: [{
+          name: "wired",
+          description: "wired fixture",
+          path: "vfs://wired",
+          explicitOnly: true,
+        }],
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
   });
 });

@@ -41,9 +41,9 @@ describe("shelf ↔ marketplace.json parity", () => {
 });
 
 describe("shelf hygiene", () => {
-  it("no shelf skill carries a secret/hidden/zombie flag", () => {
+  it("no shelf skill carries a secret/hidden/zombie/explicit-only flag", () => {
     const flagged = skillDirsIn(SHELF_DIR).filter((name) =>
-      /(secret|hidden|zombie):\s*(true|yes)/i.test(frontmatterOf(SHELF_DIR, name)),
+      /(secret|hidden|zombie|explicit-only):\s*(true|yes)/i.test(frontmatterOf(SHELF_DIR, name)),
     );
     expect(flagged).toEqual([]);
   });
@@ -84,9 +84,9 @@ describe("shelf hygiene", () => {
 });
 
 describe("vault hygiene", () => {
-  it("every non-archive vault skill is flagged secret or hidden", () => {
+  it("every non-archive vault skill carries a curation flag", () => {
     const unflagged = skillDirsIn(VAULT_DIR).filter(
-      (name) => !/(secret|hidden):\s*(true|yes)/i.test(frontmatterOf(VAULT_DIR, name)),
+      (name) => !/(secret|hidden|zombie|explicit-only):\s*(true|yes)/i.test(frontmatterOf(VAULT_DIR, name)),
     );
     expect(unflagged).toEqual([]);
   });

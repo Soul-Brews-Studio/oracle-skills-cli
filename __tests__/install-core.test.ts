@@ -19,8 +19,12 @@ import { existsSync, mkdtempSync, rmSync, readdirSync, readFileSync } from "fs";
 import { tmpdir } from "os";
 import { agents } from "../src/cli/agents";
 import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/installer";
-import type { AgentConfig } from "../src/cli/types";
+import type { AgentConfig, Skill } from "../src/cli/types";
 import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
+
+const profileEligible = (skills: Skill[]) => skills.filter(
+  (skill) => !skill.secret && !skill.zombie && !skill.explicitOnly,
+);
 
 // ═════════════════════════════════════════════════════════════════════════════
 // install-all.test.ts — install ALL skills when no --skill filter
@@ -37,20 +41,23 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
   beforeAll(() => fx.register());
   afterAll(() => fx.unregister());
 
-  describe("install all (default)", () => {
+  describe("install all profile-eligible skills (default)", () => {
     beforeEach(() => fx.cleanup());
 
-    it("installs ALL skills when no --skill filter", async () => {
+    it("requires exact names for secret, zombie, and explicit-only skills", async () => {
       const allSkills = await discoverSkills();
 
       await installSkills([TEST_AGENT], { global: true, yes: true });
 
       const installed = await listSkillDirs(SKILLS_DIR);
-      const expectedCount = allSkills.filter(s => !DEPRECATED_LITES.has(s.name)).length;
+      const expected = allSkills.filter(
+        (skill) => !DEPRECATED_LITES.has(skill.name) && !skill.secret && !skill.zombie && !skill.explicitOnly,
+      );
+      const expectedCount = expected.length;
       expect(installed.length).toBe(expectedCount);
       for (const skill of allSkills) {
-        if (DEPRECATED_LITES.has(skill.name)) continue;
-        expect(installed).toContain(skill.name);
+        if (expected.includes(skill)) expect(installed).toContain(skill.name);
+        else expect(installed).not.toContain(skill.name);
       }
     });
 
@@ -80,7 +87,9 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
 
       const manifest = JSON.parse(await readFile(join(SKILLS_DIR, ".arra-oracle-skills.json"), "utf-8"));
       expect(manifest.version).toMatch(/^\d+\.\d+\.\d+(-[\w.]+)?$/);
-      const expectedManifestCount = allSkills.filter(s => !DEPRECATED_LITES.has(s.name)).length;
+      const expectedManifestCount = allSkills.filter(
+        (skill) => !DEPRECATED_LITES.has(skill.name) && !skill.secret && !skill.zombie && !skill.explicitOnly,
+      ).length;
       expect(manifest.skills.length).toBe(expectedManifestCount);
       expect(manifest.agent).toBe(TEST_AGENT);
     });
@@ -142,15 +151,20 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       expect(content).toContain("installer: arra-oracle-skills-cli");
     });
 
-    it("ignores unknown skill names gracefully", async () => {
-      await installSkills([TEST_AGENT], {
-        global: true,
-        skills: ["recap", "nonexistent-skill"],
-        yes: true,
-      });
+    it("fails before writing when any exact skill name is unknown", async () => {
+      let message = "";
+      try {
+        await installSkills([TEST_AGENT], {
+          global: true,
+          skills: ["recap", "nonexistent-skill"],
+          yes: true,
+        });
+      } catch (error) {
+        message = error instanceof Error ? error.message : String(error);
+      }
 
-      const installed = await listSkillDirs(SKILLS_DIR);
-      expect(installed).toEqual(["recap"]);
+      expect(message).toContain("Unknown skill: nonexistent-skill");
+      expect(await listSkillDirs(SKILLS_DIR)).toEqual([]);
     });
 
     it("does not remove existing skills when adding specific ones", async () => {
@@ -158,7 +172,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       await installSkills([TEST_AGENT], { global: true, yes: true });
       const allSkills = await discoverSkills();
       let installed = await listSkillDirs(SKILLS_DIR);
-      expect(installed.length).toBe(allSkills.length - DEPRECATED_LITES);
+      expect(installed.length).toBe(profileEligible(allSkills).length - DEPRECATED_LITES);
 
       // Install specific — should NOT remove others
       await installSkills([TEST_AGENT], {
@@ -169,7 +183,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
 
       installed = await listSkillDirs(SKILLS_DIR);
       // Still has all skills (specific install is additive, not destructive)
-      expect(installed.length).toBe(allSkills.length - DEPRECATED_LITES);
+      expect(installed.length).toBe(profileEligible(allSkills).length - DEPRECATED_LITES);
     });
 
     it("manifest lists only installed skills", async () => {
@@ -278,7 +292,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       await installSkills([TEST_AGENT], { global: true, yes: true });
 
       const result = await uninstallSkills([TEST_AGENT], { global: true, yes: true });
-      expect(result.removed).toBe(allSkills.length - DEPRECATED_LITES);
+      expect(result.removed).toBe(profileEligible(allSkills).length - DEPRECATED_LITES);
 
       const remaining = await listSkillDirs(SKILLS_DIR);
       expect(remaining.length).toBe(0);
@@ -301,7 +315,7 @@ import { makeInstallFixture, listSkillDirs } from "./helpers/install-fixture";
       const remaining = await listSkillDirs(SKILLS_DIR);
       expect(remaining).not.toContain("recap");
       expect(remaining).not.toContain("trace");
-      expect(remaining.length).toBe(allSkills.length - DEPRECATED_LITES - 2);
+      expect(remaining.length).toBe(profileEligible(allSkills).length - DEPRECATED_LITES - 2);
     });
   });
 

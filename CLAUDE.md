@@ -15,10 +15,11 @@ need them (OpenCode, Codex, Gemini). Claude Code invokes SKILL.md directly as `/
   (`.claude-plugin/marketplace.json` is generated from it 1:1), and
   `npx skills add Soul-Brews-Studio/arra-oracle-skills-cli` (it's the vercel
   CLI's priority-scan dir — finding it suppresses the recursive fallback).
-  No `secret`/`hidden`/`zombie` flag ever belongs here (compile fails).
+  No `secret`/`hidden`/`zombie`/`explicit-only` flag ever belongs here (compile fails).
 - `src/skills/` — everything non-public: `release-alpha`/`release-beta`
-  (secret), `.archive/` (zombies — still installable via `-s <name>`),
-  `.template/`. All carry `metadata: internal: true` so external installers
+  (secret), internal lifecycle skills (`explicit-only: true`), `.archive/`
+  (zombies — still installable via `-s <name>`), `.template/`. All carry
+  `metadata: internal: true` so external installers
   skip them even under `--full-depth`. The archive **never** moves to the
   shelf — the vercel CLI scans dot-dirs inside containers.
 - A skill name existing in BOTH roots is a split-brain (usually a rebase
@@ -64,7 +65,8 @@ It **warns** (doesn't fail) when SKILL.md exceeds 500 lines — move detail to `
 ### Curation tiers → marketplace.json
 
 `.claude-plugin/marketplace.json` is the explicit allowlist external ecosystems
-read. Skills flagged `secret: true`, `hidden: true`, or `zombie: true` in
+read. Skills flagged `secret: true`, `hidden: true`, `zombie: true`, or
+`explicit-only: true` in
 frontmatter (and everything under `src/skills/.archive/`) are **never listed**.
 Note: unlisted ≠ private — files in this public repo are still readable by
 anyone; see issue #441.
@@ -78,8 +80,9 @@ adding or keeping a skill there:
 > no extra toolchain. Can they get value from this skill today?**
 
 If no, it belongs in the vault (`git mv skills/<name> src/skills/<name>`, then add
-`hidden: true` + `metadata: internal: true`). It stays installable by name and via
-profiles; it just stops being advertised. Four disqualifiers, each seen in the
+`hidden: true` + `metadata: internal: true`). Add `explicit-only: true` when it
+must be installable only by exact `-s <name>`, never through a profile or picker;
+a merely hidden skill remains profile-installable. Four disqualifiers, each seen in the
 2026-07-25 curation that took the listing from 32 → 21:
 
 | disqualifier | examples |
