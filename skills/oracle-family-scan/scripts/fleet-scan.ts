@@ -18,13 +18,15 @@ type Birth = { number: number; title: string; date: string; author: string };
 // Use gh api --paginate to fetch ALL issues (no 300-cap). GitHub /issues endpoint
 // includes PRs too, but BIRTH_PATTERN naturally excludes them — PRs don't match
 // "awaken|born|birth|..." title patterns.
-const birthIssuesRaw = await $`gh api --paginate "repos/${ORACLE_REPO}/issues?state=all&per_page=100" --jq '.[] | "\(.number)|\(.title)|\(.created_at[:10])|\(.user.login)"'`.text();
+//
+// Emit one JSON object per line (NDJSON) rather than a "|"-joined string: issue
+// titles routinely contain "|" (e.g. "Oracle | Born ..."), which shifted the
+// fields on split and left `date` undefined — crashing at `b.date.slice` below.
+const birthIssuesRaw = await $`gh api --paginate "repos/${ORACLE_REPO}/issues?state=all&per_page=100" --jq '.[] | {number, title, date: .created_at[:10], author: (.user.login // "unknown")} | @json'`.text();
 
 const allBirths: Birth[] = birthIssuesRaw.trim().split("\n").filter(Boolean)
-  .map(line => {
-    const [num, title, date, author] = line.split("|");
-    return { number: parseInt(num), title, date, author };
-  })
+  .map(line => JSON.parse(line) as Birth)
+  .filter(b => typeof b.title === "string" && typeof b.date === "string")
   .filter(b => BIRTH_PATTERN.test(b.title));
 
 const uniqueAuthors = new Set(allBirths.map(b => b.author));
